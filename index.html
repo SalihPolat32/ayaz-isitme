@@ -38,8 +38,8 @@
     <meta name="theme-color" content="#0b2a4a"/>
 
     <!-- Favicon -->
-    <link rel="icon" type="image/png" sizes="32x32" href="/assets/img/favicon.ico">
-    <link rel="apple-touch-icon" href="/assets/img/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon.ico">
+    <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
 
     <!-- CSS -->
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin/>
@@ -47,6 +47,57 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper/swiper-bundle.min.css"/>
     <link href="assets/css/style.css" rel="stylesheet"/>
+
+    <style>
+        /* Logo wrapper */
+        .brand-mark {
+            background: rgba(255, 255, 255, .92);
+            border: 1px solid rgba(255, 255, 255, .22);
+            padding: 6px 10px;
+            border-radius: 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 0;
+        }
+
+        /* Logo image: kareye zorlamayı iptal et */
+        .brand-logo {
+            display: block !important;
+            width: auto !important;
+            object-fit: contain !important;
+            max-width: 100%;
+        }
+
+        /* Boyutlar */
+        .brand-logo--nav {
+            height: 34px !important;
+        }
+
+        .brand-logo--card {
+            height: 52px !important;
+        }
+
+        /* Tema bazlı logo gösterimi */
+        .logo-dark {
+            display: none !important;
+        }
+
+        html[data-bs-theme="dark"] .logo-light {
+            display: none !important;
+        }
+
+        html[data-bs-theme="dark"] .logo-dark {
+            display: block !important;
+        }
+
+        /* Kart içinde biraz daha sıkı */
+        .brand-mark--card {
+            padding: 8px 12px;
+            border-radius: 14px;
+        }
+    </style>
+
 
     <!-- SCHEMA -->
 <script type="application/ld+json">
@@ -404,35 +455,35 @@ gtag('config', 'G-BFP823CF38');
                     <div class="swiper ofis-swiper" aria-label="Ofis fotoğrafları slider">
                         <div class="swiper-wrapper">
                             <div class="swiper-slide">
-                                <figure class="ky-card"><img class="ofis-img" src="assets/img/ofis/ofis-1.jpg"
+                                <figure class="ky-card"><img class="ofis-img" src="assets/img/ofis/ofis-1.jpg" onerror="this.onerror=null;this.src='assets/img/ofis/ofis-1.png';"
                                                              alt="Ofis fotoğrafı 1" loading="lazy"/></figure>
                             </div>
                             <div class="swiper-slide">
-                                <figure class="ky-card"><img class="ofis-img" src="assets/img/ofis/ofis-2.jpg"
+                                <figure class="ky-card"><img class="ofis-img" src="assets/img/ofis/ofis-2.jpg" onerror="this.onerror=null;this.src='assets/img/ofis/ofis-2.png';"
                                                              alt="Ofis fotoğrafı 2" loading="lazy"/></figure>
                             </div>
                             <div class="swiper-slide">
-                                <figure class="ky-card"><img class="ofis-img" src="assets/img/ofis/ofis-3.jpg"
+                                <figure class="ky-card"><img class="ofis-img" src="assets/img/ofis/ofis-3.jpg" onerror="this.onerror=null;this.src='assets/img/ofis/ofis-3.png';"
                                                              alt="Ofis fotoğrafı 3" loading="lazy"/></figure>
                             </div>
                             <div class="swiper-slide">
-                                <figure class="ky-card"><img class="ofis-img" src="assets/img/ofis/ofis-4.jpg"
+                                <figure class="ky-card"><img class="ofis-img" src="assets/img/ofis/ofis-4.jpg" onerror="this.onerror=null;this.src='assets/img/ofis/ofis-4.png';"
                                                              alt="Ofis fotoğrafı 4" loading="lazy"/></figure>
                             </div>
                             <div class="swiper-slide">
-                                <figure class="ky-card"><img class="ofis-img" src="assets/img/ofis/ofis-5.jpg"
+                                <figure class="ky-card"><img class="ofis-img" src="assets/img/ofis/ofis-5.jpg" onerror="this.onerror=null;this.src='assets/img/ofis/ofis-5.png';"
                                                              alt="Ofis fotoğrafı 5" loading="lazy"/></figure>
                             </div>
                             <div class="swiper-slide">
-                                <figure class="ky-card"><img class="ofis-img" src="assets/img/ofis/ofis-6.jpg"
+                                <figure class="ky-card"><img class="ofis-img" src="assets/img/ofis/ofis-6.jpg" onerror="this.onerror=null;this.src='assets/img/ofis/ofis-6.png';"
                                                              alt="Ofis fotoğrafı 6" loading="lazy"/></figure>
                             </div>
                             <div class="swiper-slide">
-                                <figure class="ky-card"><img class="ofis-img" src="assets/img/ofis/ofis-7.jpg"
+                                <figure class="ky-card"><img class="ofis-img" src="assets/img/ofis/ofis-7.jpg" onerror="this.onerror=null;this.src='assets/img/ofis/ofis-7.png';"
                                                              alt="Ofis fotoğrafı 7" loading="lazy"/></figure>
                             </div>
                             <div class="swiper-slide">
-                                <figure class="ky-card"><img class="ofis-img" src="assets/img/ofis/ofis-8.jpg"
+                                <figure class="ky-card"><img class="ofis-img" src="assets/img/ofis/ofis-8.jpg" onerror="this.onerror=null;this.src='assets/img/ofis/ofis-8.png';"
                                                              alt="Ofis fotoğrafı 8" loading="lazy"/></figure>
                             </div>
                         </div>
