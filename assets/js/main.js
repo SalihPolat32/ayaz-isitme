@@ -24,7 +24,7 @@
 
   var saved = null;
   try { saved = localStorage.getItem('theme'); } catch (e) {}
-  applyTheme(saved || 'light');
+  applyTheme('light');
 
   if (toggleBtn) {
     toggleBtn.addEventListener('click', function () {
