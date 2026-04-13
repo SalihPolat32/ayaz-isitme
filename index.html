@@ -37,7 +37,7 @@
 
     <!-- Theme -->
     <meta name="theme-color" content="#ffffff">
-    <meta name="color-scheme" content="light">
+    <meta name="color-scheme" content="light dark">
     <meta name="application-name" content="Ayaz İşitme Cihazları">
     <meta name="apple-mobile-web-app-title" content="Ayaz İşitme">
 
@@ -56,18 +56,10 @@
     <link href="assets/css/style.css" rel="stylesheet"/>
 
     <style>
-        /* Siteyi her zaman açık tema olarak tut */
-        html,
-        html[data-bs-theme="dark"],
-        body,
-        body[data-bs-theme="dark"] {
-            color-scheme: light !important;
-        }
-
         /* Logo wrapper */
         .brand-mark {
             background: rgba(255, 255, 255, .92);
-            border: 1px solid rgba(0, 0, 0, .08);
+            border: 1px solid rgba(255, 255, 255, .22);
             padding: 6px 10px;
             border-radius: 12px;
             display: inline-flex;
@@ -92,12 +84,16 @@
             height: 52px !important;
         }
 
-        /* Koyu temalı logoyu tamamen gizle */
+        /* Tema bazlı logo gösterimi */
         .logo-dark {
             display: none !important;
         }
 
-        .logo-light {
+        html[data-bs-theme="dark"] .logo-light {
+            display: none !important;
+        }
+
+        html[data-bs-theme="dark"] .logo-dark {
             display: block !important;
         }
 
@@ -106,29 +102,69 @@
             border-radius: 14px;
         }
 
-        /* Tema butonunu gizle */
-        #themeToggle {
-            display: none !important;
+        /* Blog kartlarındaki okunurluk düzeltmeleri */
+        #blog .blog-title__badge {
+            color: #ffb36b !important;
+        }
+
+        #blog > .container > .mb-4 > div > p,
+        #blog .text-muted {
+            color: rgba(255, 255, 255, .78) !important;
+        }
+
+        #blog .blog-card {
+            color: #f8fafc !important;
+        }
+
+        #blog .blog-card__title,
+        #blog .blog-card__lead,
+        #blog .blog-details summary,
+        #blog .blog-details__content,
+        #blog .blog-details__content p,
+        #blog .blog-details__content li,
+        #blog .blog-details__content div,
+        #blog .blog-details__content b,
+        #blog .blog-details__content ul {
+            color: #f8fafc !important;
+        }
+
+        #blog .blog-details summary {
+            border-color: rgba(255, 255, 255, .16) !important;
+        }
+
+        #blog .blog-card hr,
+        #blog .blog-card__header {
+            border-color: rgba(255, 255, 255, .08) !important;
         }
     </style>
 
-    <!-- Tema zorlaması: main.js ne yaparsa yapsın site beyaz açılsın -->
+    <!-- Varsayılan tema: ilk açılışta light, sonrasında kullanıcının seçimi korunur -->
     <script>
         (function () {
-            function forceLightTheme() {
-                document.documentElement.setAttribute('data-bs-theme', 'light');
-                try {
+            var savedTheme = null;
+
+            try {
+                savedTheme =
+                    localStorage.getItem('theme') ||
+                    localStorage.getItem('bs-theme') ||
+                    localStorage.getItem('data-bs-theme') ||
+                    localStorage.getItem('color-theme');
+            } catch (e) {
+                savedTheme = null;
+            }
+
+            var theme = savedTheme === 'dark' ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-bs-theme', theme);
+
+            try {
+                if (!savedTheme) {
                     localStorage.setItem('theme', 'light');
                     localStorage.setItem('bs-theme', 'light');
                     localStorage.setItem('data-bs-theme', 'light');
                     localStorage.setItem('color-theme', 'light');
-                } catch (e) {
                 }
+            } catch (e) {
             }
-
-            forceLightTheme();
-            document.addEventListener('DOMContentLoaded', forceLightTheme);
-            window.addEventListener('load', forceLightTheme);
         })();
     </script>
 
@@ -228,9 +264,13 @@
     <div class="container">
         <a class="navbar-brand d-flex align-items-center gap-2" href="#home">
             <span class="brand-mark">
-                <img src="assets/img/ayaz-logo-full.png?v=6"
+                <img src="assets/img/ayaz-logo-full.png?v=7"
                      alt="Ayaz İşitme"
                      class="brand-logo brand-logo--nav logo-light"/>
+
+                <img src="assets/img/ayaz-logo-full-white.png?v=7"
+                     alt="Ayaz İşitme"
+                     class="brand-logo brand-logo--nav logo-dark"/>
             </span>
             <span class="fw-semibold">Ayaz İşitme Cihazları</span>
         </a>
@@ -304,9 +344,13 @@
                 <div class="glass-card p-3 p-md-4 rounded-4 shadow-sm">
                     <div class="d-flex align-items-center gap-3 mb-3">
                         <span class="brand-mark brand-mark--card">
-                            <img src="assets/img/ayaz-logo-full.png?v=6"
+                            <img src="assets/img/ayaz-logo-full.png?v=7"
                                  alt="Ayaz İşitme"
                                  class="brand-logo brand-logo--card logo-light"/>
+
+                            <img src="assets/img/ayaz-logo-full-white.png?v=7"
+                                 alt="Ayaz İşitme"
+                                 class="brand-logo brand-logo--card logo-dark"/>
                         </span>
                         <div>
                             <div class="fw-semibold">Ayaz İşitme Cihazları Satış ve Uygulama Merkezi</div>
@@ -1087,32 +1131,15 @@
 
 <script>
     (function () {
-        function forceLightTheme() {
-            document.documentElement.setAttribute('data-bs-theme', 'light');
-            try {
-                localStorage.setItem('theme', 'light');
-                localStorage.setItem('bs-theme', 'light');
-                localStorage.setItem('data-bs-theme', 'light');
-                localStorage.setItem('color-theme', 'light');
-            } catch (e) {
-            }
-        }
-
-        forceLightTheme();
-
         document.addEventListener('DOMContentLoaded', function () {
-            forceLightTheme();
-            const themeToggle = document.getElementById('themeToggle');
+            var themeToggle = document.getElementById('themeToggle');
+
             if (themeToggle) {
-                themeToggle.style.display = 'none';
-                themeToggle.setAttribute('aria-hidden', 'true');
-                themeToggle.setAttribute('tabindex', '-1');
+                themeToggle.style.display = '';
+                themeToggle.removeAttribute('aria-hidden');
+                themeToggle.removeAttribute('tabindex');
             }
         });
-
-        window.addEventListener('load', forceLightTheme);
-        setTimeout(forceLightTheme, 200);
-        setTimeout(forceLightTheme, 800);
     })();
 </script>
 </body>
