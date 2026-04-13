@@ -22,7 +22,7 @@ Tercih localStorage’da saklanır ve tekrar açılışta uygulanır.
 
 ## İletişim Formu
 Formlar şu endpoint’e bağlıdır (ücretsiz, ilk kullanımda e-posta doğrulaması isteyebilir):
-- `https://formsubmit.co/medsemisitme@gmail.com`
+- `https://formsubmit.co/ayazisitmecihazlari@gmail.com`
 
 İsterseniz bunu kendi mail sunucunuza/CRM’inize veya başka bir form sağlayıcısına çevirebiliriz.
 
