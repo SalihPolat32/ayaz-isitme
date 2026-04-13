@@ -11,7 +11,7 @@
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://keciorenisitme.com/">
 
-    <!-- KEYWORDS -->
+    <!-- KEYWORDS (opsiyonel ama ekledim) -->
     <meta name="keywords" content="Keçiören işitme cihazı, Ankara işitme cihazı, işitme testi, işitme merkezi Keçiören">
 
     <!-- Open Graph -->
@@ -20,7 +20,6 @@
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://keciorenisitme.com/">
     <meta property="og:image" content="https://keciorenisitme.com/assets/img/ayaz-logo-full.png">
-    <meta property="og:image:alt" content="Ayaz İşitme Merkezi logosu">
     <meta property="og:locale" content="tr_TR">
 
     <!-- Twitter -->
@@ -36,17 +35,11 @@
     <meta name="ICBM" content="39.9780, 32.8660">
 
     <!-- Theme -->
-    <meta name="theme-color" content="#ffffff">
-    <meta name="color-scheme" content="light dark">
-    <meta name="application-name" content="Ayaz İşitme Cihazları">
-    <meta name="apple-mobile-web-app-title" content="Ayaz İşitme">
+    <meta name="theme-color" content="#0b2a4a"/>
 
-    <!-- Favicon / Logo -->
-    <link rel="icon" href="/favicon.ico" sizes="any">
-    <link rel="icon" type="image/png" sizes="48x48" href="/assets/img/favicon-48x48.png">
-    <link rel="icon" type="image/png" sizes="96x96" href="/assets/img/favicon-96x96.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="/assets/img/apple-touch-icon.png">
-    <link rel="shortcut icon" href="/assets/img/ayaz-logo-full.png">
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon.ico">
+    <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
 
     <!-- CSS -->
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin/>
@@ -68,7 +61,7 @@
             line-height: 0;
         }
 
-        /* Logo image */
+        /* Logo image: kareye zorlamayı iptal et */
         .brand-logo {
             display: block !important;
             width: auto !important;
@@ -76,6 +69,7 @@
             max-width: 100%;
         }
 
+        /* Boyutlar */
         .brand-logo--nav {
             height: 34px !important;
         }
@@ -97,146 +91,88 @@
             display: block !important;
         }
 
+        /* Kart içinde biraz daha sıkı */
         .brand-mark--card {
             padding: 8px 12px;
             border-radius: 14px;
         }
-
-        /* Blog kartlarındaki okunurluk düzeltmeleri */
-        #blog .blog-title__badge {
-            color: #ffb36b !important;
-        }
-
-        #blog > .container > .mb-4 > div > p,
-        #blog .text-muted {
-            color: rgba(255, 255, 255, .78) !important;
-        }
-
-        #blog .blog-card {
-            color: #f8fafc !important;
-        }
-
-        #blog .blog-card__title,
-        #blog .blog-card__lead,
-        #blog .blog-details summary,
-        #blog .blog-details__content,
-        #blog .blog-details__content p,
-        #blog .blog-details__content li,
-        #blog .blog-details__content div,
-        #blog .blog-details__content b,
-        #blog .blog-details__content ul {
-            color: #f8fafc !important;
-        }
-
-        #blog .blog-details summary {
-            border-color: rgba(255, 255, 255, .16) !important;
-        }
-
-        #blog .blog-card hr,
-        #blog .blog-card__header {
-            border-color: rgba(255, 255, 255, .08) !important;
-        }
     </style>
 
-    <!-- Varsayılan tema: ilk açılışta light, sonrasında kullanıcının seçimi korunur -->
-    <script>
-        (function () {
-            var savedTheme = null;
-
-            try {
-                savedTheme =
-                    localStorage.getItem('theme') ||
-                    localStorage.getItem('bs-theme') ||
-                    localStorage.getItem('data-bs-theme') ||
-                    localStorage.getItem('color-theme');
-            } catch (e) {
-                savedTheme = null;
-            }
-
-            var theme = savedTheme === 'dark' ? 'dark' : 'light';
-            document.documentElement.setAttribute('data-bs-theme', theme);
-
-            try {
-                if (!savedTheme) {
-                    localStorage.setItem('theme', 'light');
-                    localStorage.setItem('bs-theme', 'light');
-                    localStorage.setItem('data-bs-theme', 'light');
-                    localStorage.setItem('color-theme', 'light');
-                }
-            } catch (e) {
-            }
-        })();
-    </script>
 
     <!-- SCHEMA -->
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "MedicalBusiness",
-      "@id": "https://keciorenisitme.com/#business",
-      "name": "Ayaz İşitme Cihazları",
-      "image": "https://keciorenisitme.com/assets/img/ayaz-logo-full.png",
-      "logo": "https://keciorenisitme.com/assets/img/ayaz-logo-full.png",
-      "url": "https://keciorenisitme.com",
-      "telephone": "+905071551151",
-      "priceRange": "$$",
-      "address": {
-        "@type": "PostalAddress",
-        "streetAddress": "Aşağı Eğlence Mahallesi, Ayvalı Caddesi No:26/A",
-        "addressLocality": "Keçiören",
-        "addressRegion": "Ankara",
-        "postalCode": "06010",
-        "addressCountry": "TR"
-      },
-      "geo": {
-        "@type": "GeoCoordinates",
-        "latitude": 39.9780,
-        "longitude": 32.8660
-      },
-      "areaServed": [
-        "Ankara",
-        "Keçiören",
-        "Etimesgut",
-        "Sincan"
-      ],
-      "openingHoursSpecification": {
-        "@type": "OpeningHoursSpecification",
-        "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],
-        "opens": "09:00",
-        "closes": "18:00"
-      },
-      "sameAs": [
-        "https://maps.app.goo.gl/x7CAB5ZyCWHGagyi7"
-      ]
-    }
-    </script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "MedicalBusiness",
+  "@id": "https://keciorenisitme.com/#business",
+  "name": "Ayaz İşitme Cihazları",
+  "image": "https://keciorenisitme.com/assets/img/ayaz-logo-full.png",
+  "url": "https://keciorenisitme.com",
+  "telephone": "+905071551151",
+  "priceRange": "$$",
+
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "Aşağı Eğlence Mahallesi, Ayvalı Caddesi No:26/A",
+    "addressLocality": "Keçiören",
+    "addressRegion": "Ankara",
+    "postalCode": "06010",
+    "addressCountry": "TR"
+  },
+
+  "geo": {
+    "@type": "GeoCoordinates",
+    "latitude": 39.9780,
+    "longitude": 32.8660
+  },
+
+  "areaServed": [
+    "Ankara",
+    "Keçiören",
+    "Etimesgut",
+    "Sincan"
+  ],
+
+  "openingHoursSpecification": {
+    "@type": "OpeningHoursSpecification",
+    "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],
+    "opens": "09:00",
+    "closes": "18:00"
+  },
+
+  "sameAs": [
+    "https://maps.app.goo.gl/x7CAB5ZyCWHGagyi7"
+  ]
+}
+</script>
 
     <!-- GOOGLE ANALYTICS -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-VRC710M0YF"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag() {dataLayer.push(arguments);} 
-        gtag('js', new Date());
-        gtag('config', 'G-VRC710M0YF');
-    </script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-VRC710M0YF"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-VRC710M0YF');
+</script>
 
     <!-- FAQ SCHEMA -->
-    <script type="application/ld+json">
-    {
-     "@context": "https://schema.org",
-     "@type": "FAQPage",
-     "mainEntity": [{
-       "@type": "Question",
-       "name": "İşitme cihazı fiyatları ne kadar?",
-       "acceptedAnswer": {
-         "@type": "Answer",
-         "text": "Fiyatlar modele ve özelliklere göre değişmektedir. Ücretsiz test sonrası net bilgi verilir."
-       }
-     }]
-    }
-    </script>
-</head>
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@type": "FAQPage",
+ "mainEntity": [{
+   "@type": "Question",
+   "name": "İşitme cihazı fiyatları ne kadar?",
+   "acceptedAnswer": {
+     "@type": "Answer",
+     "text": "Fiyatlar modele ve özelliklere göre değişmektedir. Ücretsiz test sonrası net bilgi verilir."
+   }
+ }]
+}
+</script>
 
+</head>
+    
 <body data-bs-spy="scroll" data-bs-target="#mainNav" data-bs-offset="90" tabindex="0">
 
 <!-- Top bar -->
@@ -264,11 +200,11 @@
     <div class="container">
         <a class="navbar-brand d-flex align-items-center gap-2" href="#home">
             <span class="brand-mark">
-                <img src="assets/img/ayaz-logo-full.png?v=7"
+                <img src="assets/img/ayaz-logo-full.png?v=5"
                      alt="Ayaz İşitme"
                      class="brand-logo brand-logo--nav logo-light"/>
 
-                <img src="assets/img/ayaz-logo-full-white.png?v=7"
+                <img src="assets/img/ayaz-logo-full-white.png?v=5"
                      alt="Ayaz İşitme"
                      class="brand-logo brand-logo--nav logo-dark"/>
             </span>
@@ -344,11 +280,11 @@
                 <div class="glass-card p-3 p-md-4 rounded-4 shadow-sm">
                     <div class="d-flex align-items-center gap-3 mb-3">
                         <span class="brand-mark brand-mark--card">
-                            <img src="assets/img/ayaz-logo-full.png?v=7"
+                            <img src="assets/img/ayaz-logo-full.png?v=5"
                                  alt="Ayaz İşitme"
                                  class="brand-logo brand-logo--card logo-light"/>
 
-                            <img src="assets/img/ayaz-logo-full-white.png?v=7"
+                            <img src="assets/img/ayaz-logo-full-white.png?v=5"
                                  alt="Ayaz İşitme"
                                  class="brand-logo brand-logo--card logo-dark"/>
                         </span>
@@ -423,27 +359,90 @@
                     <h2 class="section-title ky-col-title"><span class="ky-title-pill">Kullanıcı Yorumları</span></h2>
                     <div class="swiper ky-swiper" aria-label="Kullanıcı yorumları slider">
                         <div class="swiper-wrapper">
-                            <div class="swiper-slide"><figure class="ky-card"><img class="ky-img" src="assets/img/yorumlar/1.png" alt="Kullanıcı yorumu 1" loading="lazy"/></figure></div>
-                            <div class="swiper-slide"><figure class="ky-card"><img class="ky-img" src="assets/img/yorumlar/2.png" alt="Kullanıcı yorumu 2" loading="lazy"/></figure></div>
-                            <div class="swiper-slide"><figure class="ky-card"><img class="ky-img" src="assets/img/yorumlar/3.png" alt="Kullanıcı yorumu 3" loading="lazy"/></figure></div>
-                            <div class="swiper-slide"><figure class="ky-card"><img class="ky-img" src="assets/img/yorumlar/4.png" alt="Kullanıcı yorumu 4" loading="lazy"/></figure></div>
-                            <div class="swiper-slide"><figure class="ky-card"><img class="ky-img" src="assets/img/yorumlar/5.png" alt="Kullanıcı yorumu 5" loading="lazy"/></figure></div>
-                            <div class="swiper-slide"><figure class="ky-card"><img class="ky-img" src="assets/img/yorumlar/6.png" alt="Kullanıcı yorumu 6" loading="lazy"/></figure></div>
-                            <div class="swiper-slide"><figure class="ky-card"><img class="ky-img" src="assets/img/yorumlar/7.png" alt="Kullanıcı yorumu 7" loading="lazy"/></figure></div>
-                            <div class="swiper-slide"><figure class="ky-card"><img class="ky-img" src="assets/img/yorumlar/8.png" alt="Kullanıcı yorumu 8" loading="lazy"/></figure></div>
-                            <div class="swiper-slide"><figure class="ky-card"><img class="ky-img" src="assets/img/yorumlar/9.png" alt="Kullanıcı yorumu 9" loading="lazy"/></figure></div>
-                            <div class="swiper-slide"><figure class="ky-card"><img class="ky-img" src="assets/img/yorumlar/10.png" alt="Kullanıcı yorumu 10" loading="lazy"/></figure></div>
-                            <div class="swiper-slide"><figure class="ky-card"><img class="ky-img" src="assets/img/yorumlar/11.png" alt="Kullanıcı yorumu 11" loading="lazy"/></figure></div>
-                            <div class="swiper-slide"><figure class="ky-card"><img class="ky-img" src="assets/img/yorumlar/12.png" alt="Kullanıcı yorumu 12" loading="lazy"/></figure></div>
-                            <div class="swiper-slide"><figure class="ky-card"><img class="ky-img" src="assets/img/yorumlar/13.png" alt="Kullanıcı yorumu 13" loading="lazy"/></figure></div>
-                            <div class="swiper-slide"><figure class="ky-card"><img class="ky-img" src="assets/img/yorumlar/14.png" alt="Kullanıcı yorumu 14" loading="lazy"/></figure></div>
-                            <div class="swiper-slide"><figure class="ky-card"><img class="ky-img" src="assets/img/yorumlar/15.png" alt="Kullanıcı yorumu 15" loading="lazy"/></figure></div>
-                            <div class="swiper-slide"><figure class="ky-card"><img class="ky-img" src="assets/img/yorumlar/16.png" alt="Kullanıcı yorumu 16" loading="lazy"/></figure></div>
-                            <div class="swiper-slide"><figure class="ky-card"><img class="ky-img" src="assets/img/yorumlar/17.png" alt="Kullanıcı yorumu 17" loading="lazy"/></figure></div>
-                            <div class="swiper-slide"><figure class="ky-card"><img class="ky-img" src="assets/img/yorumlar/18.png" alt="Kullanıcı yorumu 18" loading="lazy"/></figure></div>
-                            <div class="swiper-slide"><figure class="ky-card"><img class="ky-img" src="assets/img/yorumlar/19.png" alt="Kullanıcı yorumu 19" loading="lazy"/></figure></div>
-                            <div class="swiper-slide"><figure class="ky-card"><img class="ky-img" src="assets/img/yorumlar/20.png" alt="Kullanıcı yorumu 20" loading="lazy"/></figure></div>
-                            <div class="swiper-slide"><figure class="ky-card"><img class="ky-img" src="assets/img/yorumlar/21.png" alt="Kullanıcı yorumu 21" loading="lazy"/></figure></div>
+                            <div class="swiper-slide">
+                                <figure class="ky-card"><img class="ky-img" src="assets/img/yorumlar/1.png"
+                                                             alt="Kullanıcı yorumu 1" loading="lazy"/></figure>
+                            </div>
+                            <div class="swiper-slide">
+                                <figure class="ky-card"><img class="ky-img" src="assets/img/yorumlar/2.png"
+                                                             alt="Kullanıcı yorumu 2" loading="lazy"/></figure>
+                            </div>
+                            <div class="swiper-slide">
+                                <figure class="ky-card"><img class="ky-img" src="assets/img/yorumlar/3.png"
+                                                             alt="Kullanıcı yorumu 3" loading="lazy"/></figure>
+                            </div>
+                            <div class="swiper-slide">
+                                <figure class="ky-card"><img class="ky-img" src="assets/img/yorumlar/4.png"
+                                                             alt="Kullanıcı yorumu 4" loading="lazy"/></figure>
+                            </div>
+                            <div class="swiper-slide">
+                                <figure class="ky-card"><img class="ky-img" src="assets/img/yorumlar/5.png"
+                                                             alt="Kullanıcı yorumu 5" loading="lazy"/></figure>
+                            </div>
+                            <div class="swiper-slide">
+                                <figure class="ky-card"><img class="ky-img" src="assets/img/yorumlar/6.png"
+                                                             alt="Kullanıcı yorumu 6" loading="lazy"/></figure>
+                            </div>
+                            <div class="swiper-slide">
+                                <figure class="ky-card"><img class="ky-img" src="assets/img/yorumlar/7.png"
+                                                             alt="Kullanıcı yorumu 7" loading="lazy"/></figure>
+                            </div>
+                            <div class="swiper-slide">
+                                <figure class="ky-card"><img class="ky-img" src="assets/img/yorumlar/8.png"
+                                                             alt="Kullanıcı yorumu 8" loading="lazy"/></figure>
+                            </div>
+                            <div class="swiper-slide">
+                                <figure class="ky-card"><img class="ky-img" src="assets/img/yorumlar/9.png"
+                                                             alt="Kullanıcı yorumu 9" loading="lazy"/></figure>
+                            </div>
+                            <div class="swiper-slide">
+                                <figure class="ky-card"><img class="ky-img" src="assets/img/yorumlar/10.png"
+                                                             alt="Kullanıcı yorumu 10" loading="lazy"/></figure>
+                            </div>
+                            <div class="swiper-slide">
+                                <figure class="ky-card"><img class="ky-img" src="assets/img/yorumlar/11.png"
+                                                             alt="Kullanıcı yorumu 11" loading="lazy"/></figure>
+                            </div>
+                            <div class="swiper-slide">
+                                <figure class="ky-card"><img class="ky-img" src="assets/img/yorumlar/12.png"
+                                                             alt="Kullanıcı yorumu 12" loading="lazy"/></figure>
+                            </div>
+                            <div class="swiper-slide">
+                                <figure class="ky-card"><img class="ky-img" src="assets/img/yorumlar/13.png"
+                                                             alt="Kullanıcı yorumu 13" loading="lazy"/></figure>
+                            </div>
+                            <div class="swiper-slide">
+                                <figure class="ky-card"><img class="ky-img" src="assets/img/yorumlar/14.png"
+                                                             alt="Kullanıcı yorumu 14" loading="lazy"/></figure>
+                            </div>
+                            <div class="swiper-slide">
+                                <figure class="ky-card"><img class="ky-img" src="assets/img/yorumlar/15.png"
+                                                             alt="Kullanıcı yorumu 15" loading="lazy"/></figure>
+                            </div>
+                            <div class="swiper-slide">
+                                <figure class="ky-card"><img class="ky-img" src="assets/img/yorumlar/16.png"
+                                                             alt="Kullanıcı yorumu 16" loading="lazy"/></figure>
+                            </div>
+                            <div class="swiper-slide">
+                                <figure class="ky-card"><img class="ky-img" src="assets/img/yorumlar/17.png"
+                                                             alt="Kullanıcı yorumu 17" loading="lazy"/></figure>
+                            </div>
+                            <div class="swiper-slide">
+                                <figure class="ky-card"><img class="ky-img" src="assets/img/yorumlar/18.png"
+                                                             alt="Kullanıcı yorumu 18" loading="lazy"/></figure>
+                            </div>
+                            <div class="swiper-slide">
+                                <figure class="ky-card"><img class="ky-img" src="assets/img/yorumlar/19.png"
+                                                             alt="Kullanıcı yorumu 19" loading="lazy"/></figure>
+                            </div>
+                            <div class="swiper-slide">
+                                <figure class="ky-card"><img class="ky-img" src="assets/img/yorumlar/20.png"
+                                                             alt="Kullanıcı yorumu 20" loading="lazy"/></figure>
+                            </div>
+                            <div class="swiper-slide">
+                                <figure class="ky-card"><img class="ky-img" src="assets/img/yorumlar/21.png"
+                                                             alt="Kullanıcı yorumu 21" loading="lazy"/></figure>
+                            </div>
                         </div>
                         <div class="swiper-pagination"></div>
                         <div class="swiper-button-prev" aria-label="Önceki"></div>
@@ -455,14 +454,38 @@
                     <h2 class="section-title ky-col-title"><span class="ky-title-pill">Ofisimiz</span></h2>
                     <div class="swiper ofis-swiper" aria-label="Ofis fotoğrafları slider">
                         <div class="swiper-wrapper">
-                            <div class="swiper-slide"><figure class="ky-card"><img class="ofis-img" src="assets/img/ofis/ofis-1.jpg" onerror="this.onerror=null;this.src='assets/img/ofis/ofis-1.png';" alt="Ofis fotoğrafı 1" loading="lazy"/></figure></div>
-                            <div class="swiper-slide"><figure class="ky-card"><img class="ofis-img" src="assets/img/ofis/ofis-2.jpg" onerror="this.onerror=null;this.src='assets/img/ofis/ofis-2.png';" alt="Ofis fotoğrafı 2" loading="lazy"/></figure></div>
-                            <div class="swiper-slide"><figure class="ky-card"><img class="ofis-img" src="assets/img/ofis/ofis-3.jpg" onerror="this.onerror=null;this.src='assets/img/ofis/ofis-3.png';" alt="Ofis fotoğrafı 3" loading="lazy"/></figure></div>
-                            <div class="swiper-slide"><figure class="ky-card"><img class="ofis-img" src="assets/img/ofis/ofis-4.jpg" onerror="this.onerror=null;this.src='assets/img/ofis/ofis-4.png';" alt="Ofis fotoğrafı 4" loading="lazy"/></figure></div>
-                            <div class="swiper-slide"><figure class="ky-card"><img class="ofis-img" src="assets/img/ofis/ofis-5.jpg" onerror="this.onerror=null;this.src='assets/img/ofis/ofis-5.png';" alt="Ofis fotoğrafı 5" loading="lazy"/></figure></div>
-                            <div class="swiper-slide"><figure class="ky-card"><img class="ofis-img" src="assets/img/ofis/ofis-6.jpg" onerror="this.onerror=null;this.src='assets/img/ofis/ofis-6.png';" alt="Ofis fotoğrafı 6" loading="lazy"/></figure></div>
-                            <div class="swiper-slide"><figure class="ky-card"><img class="ofis-img" src="assets/img/ofis/ofis-7.jpg" onerror="this.onerror=null;this.src='assets/img/ofis/ofis-7.png';" alt="Ofis fotoğrafı 7" loading="lazy"/></figure></div>
-                            <div class="swiper-slide"><figure class="ky-card"><img class="ofis-img" src="assets/img/ofis/ofis-8.jpg" onerror="this.onerror=null;this.src='assets/img/ofis/ofis-8.png';" alt="Ofis fotoğrafı 8" loading="lazy"/></figure></div>
+                            <div class="swiper-slide">
+                                <figure class="ky-card"><img class="ofis-img" src="assets/img/ofis/ofis-1.jpg" onerror="this.onerror=null;this.src='assets/img/ofis/ofis-1.png';"
+                                                             alt="Ofis fotoğrafı 1" loading="lazy"/></figure>
+                            </div>
+                            <div class="swiper-slide">
+                                <figure class="ky-card"><img class="ofis-img" src="assets/img/ofis/ofis-2.jpg" onerror="this.onerror=null;this.src='assets/img/ofis/ofis-2.png';"
+                                                             alt="Ofis fotoğrafı 2" loading="lazy"/></figure>
+                            </div>
+                            <div class="swiper-slide">
+                                <figure class="ky-card"><img class="ofis-img" src="assets/img/ofis/ofis-3.jpg" onerror="this.onerror=null;this.src='assets/img/ofis/ofis-3.png';"
+                                                             alt="Ofis fotoğrafı 3" loading="lazy"/></figure>
+                            </div>
+                            <div class="swiper-slide">
+                                <figure class="ky-card"><img class="ofis-img" src="assets/img/ofis/ofis-4.jpg" onerror="this.onerror=null;this.src='assets/img/ofis/ofis-4.png';"
+                                                             alt="Ofis fotoğrafı 4" loading="lazy"/></figure>
+                            </div>
+                            <div class="swiper-slide">
+                                <figure class="ky-card"><img class="ofis-img" src="assets/img/ofis/ofis-5.jpg" onerror="this.onerror=null;this.src='assets/img/ofis/ofis-5.png';"
+                                                             alt="Ofis fotoğrafı 5" loading="lazy"/></figure>
+                            </div>
+                            <div class="swiper-slide">
+                                <figure class="ky-card"><img class="ofis-img" src="assets/img/ofis/ofis-6.jpg" onerror="this.onerror=null;this.src='assets/img/ofis/ofis-6.png';"
+                                                             alt="Ofis fotoğrafı 6" loading="lazy"/></figure>
+                            </div>
+                            <div class="swiper-slide">
+                                <figure class="ky-card"><img class="ofis-img" src="assets/img/ofis/ofis-7.jpg" onerror="this.onerror=null;this.src='assets/img/ofis/ofis-7.png';"
+                                                             alt="Ofis fotoğrafı 7" loading="lazy"/></figure>
+                            </div>
+                            <div class="swiper-slide">
+                                <figure class="ky-card"><img class="ofis-img" src="assets/img/ofis/ofis-8.jpg" onerror="this.onerror=null;this.src='assets/img/ofis/ofis-8.png';"
+                                                             alt="Ofis fotoğrafı 8" loading="lazy"/></figure>
+                            </div>
                         </div>
                         <div class="swiper-pagination"></div>
                         <div class="swiper-button-prev" aria-label="Önceki"></div>
@@ -520,8 +543,10 @@
 <section id="products" class="section section-bernafon p-0">
     <div id="bernafonCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="5500">
         <div class="carousel-indicators">
-            <button type="button" data-bs-target="#bernafonCarousel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Giriş"></button>
-            <button type="button" data-bs-target="#bernafonCarousel" data-bs-slide-to="1" aria-label="Alpha XT"></button>
+            <button type="button" data-bs-target="#bernafonCarousel" data-bs-slide-to="0" class="active"
+                    aria-current="true" aria-label="Giriş"></button>
+            <button type="button" data-bs-target="#bernafonCarousel" data-bs-slide-to="1"
+                    aria-label="Alpha XT"></button>
             <button type="button" data-bs-target="#bernafonCarousel" data-bs-slide-to="2" aria-label="Alpha"></button>
             <button type="button" data-bs-target="#bernafonCarousel" data-bs-slide-to="3" aria-label="Leox"></button>
             <button type="button" data-bs-target="#bernafonCarousel" data-bs-slide-to="4" aria-label="Encanta"></button>
@@ -529,6 +554,7 @@
         </div>
 
         <div class="carousel-inner">
+            <!-- Slide 1 -->
             <div class="carousel-item active">
                 <div class="bernafon-slide" style="background-image:url('assets/img/bernafon/people-city.jpg');">
                     <div class="bernafon-overlay"></div>
@@ -553,7 +579,8 @@
                             </div>
                             <div class="col-lg-6">
                                 <div class="device-frame">
-                                    <img src="assets/img/bernafon/encanta-family.png" class="img-fluid" alt="Bernafon Encanta ürün ailesi görseli">
+                                    <img src="assets/img/bernafon/encanta-family.png" class="img-fluid"
+                                         alt="Bernafon Encanta ürün ailesi görseli">
                                 </div>
                             </div>
                         </div>
@@ -566,6 +593,7 @@
                 </div>
             </div>
 
+            <!-- Slide 2 -->
             <div class="carousel-item">
                 <div class="bernafon-slide" style="background-image:url('assets/img/bernafon/alpha-xt.jpg');">
                     <div class="bernafon-overlay bernafon-overlay--strong"></div>
@@ -576,16 +604,23 @@
                                 <h2 class="display-6 fw-bold mb-3">Bernafon Alpha XT</h2>
                                 <p class="lead mb-4">Günlük yaşam senaryolarına uyum sağlayan çözümlerle işitme
                                     konforunu artırın.</p>
-                                <div class="kime-uygun" data-tooltip="Hafiften ileri derece işitme kayıplarına kadar"><span class="kime-label">Kime uygun?</span></div>
+
+                                <div class="kime-uygun" data-tooltip="Hafiften ileri derece işitme kayıplarına kadar">
+                                    <span class="kime-label">Kime uygun?</span>
+                                </div>
+
                                 <div class="d-flex flex-wrap gap-2">
-                                    <a class="btn btn-primary" href="#contact"><i class="bi bi-info-circle"></i> Bilgi al</a>
+                                    <a class="btn btn-primary" href="#contact"><i class="bi bi-info-circle"></i> Bilgi
+                                        al</a>
                                     <a class="btn btn-outline-light" href="#gallery"><i class="bi bi-images"></i> Galeri</a>
                                     <span class="feature-badge" data-product="alpha-xt">Özellikler</span>
                                 </div>
                             </div>
+
                             <div class="col-lg-6">
                                 <div class="device-frame">
-                                    <img src="assets/img/bernafon/alpha-xt.jpg" class="img-fluid rounded-4 shadow-sm" alt="Bernafon Alpha XT görseli">
+                                    <img src="assets/img/bernafon/alpha-xt.jpg" class="img-fluid rounded-4 shadow-sm"
+                                         alt="Bernafon Alpha XT görseli">
                                 </div>
                             </div>
                         </div>
@@ -593,6 +628,7 @@
                 </div>
             </div>
 
+            <!-- Slide 3 -->
             <div class="carousel-item">
                 <div class="bernafon-slide" style="background-image:url('assets/img/bernafon/alpha.jpg');">
                     <div class="bernafon-overlay bernafon-overlay--strong"></div>
@@ -603,16 +639,23 @@
                                 <h2 class="display-6 fw-bold mb-3">Bernafon Alpha</h2>
                                 <p class="lead mb-4">Kullanım tarzınıza uygun model ve ayarlarla konuşmaları daha net
                                     takip edin.</p>
-                                <div class="kime-uygun" data-tooltip="Hafiften ileri derece işitme kayıplarına kadar"><span class="kime-label">Kime uygun?</span></div>
+
+                                <div class="kime-uygun" data-tooltip="Hafiften ileri derece işitme kayıplarına kadar">
+                                    <span class="kime-label">Kime uygun?</span>
+                                </div>
+
                                 <div class="d-flex flex-wrap gap-2">
-                                    <a class="btn btn-primary" href="#contact"><i class="bi bi-info-circle"></i> Bilgi al</a>
+                                    <a class="btn btn-primary" href="#contact"><i class="bi bi-info-circle"></i> Bilgi
+                                        al</a>
                                     <a class="btn btn-outline-light" href="#gallery"><i class="bi bi-images"></i> Galeri</a>
                                     <span class="feature-badge" data-product="alpha-platform">Özellikler</span>
                                 </div>
                             </div>
+
                             <div class="col-lg-6">
                                 <div class="device-frame">
-                                    <img src="assets/img/bernafon/alpha.jpg" class="img-fluid rounded-4 shadow-sm" alt="Bernafon Alpha görseli">
+                                    <img src="assets/img/bernafon/alpha.jpg" class="img-fluid rounded-4 shadow-sm"
+                                         alt="Bernafon Alpha görseli">
                                 </div>
                             </div>
                         </div>
@@ -620,6 +663,7 @@
                 </div>
             </div>
 
+            <!-- Slide 4 -->
             <div class="carousel-item">
                 <div class="bernafon-slide" style="background-image:url('assets/img/bernafon/leox.jpg');">
                     <div class="bernafon-overlay bernafon-overlay--strong"></div>
@@ -630,16 +674,24 @@
                                 <h2 class="display-6 fw-bold mb-3">Bernafon Leox</h2>
                                 <p class="lead mb-4">Kullanım kolaylığı ve konforu önceliklendiren çözümlerle işitmeye
                                     yeniden odaklanın.</p>
-                                <div class="kime-uygun" data-tooltip="İleri ve çok ileri derecede işitme kayıpları için"><span class="kime-label">Kime uygun?</span></div>
+
+                                <div class="kime-uygun"
+                                     data-tooltip="İleri ve çok ileri derecede işitme kayıpları için">
+                                    <span class="kime-label">Kime uygun?</span>
+                                </div>
+
                                 <div class="d-flex flex-wrap gap-2">
-                                    <a class="btn btn-primary" href="#contact"><i class="bi bi-info-circle"></i> Bilgi al</a>
+                                    <a class="btn btn-primary" href="#contact"><i class="bi bi-info-circle"></i> Bilgi
+                                        al</a>
                                     <a class="btn btn-outline-light" href="#gallery"><i class="bi bi-images"></i> Galeri</a>
                                     <span class="feature-badge" data-product="leox-platform">Özellikler</span>
                                 </div>
                             </div>
+
                             <div class="col-lg-6">
                                 <div class="device-frame">
-                                    <img src="assets/img/bernafon/leox.jpg" class="img-fluid rounded-4 shadow-sm" alt="Bernafon Leox görseli">
+                                    <img src="assets/img/bernafon/leox.jpg" class="img-fluid rounded-4 shadow-sm"
+                                         alt="Bernafon Leox görseli">
                                 </div>
                             </div>
                         </div>
@@ -647,6 +699,7 @@
                 </div>
             </div>
 
+            <!-- Slide 5 -->
             <div class="carousel-item">
                 <div class="bernafon-slide" style="background-image:url('assets/img/bernafon/people-city.jpg');">
                     <div class="bernafon-overlay bernafon-overlay--strong"></div>
@@ -657,16 +710,23 @@
                                 <h2 class="display-6 fw-bold mb-3">Bernafon Encanta</h2>
                                 <p class="lead mb-4">Günlük yaşam senaryolarında dengeli dinleme deneyimi sunmayı
                                     hedefleyen çözümler.</p>
-                                <div class="kime-uygun" data-tooltip="Hafiften ileri derece işitme kayıplarına kadar"><span class="kime-label">Kime uygun?</span></div>
+
+                                <div class="kime-uygun" data-tooltip="Hafiften ileri derece işitme kayıplarına kadar">
+                                    <span class="kime-label">Kime uygun?</span>
+                                </div>
+
                                 <div class="d-flex flex-wrap gap-2">
-                                    <a class="btn btn-primary" href="#contact"><i class="bi bi-info-circle"></i> Bilgi al</a>
+                                    <a class="btn btn-primary" href="#contact"><i class="bi bi-info-circle"></i> Bilgi
+                                        al</a>
                                     <a class="btn btn-outline-light" href="#gallery"><i class="bi bi-images"></i> Galeri</a>
                                     <span class="feature-badge" data-product="encanta">Özellikler</span>
                                 </div>
                             </div>
+
                             <div class="col-lg-6">
                                 <div class="device-frame">
-                                    <img src="assets/img/bernafon/encanta.webp" alt="Bernafon Encanta" class="img-fluid" loading="lazy">
+                                    <img src="assets/img/bernafon/encanta.webp" alt="Bernafon Encanta" class="img-fluid"
+                                         loading="lazy">
                                 </div>
                             </div>
                         </div>
@@ -674,6 +734,7 @@
                 </div>
             </div>
 
+            <!-- Slide 6 -->
             <div class="carousel-item">
                 <div class="bernafon-slide" style="background-image:url('assets/img/bernafon/people-city.jpg');">
                     <div class="bernafon-overlay bernafon-overlay--strong"></div>
@@ -684,28 +745,38 @@
                                 <h2 class="display-6 fw-bold mb-3">Bernafon Viron</h2>
                                 <p class="lead mb-4">Zor ortamlarda konuşma anlaşılırlığını desteklemeyi hedefleyen
                                     platform.</p>
-                                <div class="kime-uygun" data-tooltip="Orta ve ileri derece işitme kayıpları için"><span class="kime-label">Kime uygun?</span></div>
+
+                                <div class="kime-uygun" data-tooltip="Orta ve ileri derece işitme kayıpları için">
+                                    <span class="kime-label">Kime uygun?</span>
+                                </div>
+
                                 <div class="d-flex flex-wrap gap-2">
-                                    <a class="btn btn-primary" href="#contact"><i class="bi bi-info-circle"></i> Bilgi al</a>
+                                    <a class="btn btn-primary" href="#contact"><i class="bi bi-info-circle"></i> Bilgi
+                                        al</a>
                                     <a class="btn btn-outline-light" href="#gallery"><i class="bi bi-images"></i> Galeri</a>
                                     <span class="feature-badge" data-product="viron">Özellikler</span>
                                 </div>
                             </div>
+
                             <div class="col-lg-6">
                                 <div class="device-frame">
-                                    <img src="assets/img/bernafon/viron.png" alt="Bernafon Viron" class="img-fluid" loading="lazy">
+                                    <img src="assets/img/bernafon/viron.png" alt="Bernafon Viron" class="img-fluid"
+                                         loading="lazy">
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <button class="carousel-control-prev" type="button" data-bs-target="#bernafonCarousel" data-bs-slide="prev" aria-label="Önceki">
+        </div><!-- /.carousel-inner -->
+
+        <button class="carousel-control-prev" type="button" data-bs-target="#bernafonCarousel" data-bs-slide="prev"
+                aria-label="Önceki">
             <span class="carousel-control-prev-icon" aria-hidden="true"></span>
         </button>
-        <button class="carousel-control-next" type="button" data-bs-target="#bernafonCarousel" data-bs-slide="next" aria-label="Sonraki">
+        <button class="carousel-control-next" type="button" data-bs-target="#bernafonCarousel" data-bs-slide="next"
+                aria-label="Sonraki">
             <span class="carousel-control-next-icon" aria-hidden="true"></span>
         </button>
     </div>
@@ -726,7 +797,8 @@
                 <article class="blog-card h-100">
                     <div class="blog-card__header">
                         <h3 class="blog-card__title">İşitme kaybı belirtileri</h3>
-                        <p class="blog-card__lead text-muted">TV sesini açma, "tekrar eder misin" sıklığı, kalabalıkta zorlanma...</p>
+                        <p class="blog-card__lead text-muted">TV sesini açma, "tekrar eder misin" sıklığı, kalabalıkta
+                            zorlanma...</p>
                     </div>
                     <details class="blog-details">
                         <summary>Devamını oku</summary>
@@ -737,7 +809,8 @@
                                 <li>TV/telefon sesini çevrenizden daha yüksek kullanma ihtiyacı.</li>
                                 <li>Yorgunluk: Gün sonunda “dinleme eforu” artışı.</li>
                             </ul>
-                            <p class="mb-0">Bu tür belirtiler varsa en doğru adım, ölçümle netleştirmek ve uygun çözümü belirlemektir.</p>
+                            <p class="mb-0">Bu tür belirtiler varsa en doğru adım, ölçümle netleştirmek ve uygun çözümü
+                                belirlemektir.</p>
                         </div>
                     </details>
                 </article>
@@ -747,26 +820,38 @@
                 <article class="blog-card h-100">
                     <div class="blog-card__header">
                         <h3 class="blog-card__title">Kulak arkası vs kulak içi: artılar / eksiler</h3>
-                        <p class="blog-card__lead text-muted">Seçim; estetik, güç ihtiyacı, kullanım kolaylığı ve kulak yapısı birlikte değerlendirilerek yapılır.</p>
+                        <p class="blog-card__lead text-muted">Seçim; estetik, güç ihtiyacı, kullanım kolaylığı ve kulak
+                            yapısı birlikte değerlendirilerek yapılır.</p>
                     </div>
                     <details class="blog-details">
                         <summary>Devamını oku</summary>
                         <div class="blog-details__content">
                             <div class="mb-2"><b>Kulak arkası (BTE/RIC)</b> — genelde daha güçlü ve esnek</div>
                             <ul>
-                                <li><b>Avantaj</b>: Daha geniş güç aralığı; farklı işitme kayıplarına uyarlanabilir.</li>
+                                <li><b>Avantaj</b>: Daha geniş güç aralığı; farklı işitme kayıplarına uyarlanabilir.
+                                </li>
                                 <li><b>Avantaj</b>: Kontroller daha erişilebilir olabilir; kullanımı pratik.</li>
                                 <li><b>Avantaj</b>: Parça değişimi (tüp/receiver/dome) kolay olabilir.</li>
-                                <li><b>Dezavantaj</b>: Kulak arkasında gövde görünür; gözlük/maske ile temas hissi olabilir.</li>
+                                <li><b>Dezavantaj</b>: Kulak arkasında gövde görünür; gözlük/maske ile temas hissi
+                                    olabilir.
+                                </li>
                             </ul>
                             <div class="mb-2"><b>Kulak içi (ITE/ITC/CIC/IIC)</b> — daha kompakt seçenekler</div>
                             <ul>
-                                <li><b>Avantaj</b>: Daha az görünür; estetik beklentisi yüksek kişilerde tercih edilebilir.</li>
-                                <li><b>Avantaj</b>: Mikrofonlar kulağın doğal konumuna yakın olduğundan yön hissi artabilir.</li>
-                                <li><b>Dezavantaj</b>: Kulak kiri/nem etkisine daha açık olabilir; filtre ihtiyacı artabilir.</li>
+                                <li><b>Avantaj</b>: Daha az görünür; estetik beklentisi yüksek kişilerde tercih
+                                    edilebilir.
+                                </li>
+                                <li><b>Avantaj</b>: Mikrofonlar kulağın doğal konumuna yakın olduğundan yön hissi
+                                    artabilir.
+                                </li>
+                                <li><b>Dezavantaj</b>: Kulak kiri/nem etkisine daha açık olabilir; filtre ihtiyacı
+                                    artabilir.
+                                </li>
                                 <li><b>Dezavantaj</b>: Çok ileri kayıplarda güç sınırlı kalabilir (modele göre).</li>
                             </ul>
-                            <div class="small text-muted">Not: En doğru seçim, odyolojik ölçüm + kulak yapısı + günlük ihtiyaçlarla birlikte belirlenir.</div>
+                            <div class="small text-muted">Not: En doğru seçim, odyolojik ölçüm + kulak yapısı + günlük
+                                ihtiyaçlarla birlikte belirlenir.
+                            </div>
                         </div>
                     </details>
                 </article>
@@ -776,7 +861,8 @@
                 <article class="blog-card h-100">
                     <div class="blog-card__header">
                         <h3 class="blog-card__title">İlk adaptasyon süreci</h3>
-                        <p class="blog-card__lead text-muted">Beyin "yeniden öğrenir". Kademeli kullanım ve düzenli kontrol en iyi sonucu verir.</p>
+                        <p class="blog-card__lead text-muted">Beyin "yeniden öğrenir". Kademeli kullanım ve düzenli
+                            kontrol en iyi sonucu verir.</p>
                     </div>
                     <details class="blog-details">
                         <summary>Devamını oku</summary>
@@ -795,24 +881,37 @@
                 <article class="blog-card h-100">
                     <div class="blog-card__header">
                         <h3 class="blog-card__title">Erken cihaz kullanımı: SD testi &amp; algılama desteği</h3>
-                        <p class="blog-card__lead text-muted">Erken ve doğru ayarlanan cihaz kullanımı, konuşmayı anlama ve adaptasyon sürecinde avantaj sağlayabilir.</p>
+                        <p class="blog-card__lead text-muted">Erken ve doğru ayarlanan cihaz kullanımı, konuşmayı anlama
+                            ve adaptasyon sürecinde avantaj sağlayabilir.</p>
                     </div>
                     <details class="blog-details">
                         <summary>Devamını oku</summary>
                         <div class="blog-details__content">
                             <div class="mb-2"><b>SD (Speech Discrimination) / Konuşmayı Anlama</b></div>
                             <ul>
-                                <li><b>SD testi</b>: Kelimeleri/konuşmayı ne kadar doğru ayırt ettiğinizi gösterir (yüzde olarak raporlanabilir).</li>
-                                <li><b>Erken müdahale</b>: İşitme girdisi uzun süre az kalırsa dinleme eforu artabilir; erken destek adaptasyonu kolaylaştırır.</li>
-                                <li><b>Hedef</b>: Konuşma ipuçlarını daha net duymak ve beynin yeniden öğrenme sürecini hızlandırmak.</li>
+                                <li><b>SD testi</b>: Kelimeleri/konuşmayı ne kadar doğru ayırt ettiğinizi gösterir
+                                    (yüzde olarak raporlanabilir).
+                                </li>
+                                <li><b>Erken müdahale</b>: İşitme girdisi uzun süre az kalırsa dinleme eforu artabilir;
+                                    erken destek adaptasyonu kolaylaştırır.
+                                </li>
+                                <li><b>Hedef</b>: Konuşma ipuçlarını daha net duymak ve beynin yeniden öğrenme sürecini
+                                    hızlandırmak.
+                                </li>
                             </ul>
                             <div class="mb-2"><b>Algılama ve günlük yaşam</b></div>
                             <ul>
-                                <li><b>İlk günler</b>: Bazı sesler (kağıt hışırtısı, tabak sesi) belirgin gelebilir; bu genelde normaldir.</li>
-                                <li><b>Kademeli kullanım</b>: Süreyi kademeli artırmak ve düzenli kontrol/ince ayar performansı yükseltir.</li>
+                                <li><b>İlk günler</b>: Bazı sesler (kağıt hışırtısı, tabak sesi) belirgin gelebilir; bu
+                                    genelde normaldir.
+                                </li>
+                                <li><b>Kademeli kullanım</b>: Süreyi kademeli artırmak ve düzenli kontrol/ince ayar
+                                    performansı yükseltir.
+                                </li>
                                 <li><b>Takip</b>: Cihaz ayarı ve dome/kalıp seçimi SD ve konforu etkiler.</li>
                             </ul>
-                            <div class="small text-muted">Not: SD oranı kaybın tipi/şiddeti ve ölçüm koşullarına göre değişir.</div>
+                            <div class="small text-muted">Not: SD oranı kaybın tipi/şiddeti ve ölçüm koşullarına göre
+                                değişir.
+                            </div>
                         </div>
                     </details>
                 </article>
@@ -822,7 +921,8 @@
                 <article class="blog-card h-100">
                     <div class="blog-card__header">
                         <h3 class="blog-card__title">Bakım: filtre &amp; temizlik</h3>
-                        <p class="blog-card__lead text-muted">Düzenli bakım, performansı korur ve arıza riskini azaltır.</p>
+                        <p class="blog-card__lead text-muted">Düzenli bakım, performansı korur ve arıza riskini
+                            azaltır.</p>
                     </div>
                     <details class="blog-details">
                         <summary>Devamını oku</summary>
@@ -841,7 +941,8 @@
                 <article class="blog-card h-100">
                     <div class="blog-card__header">
                         <h3 class="blog-card__title">Bluetooth &amp; bağlantı</h3>
-                        <p class="blog-card__lead text-muted">Telefon modeli, işletim sistemi ve cihaz ailesi bağlantı deneyimini belirler.</p>
+                        <p class="blog-card__lead text-muted">Telefon modeli, işletim sistemi ve cihaz ailesi bağlantı
+                            deneyimini belirler.</p>
                     </div>
                     <details class="blog-details">
                         <summary>Devamını oku</summary>
@@ -849,7 +950,8 @@
                             <ul>
                                 <li>Ses akışı: Arama, müzik, video sesini cihazdan dinleme (uyumluluğa bağlı).</li>
                                 <li>Hands-free: Bazı kombinasyonlarda telefona dokunmadan görüşme (modele göre).</li>
-                                <li>LE Audio / Auracast: Destekleyen cihazlarda yeni nesil yayın/akış (modele göre).</li>
+                                <li>LE Audio / Auracast: Destekleyen cihazlarda yeni nesil yayın/akış (modele göre).
+                                </li>
                             </ul>
                         </div>
                     </details>
@@ -870,26 +972,45 @@
         <div class="row g-3">
             <div class="col-sm-6 col-lg-3">
                 <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden">
-                    <img src="assets/img/bernafon/encanta.jpg" class="w-100 gallery-img" alt="Bernafon Encanta ürün görseli" loading="lazy">
-                    <div class="card-body"><div class="fw-semibold">Encanta</div><div class="small text-muted">Yeni nesil seçenekler</div></div>
+                    <img src="assets/img/bernafon/encanta.jpg" class="w-100 gallery-img"
+                         alt="Bernafon Encanta ürün görseli" loading="lazy">
+                    <div class="card-body">
+                        <div class="fw-semibold">Encanta</div>
+                        <div class="small text-muted">Yeni nesil seçenekler</div>
+                    </div>
                 </div>
             </div>
+
             <div class="col-sm-6 col-lg-3">
                 <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden">
-                    <img src="assets/img/bernafon/alpha-xt.jpg" class="w-100 gallery-img" alt="Bernafon Alpha XT ürün görseli" loading="lazy">
-                    <div class="card-body"><div class="fw-semibold">Alpha XT</div><div class="small text-muted">Konfor odaklı</div></div>
+                    <img src="assets/img/bernafon/alpha-xt.jpg" class="w-100 gallery-img"
+                         alt="Bernafon Alpha XT ürün görseli" loading="lazy">
+                    <div class="card-body">
+                        <div class="fw-semibold">Alpha XT</div>
+                        <div class="small text-muted">Konfor odaklı</div>
+                    </div>
                 </div>
             </div>
+
             <div class="col-sm-6 col-lg-3">
                 <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden">
-                    <img src="assets/img/bernafon/alpha.jpg" class="w-100 gallery-img" alt="Bernafon Alpha ürün görseli" loading="lazy">
-                    <div class="card-body"><div class="fw-semibold">Alpha</div><div class="small text-muted">Günlük kullanım</div></div>
+                    <img src="assets/img/bernafon/alpha.jpg" class="w-100 gallery-img" alt="Bernafon Alpha ürün görseli"
+                         loading="lazy">
+                    <div class="card-body">
+                        <div class="fw-semibold">Alpha</div>
+                        <div class="small text-muted">Günlük kullanım</div>
+                    </div>
                 </div>
             </div>
+
             <div class="col-sm-6 col-lg-3">
                 <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden">
-                    <img src="assets/img/bernafon/leox.jpg" class="w-100 gallery-img" alt="Bernafon Leox ürün görseli" loading="lazy">
-                    <div class="card-body"><div class="fw-semibold">Leox</div><div class="small text-muted">Kullanım kolaylığı</div></div>
+                    <img src="assets/img/bernafon/leox.jpg" class="w-100 gallery-img" alt="Bernafon Leox ürün görseli"
+                         loading="lazy">
+                    <div class="card-body">
+                        <div class="fw-semibold">Leox</div>
+                        <div class="small text-muted">Kullanım kolaylığı</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -901,110 +1022,194 @@
     <div class="container">
         <h2 class="fw-bold mb-4">Sık Sorulan Sorular</h2>
 
-        <div id="faqCarousel" class="carousel slide carousel-fade faq-carousel" data-bs-ride="carousel" data-bs-interval="5000" data-bs-pause="hover">
+        <div id="faqCarousel" class="carousel slide carousel-fade faq-carousel" data-bs-ride="carousel"
+             data-bs-interval="5000" data-bs-pause="hover">
             <div class="carousel-inner">
+                <!-- Page 1 -->
                 <div class="carousel-item active">
                     <div class="accordion" id="faqAcc1">
                         <div class="accordion-item">
                             <h2 class="accordion-header">
-                                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#f1" aria-expanded="true" aria-controls="f1">İşitme cihazı seçimi nasıl yapılır?</button>
+                                <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#f1" aria-expanded="true" aria-controls="f1">
+                                    İşitme cihazı seçimi nasıl yapılır?
+                                </button>
                             </h2>
                             <div id="f1" class="accordion-collapse collapse show" data-bs-parent="#faqAcc1">
-                                <div class="accordion-body text-muted">Odyolojik ölçümler (odyogram), işitme kaybının derecesi ve yaşam tarzı ihtiyaçları birlikte değerlendirilir. Kulak yapısı, kullanım kolaylığı ve bağlantı beklentileri de modele karar vermede etkilidir.</div>
+                                <div class="accordion-body text-muted">
+                                    Odyolojik ölçümler (odyogram), işitme kaybının derecesi ve yaşam tarzı ihtiyaçları
+                                    birlikte değerlendirilir.
+                                    Kulak yapısı, kullanım kolaylığı ve bağlantı beklentileri de modele karar vermede
+                                    etkilidir.
+                                </div>
                             </div>
                         </div>
+
                         <div class="accordion-item">
                             <h2 class="accordion-header">
-                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#f2" aria-expanded="false" aria-controls="f2">İlk kez işitme cihazı kullanırken adaptasyon ne kadar sürer?</button>
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#f2" aria-expanded="false" aria-controls="f2">
+                                    İlk kez işitme cihazı kullanırken adaptasyon ne kadar sürer?
+                                </button>
                             </h2>
                             <div id="f2" class="accordion-collapse collapse" data-bs-parent="#faqAcc1">
-                                <div class="accordion-body text-muted">Beyin yeni sesleri yeniden “öğrenir”. İlk günlerde ortam sesleri farklı gelebilir. Kademeli kullanım ve düzenli kontrol ayarlarıyla çoğu kullanıcı birkaç hafta içinde belirgin şekilde alışır.</div>
+                                <div class="accordion-body text-muted">
+                                    Beyin yeni sesleri yeniden “öğrenir”. İlk günlerde ortam sesleri farklı gelebilir.
+                                    Kademeli kullanım ve düzenli kontrol ayarlarıyla çoğu kullanıcı birkaç hafta içinde
+                                    belirgin şekilde alışır.
+                                </div>
                             </div>
                         </div>
+
                         <div class="accordion-item">
                             <h2 class="accordion-header">
-                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#f3" aria-expanded="false" aria-controls="f3">İşitme cihazı sesi gerçekten yükseltir mi, yoksa konuşmayı mı netleştirir?</button>
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#f3" aria-expanded="false" aria-controls="f3">
+                                    İşitme cihazı sesi gerçekten yükseltir mi, yoksa konuşmayı mı netleştirir?
+                                </button>
                             </h2>
                             <div id="f3" class="accordion-collapse collapse" data-bs-parent="#faqAcc1">
-                                <div class="accordion-body text-muted">Amaç sadece sesi yükseltmek değil; konuşmayı öne çıkarıp gürültüyü yöneterek anlaşılabilirliği artırmaktır. Bu yüzden doğru ayar (fitting) kritik öneme sahiptir.</div>
+                                <div class="accordion-body text-muted">
+                                    Amaç sadece sesi yükseltmek değil; konuşmayı öne çıkarıp gürültüyü yöneterek
+                                    anlaşılabilirliği artırmaktır.
+                                    Bu yüzden doğru ayar (fitting) kritik öneme sahiptir.
+                                </div>
                             </div>
                         </div>
+
                         <div class="accordion-item">
                             <h2 class="accordion-header">
-                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#f4" aria-expanded="false" aria-controls="f4">Kulak içi mi kulak arkası mı daha iyi?</button>
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#f4" aria-expanded="false" aria-controls="f4">
+                                    Kulak içi mi kulak arkası mı daha iyi?
+                                </button>
                             </h2>
                             <div id="f4" class="accordion-collapse collapse" data-bs-parent="#faqAcc1">
-                                <div class="accordion-body text-muted">Tek bir “en iyi” yoktur. Kulak arkası modeller genelde daha geniş güç aralığı ve kolay kullanım sunar. Kulak içi modeller estetik avantaj sağlayabilir. Karar; kayıp derecesi, kulak kanalı yapısı ve kullanım beklentilerine göre verilir.</div>
+                                <div class="accordion-body text-muted">
+                                    Tek bir “en iyi” yoktur. Kulak arkası modeller genelde daha geniş güç aralığı ve
+                                    kolay kullanım sunar.
+                                    Kulak içi modeller estetik avantaj sağlayabilir. Karar; kayıp derecesi, kulak kanalı
+                                    yapısı ve kullanım beklentilerine göre verilir.
+                                </div>
                             </div>
                         </div>
+
                         <div class="accordion-item">
                             <h2 class="accordion-header">
-                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#f5" aria-expanded="false" aria-controls="f5">Şarjlı mı pilli mi tercih etmeliyim?</button>
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#f5" aria-expanded="false" aria-controls="f5">
+                                    Şarjlı mı pilli mi tercih etmeliyim?
+                                </button>
                             </h2>
                             <div id="f5" class="accordion-collapse collapse" data-bs-parent="#faqAcc1">
-                                <div class="accordion-body text-muted">Şarjlı modeller pratiklik sağlar. Pilli modellerde pil değişimiyle kesintisiz kullanım ve bazı kullanıcılar için daha esnek lojistik mümkün olabilir.</div>
+                                <div class="accordion-body text-muted">
+                                    Şarjlı modeller pratiklik sağlar. Pilli modellerde pil değişimiyle kesintisiz
+                                    kullanım ve bazı kullanıcılar için daha esnek lojistik mümkün olabilir.
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
+                <!-- Page 2 -->
                 <div class="carousel-item">
                     <div class="accordion" id="faqAcc2">
                         <div class="accordion-item">
                             <h2 class="accordion-header">
-                                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#f6" aria-expanded="true" aria-controls="f6">Bluetooth ile telefona bağlanır mı? Her telefonda çalışır mı?</button>
+                                <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#f6" aria-expanded="true" aria-controls="f6">
+                                    Bluetooth ile telefona bağlanır mı? Her telefonda çalışır mı?
+                                </button>
                             </h2>
                             <div id="f6" class="accordion-collapse collapse show" data-bs-parent="#faqAcc2">
-                                <div class="accordion-body text-muted">Birçok modelde Bluetooth bağlantısı bulunur; ancak destek, telefon modeli/işletim sistemi ve cihazın bağlantı standardına göre değişebilir. Uyum kontrolü yaparak en doğru eşleştirmeyi belirliyoruz.</div>
+                                <div class="accordion-body text-muted">
+                                    Birçok modelde Bluetooth bağlantısı bulunur; ancak destek, telefon modeli/işletim
+                                    sistemi ve cihazın bağlantı standardına göre değişebilir.
+                                    Uyum kontrolü yaparak en doğru eşleştirmeyi belirliyoruz.
+                                </div>
                             </div>
                         </div>
+
                         <div class="accordion-item">
                             <h2 class="accordion-header">
-                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#f7" aria-expanded="false" aria-controls="f7">Cihaz ötme (feedback) yaparsa ne olur?</button>
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#f7" aria-expanded="false" aria-controls="f7">
+                                    Cihaz ötme (feedback) yaparsa ne olur?
+                                </button>
                             </h2>
                             <div id="f7" class="accordion-collapse collapse" data-bs-parent="#faqAcc2">
-                                <div class="accordion-body text-muted">Ötme genellikle kalıp/dome uyumu, kulak kiri, gevşek yerleşim veya yanlış ayar gibi sebeplerle oluşur. Doğru kulak uyumu ve feedback kontrol ayarlarıyla çoğu durumda hızla çözülür.</div>
+                                <div class="accordion-body text-muted">
+                                    Ötme genellikle kalıp/dome uyumu, kulak kiri, gevşek yerleşim veya yanlış ayar gibi
+                                    sebeplerle oluşur.
+                                    Doğru kulak uyumu ve feedback kontrol ayarlarıyla çoğu durumda hızla çözülür.
+                                </div>
                             </div>
                         </div>
+
                         <div class="accordion-item">
                             <h2 class="accordion-header">
-                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#f8" aria-expanded="false" aria-controls="f8">İşitme cihazı bakımı nasıl yapılır? Filtre ne sıklıkla değişir?</button>
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#f8" aria-expanded="false" aria-controls="f8">
+                                    İşitme cihazı bakımı nasıl yapılır? Filtre ne sıklıkla değişir?
+                                </button>
                             </h2>
                             <div id="f8" class="accordion-collapse collapse" data-bs-parent="#faqAcc2">
-                                <div class="accordion-body text-muted">Günlük yüzey temizliği ve nemden koruma performansı artırır. Kulak içi modellerde filtre/koruyucu parçalar kullanım ve kulak kiri durumuna göre periyodik değişebilir.</div>
+                                <div class="accordion-body text-muted">
+                                    Günlük yüzey temizliği ve nemden koruma performansı artırır.
+                                    Kulak içi modellerde filtre/koruyucu parçalar kullanım ve kulak kiri durumuna göre
+                                    periyodik değişebilir.
+                                </div>
                             </div>
                         </div>
+
                         <div class="accordion-item">
                             <h2 class="accordion-header">
-                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#f9" aria-expanded="false" aria-controls="f9">Kontrole ne sıklıkla gelmeliyim?</button>
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#f9" aria-expanded="false" aria-controls="f9">
+                                    Kontrole ne sıklıkla gelmeliyim?
+                                </button>
                             </h2>
                             <div id="f9" class="accordion-collapse collapse" data-bs-parent="#faqAcc2">
-                                <div class="accordion-body text-muted">İlk kullanım döneminde daha sık kontrol önerilir. Sonrasında çoğu kullanıcı için 6–12 ay aralığında periyodik kontrol yeterli olur.</div>
+                                <div class="accordion-body text-muted">
+                                    İlk kullanım döneminde daha sık kontrol önerilir. Sonrasında çoğu kullanıcı için
+                                    6–12 ay aralığında periyodik kontrol yeterli olur.
+                                </div>
                             </div>
                         </div>
+
                         <div class="accordion-item">
                             <h2 class="accordion-header">
-                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#f10" aria-expanded="false" aria-controls="f10">Garanti, servis ve yedek parça süreçleri nasıl işler?</button>
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#f10" aria-expanded="false" aria-controls="f10">
+                                    Garanti, servis ve yedek parça süreçleri nasıl işler?
+                                </button>
                             </h2>
                             <div id="f10" class="accordion-collapse collapse" data-bs-parent="#faqAcc2">
-                                <div class="accordion-body text-muted">Garanti koşulları modele ve tedarik kanalına göre değişir. Arıza tespiti sonrası onarım veya parça değişimi planlanır.</div>
+                                <div class="accordion-body text-muted">
+                                    Garanti koşulları modele ve tedarik kanalına göre değişir. Arıza tespiti sonrası
+                                    onarım veya parça değişimi planlanır.
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            </div><!-- /.carousel-inner -->
 
-            <button class="carousel-control-prev" type="button" data-bs-target="#faqCarousel" data-bs-slide="prev" aria-label="Önceki">
+            <button class="carousel-control-prev" type="button" data-bs-target="#faqCarousel" data-bs-slide="prev"
+                    aria-label="Önceki">
                 <span class="carousel-control-prev-icon" aria-hidden="true"></span>
             </button>
-            <button class="carousel-control-next" type="button" data-bs-target="#faqCarousel" data-bs-slide="next" aria-label="Sonraki">
+            <button class="carousel-control-next" type="button" data-bs-target="#faqCarousel" data-bs-slide="next"
+                    aria-label="Sonraki">
                 <span class="carousel-control-next-icon" aria-hidden="true"></span>
             </button>
 
             <div class="d-flex flex-column align-items-center gap-2 mt-3">
                 <div class="carousel-indicators faq-indicators m-0">
-                    <button type="button" data-bs-target="#faqCarousel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Sayfa 1"></button>
-                    <button type="button" data-bs-target="#faqCarousel" data-bs-slide-to="1" aria-label="Sayfa 2"></button>
+                    <button type="button" data-bs-target="#faqCarousel" data-bs-slide-to="0" class="active"
+                            aria-current="true" aria-label="Sayfa 1"></button>
+                    <button type="button" data-bs-target="#faqCarousel" data-bs-slide-to="1"
+                            aria-label="Sayfa 2"></button>
                 </div>
             </div>
         </div>
@@ -1019,29 +1224,39 @@
                 <h2 class="fw-bold mb-1">İletişim</h2>
                 <p class="text-muted mb-4">Randevu ve bilgi için formu doldurun veya telefon/WhatsApp ile ulaşın.</p>
 
-                <form class="card border-0 shadow-sm rounded-4 p-4 contact-form" method="POST" action="https://formsubmit.co/ayazisitmecihazlari@gmail.com">
+                <form class="card border-0 shadow-sm rounded-4 p-4 contact-form"
+                      method="POST"
+                      action="https://formsubmit.co/ayazisitmecihazlari@gmail.com">
                     <input type="hidden" name="_subject" value="Ayaz İşitme Web Sitesi İletişim Formu">
                     <input type="hidden" name="_captcha" value="false">
                     <input type="hidden" name="_template" value="table">
 
                     <div class="mb-3">
-                        <label class="form-label" for="name">Ad Soyad</label>
-                        <input id="name" name="name" class="form-control" required>
+                        <label class="form-label">Ad Soyad</label>
+                        <label>
+                            <input name="name" class="form-control" required/>
+                        </label>
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label" for="phone">Telefon</label>
-                        <input id="phone" name="phone" class="form-control" placeholder="0507 155 11 51">
+                        <label class="form-label">Telefon</label>
+                        <label>
+                            <input name="phone" class="form-control" placeholder="0507 155 11 51"/>
+                        </label>
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label" for="email">E-posta</label>
-                        <input id="email" name="email" type="email" class="form-control" required>
+                        <label class="form-label">E-posta</label>
+                        <label>
+                            <input name="email" type="email" class="form-control" required/>
+                        </label>
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label" for="message">Mesaj</label>
-                        <textarea id="message" name="message" class="form-control" rows="4" required></textarea>
+                        <label class="form-label">Mesaj</label>
+                        <label>
+                            <textarea name="message" class="form-control" rows="4" required></textarea>
+                        </label>
                     </div>
 
                     <button class="btn btn-primary w-100" type="submit"><i class="bi bi-send"></i> Gönder</button>
@@ -1051,10 +1266,16 @@
             <div class="col-lg-6">
                 <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
                     <h5 class="fw-semibold">Adres &amp; İletişim</h5>
-                    <p class="text-muted mb-2"><i class="bi bi-geo-alt"></i> Aşağı Eğlence Mahallesi, Ayvalı Caddesi No:26/A, Keçiören/Ankara</p>
-                    <p class="text-muted mb-2"><i class="bi bi-telephone"></i> <a href="tel:+905071551151">0507 155 11 51</a></p>
-                    <p class="text-muted mb-2"><i class="bi bi-envelope"></i> <a href="mailto:ayazisitmecihazlari@gmail.com">ayazisitmecihazlari@gmail.com</a></p>
-                    <p class="text-muted mb-4"><i class="bi bi-whatsapp"></i> <a href="https://wa.me/905071551151" target="_blank" rel="noopener noreferrer">WhatsApp ile yazın</a></p>
+                    <p class="text-muted mb-2"><i class="bi bi-geo-alt"></i> Aşağı Eğlence Mahallesi, Ayvalı Caddesi
+                        No:26/A, Keçiören/Ankara</p>
+                    <p class="text-muted mb-2"><i class="bi bi-telephone"></i> <a href="tel:+905071551151">0507 155 11
+                        51</a></p>
+                    <p class="text-muted mb-2"><i class="bi bi-envelope"></i> <a
+                            href="mailto:ayazisitmecihazlari@gmail.com">ayazisitmecihazlari@gmail.com</a></p>
+                    <p class="text-muted mb-4"><i class="bi bi-whatsapp"></i> <a href="https://wa.me/905071551151"
+                                                                                 target="_blank"
+                                                                                 rel="noopener noreferrer">WhatsApp ile
+                        yazın</a></p>
 
                     <div class="ratio ratio-16x9 rounded-4 overflow-hidden border">
                         <iframe
@@ -1067,8 +1288,14 @@
                     </div>
 
                     <div class="d-flex gap-2 mt-3">
-                        <a class="btn btn-success flex-fill" href="https://wa.me/905071551151" target="_blank" rel="noopener noreferrer"><i class="bi bi-whatsapp"></i> WhatsApp</a>
-                        <a class="btn btn-outline-secondary flex-fill" href="https://maps.app.goo.gl/x7CAB5ZyCWHGagyi7" target="_blank" rel="noopener noreferrer"><i class="bi bi-map"></i> Yol Tarifi</a>
+                        <a class="btn btn-success flex-fill" href="https://wa.me/905071551151" target="_blank"
+                           rel="noopener noreferrer">
+                            <i class="bi bi-whatsapp"></i> WhatsApp
+                        </a>
+                        <a class="btn btn-outline-secondary flex-fill" href="https://maps.app.goo.gl/x7CAB5ZyCWHGagyi7"
+                           target="_blank" rel="noopener noreferrer">
+                            <i class="bi bi-map"></i> Yol Tarifi
+                        </a>
                     </div>
                 </div>
             </div>
@@ -1083,7 +1310,8 @@
     </div>
 </footer>
 
-<a class="fab-whatsapp" href="https://wa.me/905071551151" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">
+<a class="fab-whatsapp" href="https://wa.me/905071551151" target="_blank" rel="noopener noreferrer"
+   aria-label="WhatsApp">
     <i class="bi bi-whatsapp"></i>
 </a>
 
@@ -1127,20 +1355,6 @@
 <script src="https://cdn.jsdelivr.net/npm/swiper/swiper-bundle.min.js"></script>
 
 <!-- Site JS -->
-<script src="assets/js/main.js"></script>
-
-<script>
-    (function () {
-        document.addEventListener('DOMContentLoaded', function () {
-            var themeToggle = document.getElementById('themeToggle');
-
-            if (themeToggle) {
-                themeToggle.style.display = '';
-                themeToggle.removeAttribute('aria-hidden');
-                themeToggle.removeAttribute('tabindex');
-            }
-        });
-    })();
-</script>
+<!--  <script src="assets/js/main.js"></script> -->
 </body>
 </html>
