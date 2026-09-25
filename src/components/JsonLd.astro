@@ -1,0 +1,72 @@
+---
+/** LocalBusiness (MedicalBusiness) + FAQPage JSON-LD — görünür bilgilerle birebir eşleşir. */
+import type { Locale, SiteContent } from '../content/types';
+import { business, canShow } from '../config/business';
+
+interface Props {
+  locale: Locale;
+  c: SiteContent;
+  canonical: string;
+  withFaq?: boolean;
+}
+const { locale, c, canonical, withFaq = true } = Astro.props;
+const site = Astro.site!.href.replace(/\/$/, '');
+const b = business;
+
+const localBusiness: Record<string, unknown> = {
+  '@context': 'https://schema.org',
+  '@type': 'MedicalBusiness',
+  '@id': `${site}/#business`,
+  name: locale === 'tr' ? b.legalName : b.legalNameEn,
+  alternateName: locale === 'tr' ? b.brand : b.brandEn,
+  url: `${site}/`,
+  telephone: b.phone.e164,
+  email: b.email,
+  image: `${site}/og.jpg`,
+  logo: `${site}/logo-ayaz.png`,
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: b.address.street,
+    addressLocality: b.address.district,
+    addressRegion: b.address.city,
+    ...(canShow(b.address.postalCode) ? { postalCode: b.address.postalCode.value } : {}),
+    addressCountry: b.address.country,
+  },
+  areaServed: [{ '@type': 'City', name: 'Ankara' }, { '@type': 'Place', name: 'Keçiören' }],
+  sameAs: b.sameAs,
+  hasMap: b.google.directionsUrl,
+  ...(canShow(b.hours)
+    ? {
+        openingHoursSpecification: b.hours.weekly.map((w) => ({
+          '@type': 'OpeningHoursSpecification',
+          dayOfWeek: w.days.map((d) => `https://schema.org/${d}`),
+          opens: w.opens,
+          closes: w.closes,
+        })),
+      }
+    : {}),
+  knowsAbout: ['Hearing aids', 'Ear molds', 'Hearing aid fitting', 'Hearing aid maintenance'],
+  makesOffer: c.services.items.map((s) => ({
+    '@type': 'Offer',
+    itemOffered: { '@type': 'Service', name: s.title, description: s.text },
+  })),
+};
+
+const faq = withFaq
+  ? {
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      '@id': `${canonical}#faq`,
+      mainEntity: c.faq.items.map((i) => ({
+        '@type': 'Question',
+        name: i.q,
+        acceptedAnswer: { '@type': 'Answer', text: i.a },
+      })),
+    }
+  : null;
+
+const safe = (o: unknown) => JSON.stringify(o).replace(/</g, '\\u003c');
+---
+
+<script type="application/ld+json" set:html={safe(localBusiness)} />
+{faq && <script type="application/ld+json" set:html={safe(faq)} />}

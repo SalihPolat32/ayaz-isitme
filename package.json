@@ -1,0 +1,38 @@
+{
+  "name": "ayaz-isitme",
+  "type": "module",
+  "version": "2.0.0",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro check && astro build",
+    "preview": "astro preview",
+    "check": "astro check",
+    "astro": "astro",
+    "images:prepare": "node scripts/prepare-images.mjs",
+    "og:make": "node scripts/make-og.mjs",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test"
+  },
+  "dependencies": {
+    "@astrojs/sitemap": "^3.7.4",
+    "astro": "^7.3.5",
+    "three": "^0.186.1"
+  },
+  "allowScripts": {
+    "esbuild": true
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.10",
+    "@playwright/test": "^1.63.0",
+    "@types/three": "^0.186.0",
+    "lighthouse": "^13.5.0",
+    "typescript": "^5.9.3",
+    "vitest": "^5.0.1"
+  },
+  "private": true,
+  "description": "Ayaz İşitme Merkezi — keciorenisitme.com (Astro 7 one-page)"
+}

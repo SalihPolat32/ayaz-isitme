@@ -1,0 +1,59 @@
+---
+import type { Locale, SiteContent } from '../content/types';
+import Icon from './Icon.astro';
+interface Props { locale: Locale; c: SiteContent }
+const { c } = Astro.props;
+const s = c.services;
+type IconName = Parameters<typeof Icon>[0]['name'];
+---
+
+<section class="section section--soft sv" id="hizmetler" aria-labelledby="sv-title">
+  <div class="container">
+    <div class="section-head reveal">
+      <p class="eyebrow">{s.eyebrow}</p>
+      <h2 id="sv-title">{s.h2}</h2>
+      <p class="lead">{s.lead}</p>
+    </div>
+    <div class="grid grid--2 grid--3">
+      {s.items.map((it, i) => (
+        <article class="card card--pad card--hover sv__card reveal" style={`--reveal-delay:${(i % 3) * 60}ms`} id={`hizmet-${it.id}`}>
+          <div class="sv__top">
+            <span class="sv__icon"><Icon name={it.icon as IconName} /></span>
+            {it.badge && <span class="pill">{it.badge}</span>}
+          </div>
+          <h3>{it.title}</h3>
+          <p class="small muted">{it.text}</p>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .sv__card {
+    display: grid;
+    gap: 0.75rem;
+    align-content: start;
+  }
+  .sv__top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .sv__icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 16px;
+    display: grid;
+    place-items: center;
+    background: var(--navy);
+    color: #fff;
+  }
+  .sv__icon .icon {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+  .sv__card h3 {
+    font-size: 1.2rem;
+  }
+</style>

@@ -1,0 +1,138 @@
+---
+import { Image } from 'astro:assets';
+import type { Locale, SiteContent } from '../content/types';
+import { business, canShow } from '../config/business';
+import { legalPaths } from '../i18n';
+import Icon from './Icon.astro';
+import logo from '../assets/brand/ayaz-logo-full-white.png';
+
+interface Props { locale: Locale; c: SiteContent }
+const { locale, c } = Astro.props;
+const year = new Date().getFullYear();
+---
+
+<footer class="ftr">
+  <div class="container">
+    <div class="ftr__grid">
+      <div class="ftr__brand">
+        <span class="ftr__logochip"><Image src={logo} alt={locale === 'tr' ? business.brand : business.brandEn} width="150" height="98" densities={[1, 2]} loading="lazy" class="ftr__logo" /></span>
+        <p class="ftr__legal">{c.footer.legal}</p>
+        <p class="ftr__disc">{c.footer.disclaimer}</p>
+      </div>
+      <nav class="ftr__col" aria-label={c.footer.quick}>
+        <h3>{c.footer.quick}</h3>
+        <ul>
+          {c.nav.map((n) => <li><a href={n.href}>{n.label}</a></li>)}
+          <li><a href={legalPaths[locale]}>{c.footer.privacy}</a></li>
+        </ul>
+      </nav>
+      <div class="ftr__col">
+        <h3>{c.footer.contact}</h3>
+        <ul class="ftr__contact">
+          <li><Icon name="map-pin" /><span>{business.address.line}</span></li>
+          <li><Icon name="phone" /><a href={business.phone.href} data-track="phone_click">{business.phone.display}</a></li>
+          <li><Icon name="whatsapp" /><a href={business.whatsapp.href} target="_blank" rel="noopener" data-track="whatsapp_click">WhatsApp</a></li>
+          <li><Icon name="mail" /><a href={`mailto:${business.email}`}>{business.email}</a></li>
+          {canShow(business.hours) && <li><Icon name="clock" /><span>{c.contact.info.hoursValue}<br /><span class="small">{c.contact.info.closed}</span></span></li>}
+        </ul>
+      </div>
+    </div>
+    <div class="ftr__bottom">
+      <p>© {year} {c.footer.legal}. {c.footer.rights}</p>
+      <div class="ftr__links">
+        <a href={legalPaths[locale]}>{c.footer.privacy}</a>
+        <button type="button" data-consent-open>{c.footer.cookies}</button>
+        <a href={c.langSwitch.href} hreflang={c.langSwitch.hreflang}>{locale === 'tr' ? 'English' : 'Türkçe'}</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .ftr {
+    background: var(--navy-2);
+    color: var(--on-navy-muted);
+    padding-block: var(--space-8) var(--space-6);
+    margin-top: var(--space-6);
+  }
+  .ftr a,
+  .ftr button {
+    color: var(--on-navy);
+    text-decoration: none;
+  }
+  .ftr a:hover,
+  .ftr button:hover {
+    color: #fff;
+    text-decoration: underline;
+  }
+  .ftr__grid {
+    display: grid;
+    gap: var(--space-7);
+  }
+  @media (min-width: 800px) {
+    .ftr__grid {
+      grid-template-columns: 1.3fr 0.8fr 1fr;
+    }
+  }
+  .ftr__logochip {
+    display: inline-block;
+    padding: 0.5rem 0.8rem;
+    border-radius: var(--r-md);
+    background: #fff;
+    line-height: 0;
+  }
+  .ftr__logo {
+    height: 56px;
+    width: auto;
+  }
+  .ftr__legal {
+    margin-top: var(--space-4);
+    color: #fff;
+    font-weight: 600;
+  }
+  .ftr__disc {
+    margin-top: var(--space-3);
+    font-size: var(--text-xs);
+    max-width: 44ch;
+  }
+  .ftr__col h3 {
+    color: #fff;
+    font-size: 1rem;
+    margin-bottom: var(--space-4);
+  }
+  .ftr__col ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 0.6rem;
+  }
+  .ftr__contact li {
+    display: flex;
+    gap: 0.6rem;
+    align-items: flex-start;
+  }
+  .ftr__contact .icon {
+    flex: none;
+    margin-top: 0.2em;
+    color: #8fd3da;
+  }
+  .ftr__bottom {
+    margin-top: var(--space-7);
+    padding-top: var(--space-5);
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: space-between;
+    font-size: var(--text-xs);
+  }
+  .ftr__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.25rem;
+  }
+  .ftr__links button {
+    font-size: inherit;
+  }
+</style>

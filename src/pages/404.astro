@@ -1,0 +1,20 @@
+---
+import Base from '../layouts/Base.astro';
+import { getContent } from '../i18n';
+import Icon from '../components/Icon.astro';
+const c = getContent('tr');
+---
+
+<Base locale="tr" c={c} title="Sayfa bulunamadı | Ayaz İşitme Merkezi" description="Aradığınız sayfa bulunamadı." noindex>
+  <section class="section">
+    <div class="container" style="text-align:center; max-width: 40rem">
+      <p class="eyebrow" style="justify-content:center">404</p>
+      <h1 style="font-size: var(--h2)">Sayfa bulunamadı</h1>
+      <p class="lead">Aradığınız sayfa taşınmış veya hiç var olmamış olabilir.</p>
+      <div class="cluster mt-6" style="justify-content:center">
+        <a class="btn btn--primary" href="/"><Icon name="chevron-left" />Ana sayfa</a>
+        <a class="btn btn--outline" href="/en/">English</a>
+      </div>
+    </div>
+  </section>
+</Base>

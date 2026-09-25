@@ -1,0 +1,116 @@
+/* ==========================================================================
+   Ayaz İşitme — tasarım token'ları
+   Palet: ferah kırık beyaz zemin, derin lacivert mürekkep, kontrollü turkuaz.
+   Kontrast (WCAG): ink/bg 15.6:1 · ink-2/bg 7.6:1 · ink-3/bg 4.6:1
+                    accent-text/bg 6.2:1 · white/accent 4.75:1 · white/navy 14.6:1
+   ========================================================================== */
+:root {
+  color-scheme: light;
+
+  /* Yüzeyler */
+  --bg: #f6f8f7;
+  --surface: #ffffff;
+  --surface-2: #eef3f2;
+  --surface-3: #e4ebea;
+  --line: #d9e1e0;
+  --line-strong: #c3cfcd;
+
+  /* Metin */
+  --ink: #112b3c;
+  --ink-2: #3b5266;
+  --ink-3: #5f7385;
+
+  /* Vurgu (turkuaz) */
+  --accent: #087f8c;
+  --accent-strong: #066b76;
+  --accent-text: #0b6670;
+  --accent-soft: #e3f2f3;
+  --accent-soft-2: #cfe8ea;
+
+  /* Lacivert bloklar */
+  --navy: #112b3c;
+  --navy-2: #0c1f2c;
+  --navy-3: #163a50;
+  --on-navy: #e8eef2;
+  --on-navy-muted: #a9bbc8;
+
+  /* Durum */
+  --success: #1e7b4f;
+  --success-soft: #e3f3ea;
+  --warn: #9a5b00;
+  --warn-soft: #fff3df;
+  --danger: #b3261e;
+  --danger-soft: #fbe9e7;
+  --whatsapp: #128c7e;
+
+  /* Ürün sunumu (titanyum/grafit) */
+  --graphite: #2b2f36;
+  --titanium: #b8bcc2;
+
+  /* Tipografi */
+  --font-display: 'Manrope', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  --font-body: 'Inter', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  --text-base: clamp(1.0625rem, 1rem + 0.2vw, 1.125rem); /* 17–18px */
+  --text-sm: 0.9375rem;
+  --text-xs: 0.8125rem;
+  --text-lg: clamp(1.125rem, 1.05rem + 0.35vw, 1.3125rem);
+  --h1: clamp(2.25rem, 1.4rem + 3.4vw, 4.25rem);
+  --h2: clamp(1.75rem, 1.25rem + 2vw, 2.75rem);
+  --h3: clamp(1.2rem, 1.1rem + 0.5vw, 1.5rem);
+  --leading-tight: 1.08;
+  --leading-snug: 1.25;
+  --leading-body: 1.6;
+  --tracking-tight: -0.02em;
+
+  /* Boşluk */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4rem;
+  --space-9: 6rem;
+  --section-y: clamp(4rem, 3rem + 4vw, 7rem);
+  --gutter: clamp(1rem, 0.5rem + 2.5vw, 2rem);
+  --container: 1240px;
+  --container-wide: 1400px;
+
+  /* Şekil */
+  --r-sm: 8px;
+  --r-md: 14px;
+  --r-lg: 22px;
+  --r-xl: 32px;
+  --r-pill: 999px;
+
+  /* Gölge (yumuşak, katmanlı) */
+  --shadow-1: 0 1px 2px rgba(17, 43, 60, 0.06), 0 1px 1px rgba(17, 43, 60, 0.04);
+  --shadow-2: 0 4px 12px rgba(17, 43, 60, 0.08), 0 1px 3px rgba(17, 43, 60, 0.05);
+  --shadow-3: 0 18px 40px rgba(17, 43, 60, 0.14), 0 4px 10px rgba(17, 43, 60, 0.06);
+  --ring: 0 0 0 3px rgba(8, 127, 140, 0.35);
+
+  /* Hareket */
+  --ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-1: 180ms;
+  --dur-2: 320ms;
+  --dur-3: 560ms;
+
+  /* Katmanlar */
+  --z-header: 50;
+  --z-bar: 60;
+  --z-dialog: 100;
+  --z-toast: 110;
+
+  /* Yapışkan başlık yüksekliği (scroll-margin için) */
+  --header-h: 72px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-1: 0ms;
+    --dur-2: 0ms;
+    --dur-3: 0ms;
+  }
+}

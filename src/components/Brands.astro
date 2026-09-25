@@ -1,0 +1,131 @@
+---
+import type { Locale, SiteContent } from '../content/types';
+import Icon from './Icon.astro';
+interface Props { locale: Locale; c: SiteContent }
+const { c } = Astro.props;
+const br = c.brands;
+const techIcons = ['sparkles', 'battery', 'bluetooth', 'sliders', 'volume', 'ear'] as const;
+---
+
+<section class="section bx" id="markalar" aria-labelledby="bx-title">
+  <div class="container">
+    <div class="section-head reveal">
+      <p class="eyebrow">{br.eyebrow}</p>
+      <h2 id="bx-title">{br.h2}</h2>
+      <p class="lead">{br.lead}</p>
+    </div>
+
+    <div class="grid grid--2 grid--3 bx__featured">
+      {br.featured.map((f, i) => (
+        <article class="card card--pad card--hover reveal" style={`--reveal-delay:${i * 50}ms`}>
+          <div class="bx__wordmark">{f.name}</div>
+          <p class="pill pill--neutral">{f.group}</p>
+          <p class="small muted mt-4">{f.text}</p>
+        </article>
+      ))}
+    </div>
+
+    <div class="bx__lower">
+      <div class="reveal">
+        <h3>{br.groupsTitle}</h3>
+        <table class="bx__groups">
+          <tbody>
+            {br.groups.map((g) => (
+              <tr>
+                <th scope="row">{g.group}<span class="small muted">{g.note}</span></th>
+                <td>{g.brands.join(' · ')}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <p class="small muted mt-4">{br.disclaimer}</p>
+      </div>
+      <div class="reveal" style="--reveal-delay:100ms">
+        <h3>{br.techTitle}</h3>
+        <ul class="bx__tech">
+          {br.tech.map((t, i) => (
+            <li>
+              <span class="bx__techicon"><Icon name={techIcons[i % techIcons.length]} /></span>
+              <div>
+                <strong>{t.name}</strong>
+                <p class="small muted">{t.text}</p>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .bx__wordmark {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 1.6rem;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    margin-bottom: 0.6rem;
+  }
+  .bx__lower {
+    display: grid;
+    gap: var(--space-7);
+    margin-top: var(--space-8);
+  }
+  @media (min-width: 900px) {
+    .bx__lower {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  .bx__groups {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: var(--space-5);
+    font-size: var(--text-sm);
+  }
+  .bx__groups th,
+  .bx__groups td {
+    padding: 0.8rem 0.5rem;
+    border-bottom: 1px solid var(--line);
+    text-align: left;
+    vertical-align: top;
+  }
+  .bx__groups th {
+    font-family: var(--font-display);
+    font-weight: 800;
+    color: var(--ink);
+    white-space: nowrap;
+    display: grid;
+  }
+  .bx__groups th .small {
+    font-family: var(--font-body);
+    font-weight: 400;
+  }
+  .bx__tech {
+    list-style: none;
+    padding: 0;
+    margin: var(--space-5) 0 0;
+    display: grid;
+    gap: 1rem;
+  }
+  .bx__tech li {
+    display: flex;
+    gap: 0.9rem;
+    align-items: flex-start;
+  }
+  .bx__techicon {
+    flex: none;
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    background: var(--accent-soft);
+    color: var(--accent-text);
+  }
+  .bx__tech strong {
+    display: block;
+    font-family: var(--font-display);
+    font-weight: 700;
+  }
+</style>

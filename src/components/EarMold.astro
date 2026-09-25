@@ -1,0 +1,176 @@
+---
+import type { Locale, SiteContent } from '../content/types';
+import Icon from './Icon.astro';
+interface Props { locale: Locale; c: SiteContent }
+const { c } = Astro.props;
+const e = c.earMold;
+---
+
+<section class="section section--navy em" id="kulak-kalibi" aria-labelledby="em-title">
+  <div class="container">
+    <div class="em__head reveal">
+      <div>
+        <p class="eyebrow">{e.eyebrow}</p>
+        <h2 id="em-title">{e.h2}</h2>
+      </div>
+      <p class="lead">{e.lead}</p>
+    </div>
+
+    <ol class="em__steps reveal">
+      {e.steps.map((st, i) => (
+        <li>
+          <span class="em__num">{String(i + 1).padStart(2, '0')}</span>
+          <h3>{st.title}</h3>
+          <p>{st.text}</p>
+        </li>
+      ))}
+    </ol>
+
+    <div class="em__lower">
+      <div class="reveal">
+        <div class="grid grid--2">
+          {e.types.map((t) => (
+            <article class="em__type">
+              <h4>{t.name}</h4>
+              <p>{t.text}</p>
+            </article>
+          ))}
+        </div>
+      </div>
+      <div class="em__care reveal" style="--reveal-delay:120ms">
+        <ul>
+          {e.care.map((cItem) => (
+            <li><Icon name="check" />{cItem}</li>
+          ))}
+        </ul>
+        <p class="em__dist"><Icon name="info" />{e.distinction}</p>
+        <a class="btn btn--white" href="#iletisim" data-track="appointment_start" data-topic="kulak-kalibi"><Icon name="calendar" />{e.cta}</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .em {
+    background:
+      radial-gradient(60% 50% at 100% 0%, rgba(8, 127, 140, 0.35) 0%, rgba(8, 127, 140, 0) 60%),
+      var(--navy);
+  }
+  .em__head {
+    display: grid;
+    gap: var(--space-5);
+    align-items: end;
+    margin-bottom: clamp(2rem, 1.5rem + 2vw, 3.5rem);
+  }
+  @media (min-width: 900px) {
+    .em__head {
+      grid-template-columns: 1.1fr 0.9fr;
+    }
+  }
+  .em__head .lead {
+    margin-top: 0;
+  }
+  .em__steps {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 1rem;
+    counter-reset: step;
+  }
+  @media (min-width: 720px) {
+    .em__steps {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  @media (min-width: 1100px) {
+    .em__steps {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+  .em__steps li {
+    padding: 1.25rem;
+    border-radius: var(--r-lg);
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    display: grid;
+    gap: 0.5rem;
+    align-content: start;
+  }
+  .em__num {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 1.6rem;
+    color: #8fd3da;
+    line-height: 1;
+  }
+  .em__steps h3 {
+    font-size: 1.1rem;
+  }
+  .em__steps p {
+    color: var(--on-navy-muted);
+    font-size: var(--text-sm);
+  }
+  .em__lower {
+    display: grid;
+    gap: var(--space-6);
+    margin-top: var(--space-7);
+  }
+  @media (min-width: 1000px) {
+    .em__lower {
+      grid-template-columns: 1.2fr 0.8fr;
+    }
+  }
+  .em__type {
+    padding: 1.25rem;
+    border-radius: var(--r-lg);
+    background: #fff;
+    color: var(--ink);
+    display: grid;
+    gap: 0.5rem;
+  }
+  .em__type h4 {
+    font-size: 1.05rem;
+  }
+  .em__type p {
+    font-size: var(--text-sm);
+    color: var(--ink-2);
+  }
+  .em__care {
+    display: grid;
+    gap: 1.25rem;
+    align-content: start;
+  }
+  .em__care ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 0.75rem;
+  }
+  .em__care li {
+    display: flex;
+    gap: 0.6rem;
+    color: var(--on-navy);
+    font-size: var(--text-sm);
+  }
+  .em__care .icon {
+    flex: none;
+    color: #8fd3da;
+    stroke-width: 3;
+    margin-top: 0.15em;
+  }
+  .em__dist {
+    display: flex;
+    gap: 0.6rem;
+    font-size: var(--text-sm);
+    color: var(--on-navy-muted);
+    padding: 0.9rem 1rem;
+    border-radius: var(--r-md);
+    background: rgba(255, 255, 255, 0.06);
+  }
+  .em__dist .icon {
+    flex: none;
+    margin-top: 0.15em;
+  }
+</style>

@@ -1,0 +1,61 @@
+---
+import type { SiteContent } from '../content/types';
+import { business } from '../config/business';
+import Icon from './Icon.astro';
+interface Props { c: SiteContent }
+const { c } = Astro.props;
+---
+
+<nav class="mbar" aria-label={c.mobileBar.call + ' / ' + c.mobileBar.whatsapp + ' / ' + c.mobileBar.directions} data-mobile-bar>
+  <a href={business.phone.href} data-track="phone_click"><Icon name="phone" /><span>{c.mobileBar.call}</span></a>
+  <a href={business.whatsapp.href} target="_blank" rel="noopener" data-track="whatsapp_click" class="mbar__wa"><Icon name="whatsapp" /><span>{c.mobileBar.whatsapp}</span></a>
+  <a href={business.google.directionsUrl} target="_blank" rel="noopener" data-track="directions_click"><Icon name="navigation" /><span>{c.mobileBar.directions}</span></a>
+</nav>
+
+<style>
+  .mbar {
+    position: fixed;
+    inset: auto 0 0 0;
+    z-index: var(--z-bar);
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    background: rgba(255, 255, 255, 0.94);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-top: 1px solid var(--line);
+    padding-bottom: env(safe-area-inset-bottom);
+    box-shadow: 0 -8px 24px rgba(17, 43, 60, 0.08);
+  }
+  .mbar a {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.2rem;
+    min-height: 60px;
+    color: var(--ink);
+    text-decoration: none;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 0.8rem;
+  }
+  .mbar a .icon {
+    width: 1.35rem;
+    height: 1.35rem;
+  }
+  .mbar__wa {
+    color: var(--whatsapp) !important;
+  }
+  @media (min-width: 900px) {
+    .mbar {
+      display: none;
+    }
+  }
+</style>
+<style is:global>
+  @media (max-width: 899px) {
+    body {
+      padding-bottom: calc(60px + env(safe-area-inset-bottom));
+    }
+  }
+</style>

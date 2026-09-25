@@ -1,0 +1,13 @@
+# keciorenisitme.com
+User-agent: *
+Allow: /
+Disallow: /dev/
+
+# Yapay zekâ arama botları: aramada görünürlük için izinli (eğitim botu GPTBot ayrı değerlendirilir)
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+Sitemap: https://keciorenisitme.com/sitemap-index.xml

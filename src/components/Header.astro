@@ -1,0 +1,297 @@
+---
+import { Image } from 'astro:assets';
+import type { Locale, SiteContent } from '../content/types';
+import { business } from '../config/business';
+import Icon from './Icon.astro';
+import logo from '../assets/brand/ayaz-logo-full.png';
+
+interface Props { locale: Locale; c: SiteContent }
+const { locale, c } = Astro.props;
+const home = locale === 'tr' ? '/' : '/en/';
+const brand = locale === 'tr' ? business.brand : business.brandEn;
+---
+
+<header class="hdr" id="hdr" data-header>
+  <div class="container hdr__in">
+    <a class="hdr__brand" href={home} aria-label={brand}>
+      <Image src={logo} alt="" width="120" height="79" densities={[1, 2]} loading="eager" decoding="async" class="hdr__logo" />
+      <span class="hdr__name">{brand}</span>
+    </a>
+
+    <nav class="hdr__nav" aria-label={c.common.menu}>
+      <ul>
+        {c.nav.map((n) => (
+          <li><a href={n.href} data-nav-link>{n.label}</a></li>
+        ))}
+      </ul>
+    </nav>
+
+    <div class="hdr__actions">
+      <a class="hdr__phone" href={business.phone.href} data-track="phone_click">
+        <Icon name="phone" /><span>{business.phone.display}</span>
+      </a>
+      <a class="hdr__lang" href={c.langSwitch.href} hreflang={c.langSwitch.hreflang} lang={c.langSwitch.hreflang} aria-label={locale === 'tr' ? 'English' : 'Türkçe'}>{c.langSwitch.label}</a>
+      <a class="btn btn--primary btn--sm hdr__cta" href="#iletisim" data-track="appointment_start">
+        <Icon name="calendar" />{c.navCta}
+      </a>
+      <button class="hdr__burger" type="button" aria-label={c.common.menu} aria-controls="mobileMenu" aria-expanded="false" data-menu-open>
+        <Icon name="menu" />
+      </button>
+    </div>
+  </div>
+
+  <dialog id="mobileMenu" class="mmenu" aria-label={c.common.menu}>
+    <div class="mmenu__head">
+      <span class="hdr__name">{brand}</span>
+      <button class="btn btn--icon btn--outline" type="button" aria-label={c.common.close} data-menu-close><Icon name="x" /></button>
+    </div>
+    <nav aria-label={c.common.menu}>
+      <ul class="mmenu__list">
+        {c.nav.map((n) => (
+          <li><a href={n.href} data-menu-link>{n.label}<Icon name="chevron-right" /></a></li>
+        ))}
+      </ul>
+    </nav>
+    <div class="mmenu__foot">
+      <a class="btn btn--primary" href="#iletisim" data-menu-link data-track="appointment_start"><Icon name="calendar" />{c.navCta}</a>
+      <a class="btn btn--outline" href={business.phone.href} data-track="phone_click"><Icon name="phone" />{business.phone.display}</a>
+      <a class="mmenu__lang" href={c.langSwitch.href} hreflang={c.langSwitch.hreflang}><Icon name="globe" />{locale === 'tr' ? 'English' : 'Türkçe'}</a>
+    </div>
+  </dialog>
+</header>
+
+<style>
+  .hdr {
+    position: sticky;
+    top: 0;
+    z-index: var(--z-header);
+    background: rgba(246, 248, 247, 0.82);
+    backdrop-filter: saturate(1.4) blur(14px);
+    -webkit-backdrop-filter: saturate(1.4) blur(14px);
+    border-bottom: 1px solid transparent;
+    transition:
+      border-color var(--dur-2) var(--ease-out),
+      box-shadow var(--dur-2) var(--ease-out),
+      background var(--dur-2) var(--ease-out);
+  }
+  .hdr.is-scrolled {
+    border-bottom-color: var(--line);
+    box-shadow: 0 6px 24px rgba(17, 43, 60, 0.06);
+    background: rgba(246, 248, 247, 0.92);
+  }
+  .hdr__in {
+    display: flex;
+    align-items: center;
+    gap: var(--space-5);
+    min-height: var(--header-h);
+  }
+  .hdr__brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    text-decoration: none;
+    color: var(--ink);
+    margin-right: auto;
+  }
+  .hdr__logo {
+    width: auto;
+    height: 44px;
+    object-fit: contain;
+  }
+  .hdr__name {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 1.05rem;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+  }
+  .hdr__nav ul {
+    display: none;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    gap: 0.25rem;
+  }
+  .hdr__nav a {
+    display: inline-block;
+    padding: 0.55rem 0.85rem;
+    border-radius: var(--r-pill);
+    color: var(--ink-2);
+    font-weight: 600;
+    font-size: var(--text-sm);
+    text-decoration: none;
+    transition: background var(--dur-1), color var(--dur-1);
+  }
+  .hdr__nav a:hover {
+    background: var(--surface-2);
+    color: var(--ink);
+  }
+  .hdr__nav a[aria-current='true'] {
+    background: var(--accent-soft);
+    color: var(--accent-text);
+  }
+  .hdr__actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .hdr__phone {
+    display: none;
+    align-items: center;
+    gap: 0.45rem;
+    color: var(--ink);
+    font-weight: 700;
+    text-decoration: none;
+    padding: 0.5rem 0.75rem;
+    border-radius: var(--r-pill);
+    font-family: var(--font-display);
+    white-space: nowrap;
+  }
+  .hdr__phone:hover {
+    background: var(--surface-2);
+    color: var(--ink);
+  }
+  .hdr__lang {
+    display: inline-grid;
+    place-items: center;
+    min-width: 44px;
+    min-height: 44px;
+    border-radius: var(--r-pill);
+    border: 1.5px solid var(--line-strong);
+    color: var(--ink-2);
+    font-weight: 700;
+    font-size: var(--text-xs);
+    text-decoration: none;
+    letter-spacing: 0.06em;
+  }
+  .hdr__lang:hover {
+    border-color: var(--ink);
+    color: var(--ink);
+  }
+  .hdr__cta {
+    display: none;
+  }
+  .hdr__burger {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border-radius: var(--r-pill);
+    color: var(--ink);
+    border: 1.5px solid var(--line-strong);
+  }
+  @media (min-width: 640px) {
+    .hdr__cta {
+      display: inline-flex;
+    }
+  }
+  @media (min-width: 1024px) {
+    .hdr__nav ul {
+      display: flex;
+    }
+    .hdr__burger {
+      display: none;
+    }
+  }
+  /* 1024–1199: yalnızca logo; 1200+: logo + ad; 1280+: telefon da görünür */
+  @media (min-width: 1024px) and (max-width: 1199px) {
+    .hdr__name {
+      display: none;
+    }
+    .hdr__nav a {
+      padding-inline: 0.7rem;
+    }
+  }
+  @media (min-width: 1280px) {
+    .hdr__phone {
+      display: inline-flex;
+    }
+  }
+  @media (max-width: 420px) {
+    .hdr__name {
+      display: none;
+    }
+  }
+
+  /* Mobil menü (dialog) */
+  .mmenu {
+    border: 0;
+    padding: 0;
+    margin: 0;
+    width: min(100vw, 420px);
+    max-width: 100vw;
+    height: 100dvh;
+    max-height: 100dvh;
+    inset: 0 0 0 auto;
+    background: var(--surface);
+    color: var(--ink);
+    box-shadow: var(--shadow-3);
+    display: none;
+    flex-direction: column;
+    transform: translateX(24px);
+    opacity: 0;
+    transition:
+      transform var(--dur-2) var(--ease-out),
+      opacity var(--dur-2) var(--ease-out),
+      display var(--dur-2) allow-discrete,
+      overlay var(--dur-2) allow-discrete;
+  }
+  .mmenu[open] {
+    display: flex;
+    transform: none;
+    opacity: 1;
+  }
+  @starting-style {
+    .mmenu[open] {
+      transform: translateX(24px);
+      opacity: 0;
+    }
+  }
+  .mmenu::backdrop {
+    background: rgba(12, 31, 44, 0.45);
+    backdrop-filter: blur(2px);
+  }
+  .mmenu__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem var(--gutter);
+    min-height: var(--header-h);
+    border-bottom: 1px solid var(--line);
+  }
+  .mmenu__list {
+    list-style: none;
+    margin: 0;
+    padding: 0.5rem 0;
+    flex: 1;
+    overflow: auto;
+  }
+  .mmenu__list a {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem var(--gutter);
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .mmenu__list a:hover {
+    background: var(--surface-2);
+  }
+  .mmenu__foot {
+    display: grid;
+    gap: 0.6rem;
+    padding: 1rem var(--gutter) calc(1rem + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--line);
+  }
+  .mmenu__lang {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    justify-content: center;
+    padding: 0.6rem;
+    font-weight: 600;
+  }
+</style>

@@ -1,0 +1,46 @@
+# GitHub Pages dağıtımı — Astro resmî eylemi.
+# Repo ayarlarında Pages > Source: "GitHub Actions" seçilmeli. CNAME public/ içinde korunur.
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [master, main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: withastro/action@v6
+        with:
+          node-version: 24
+          package-manager: npm@latest
+        env:
+          PUBLIC_SITE_ENV: production
+          PUBLIC_API_BASE: ${{ vars.PUBLIC_API_BASE }}
+          PUBLIC_GA4_ID: ${{ vars.PUBLIC_GA4_ID }}
+          PUBLIC_GADS_ID: ${{ vars.PUBLIC_GADS_ID }}
+          PUBLIC_GADS_APPOINTMENT_LABEL: ${{ vars.PUBLIC_GADS_APPOINTMENT_LABEL }}
+          PUBLIC_META_PIXEL_ID: ${{ vars.PUBLIC_META_PIXEL_ID }}
+          PUBLIC_OPENAI_PIXEL_ID: ${{ vars.PUBLIC_OPENAI_PIXEL_ID }}
+          PUBLIC_TURNSTILE_SITE_KEY: ${{ vars.PUBLIC_TURNSTILE_SITE_KEY }}
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5

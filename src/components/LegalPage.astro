@@ -1,0 +1,108 @@
+---
+import type { Locale, SiteContent } from '../content/types';
+import type { LegalSection } from '../content/legal/tr';
+import Icon from './Icon.astro';
+interface Props {
+  locale: Locale;
+  c: SiteContent;
+  legal: { title: string; draftNotice: string; updated: string; sections: LegalSection[] };
+}
+const { locale, legal } = Astro.props;
+const back = locale === 'tr' ? 'Ana sayfaya dön' : 'Back to home';
+const updatedLabel = locale === 'tr' ? 'Son güncelleme' : 'Last updated';
+const toc = locale === 'tr' ? 'Bu sayfada' : 'On this page';
+---
+
+<article class="section legal">
+  <div class="container legal__grid">
+    <aside class="legal__aside">
+      <a class="btn btn--ghost btn--sm" href={locale === 'tr' ? '/' : '/en/'}><Icon name="chevron-left" />{back}</a>
+      <nav aria-label={toc} class="legal__toc">
+        <p class="eyebrow">{toc}</p>
+        <ul>
+          {legal.sections.map((s) => <li><a href={`#${s.id}`}>{s.title}</a></li>)}
+        </ul>
+      </nav>
+    </aside>
+    <div class="legal__body">
+      <h1>{legal.title}</h1>
+      <p class="muted">{updatedLabel}: {legal.updated}</p>
+      <p class="notice notice--warn"><Icon name="alert" />{legal.draftNotice}</p>
+      {legal.sections.map((s) => (
+        <section id={s.id} class="legal__section">
+          <h2>{s.title}</h2>
+          <div set:html={s.html} />
+        </section>
+      ))}
+    </div>
+  </div>
+</article>
+
+<style>
+  .legal__grid {
+    display: grid;
+    gap: var(--space-6);
+    align-items: start;
+  }
+  @media (min-width: 900px) {
+    .legal__grid {
+      grid-template-columns: 260px minmax(0, 1fr);
+      gap: var(--space-8);
+    }
+    .legal__aside {
+      position: sticky;
+      top: calc(var(--header-h) + 1.5rem);
+    }
+  }
+  .legal__toc {
+    margin-top: var(--space-5);
+  }
+  .legal__toc ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 0.5rem;
+    font-size: var(--text-sm);
+  }
+  .legal__body {
+    max-width: 76ch;
+  }
+  .legal__body h1 {
+    font-size: var(--h2);
+  }
+  .legal__section {
+    margin-top: var(--space-7);
+  }
+  .legal__section h2 {
+    font-size: 1.4rem;
+    margin-bottom: var(--space-4);
+    scroll-margin-top: calc(var(--header-h) + 1rem);
+  }
+  .legal__section :global(p) {
+    color: var(--ink-2);
+    margin-top: 0.9rem;
+  }
+  .legal__section :global(.legal-table) {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+    font-size: var(--text-sm);
+  }
+  .legal__section :global(.legal-table th),
+  .legal__section :global(.legal-table td) {
+    text-align: left;
+    padding: 0.6rem;
+    border-bottom: 1px solid var(--line);
+    vertical-align: top;
+  }
+  .legal__section :global(.legal-table th) {
+    background: var(--surface-2);
+  }
+  .legal__section :global(code) {
+    font-size: 0.85em;
+    background: var(--surface-2);
+    padding: 0.1em 0.4em;
+    border-radius: 4px;
+  }
+</style>

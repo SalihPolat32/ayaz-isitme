@@ -1,0 +1,97 @@
+---
+import type { Locale, SiteContent } from '../content/types';
+import Icon from './Icon.astro';
+interface Props { locale: Locale; c: SiteContent }
+const { c } = Astro.props;
+const p = c.process;
+---
+
+<section class="section pr" id="surec" aria-labelledby="pr-title">
+  <div class="container">
+    <div class="section-head section-head--center reveal">
+      <p class="eyebrow">{p.eyebrow}</p>
+      <h2 id="pr-title">{p.h2}</h2>
+      <p class="lead">{p.lead}</p>
+    </div>
+    <ol class="pr__steps">
+      {p.steps.map((s, i) => (
+        <li class="reveal" style={`--reveal-delay:${i * 80}ms`}>
+          <span class="pr__num">{i + 1}</span>
+          <h3>{s.title}</h3>
+          <p class="small muted">{s.text}</p>
+        </li>
+      ))}
+    </ol>
+    <p class="pr__note small muted reveal"><Icon name="info" />{p.note}</p>
+  </div>
+</section>
+
+<style>
+  .pr__steps {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 1.25rem;
+    position: relative;
+  }
+  @media (min-width: 720px) {
+    .pr__steps {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  @media (min-width: 1100px) {
+    .pr__steps {
+      grid-template-columns: repeat(4, 1fr);
+    }
+    .pr__steps::before {
+      content: '';
+      position: absolute;
+      left: 8%;
+      right: 8%;
+      top: 26px;
+      height: 2px;
+      background: linear-gradient(90deg, var(--accent-soft-2), var(--accent), var(--accent-soft-2));
+      opacity: 0.7;
+    }
+  }
+  .pr__steps li {
+    position: relative;
+    display: grid;
+    gap: 0.6rem;
+    align-content: start;
+    padding: 0 0.5rem;
+  }
+  .pr__num {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: var(--accent);
+    color: #fff;
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 1.2rem;
+    box-shadow: 0 0 0 8px var(--bg);
+    position: relative;
+    z-index: 1;
+  }
+  .pr__steps h3 {
+    font-size: 1.15rem;
+    margin-top: 0.4rem;
+  }
+  .pr__note {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: var(--space-7);
+    justify-content: center;
+    text-align: left;
+    max-width: 70ch;
+    margin-inline: auto;
+  }
+  .pr__note .icon {
+    flex: none;
+    margin-top: 0.2em;
+  }
+</style>

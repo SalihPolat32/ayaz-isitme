@@ -1,0 +1,44 @@
+---
+import type { Locale, SiteContent } from '../content/types';
+import Icon from './Icon.astro';
+interface Props { locale: Locale; c: SiteContent }
+const { c } = Astro.props;
+const f = c.faq;
+---
+
+<section class="section fq" id="sss" aria-labelledby="fq-title">
+  <div class="container fq__grid">
+    <div class="section-head reveal">
+      <p class="eyebrow">{f.eyebrow}</p>
+      <h2 id="fq-title">{f.h2}</h2>
+      <p class="lead">{f.lead}</p>
+    </div>
+    <div class="fq__list reveal" style="--reveal-delay:100ms">
+      {f.items.map((it, i) => (
+        <details class="acc" name="faq" id={`sss-${i + 1}`}>
+          <summary>{it.q}<span class="acc__chev"><Icon name="chevron-down" /></span></summary>
+          <div class="acc__body"><p>{it.a}</p></div>
+        </details>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .fq__grid {
+    display: grid;
+    gap: var(--space-6);
+    align-items: start;
+  }
+  @media (min-width: 1000px) {
+    .fq__grid {
+      grid-template-columns: 0.8fr 1.2fr;
+      gap: var(--space-8);
+    }
+    .fq__grid .section-head {
+      position: sticky;
+      top: calc(var(--header-h) + 2rem);
+      margin-bottom: 0;
+    }
+  }
+</style>

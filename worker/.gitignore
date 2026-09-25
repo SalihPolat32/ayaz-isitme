@@ -1,0 +1,7 @@
+node_modules/
+.wrangler/
+.dev.vars
+.dev.vars.*
+!.dev.vars.example
+# `wrangler types` üretir (npm run typecheck)
+worker-configuration.d.ts

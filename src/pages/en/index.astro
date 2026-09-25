@@ -1,0 +1,32 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getContent } from '../../i18n';
+import Hero from '../../components/Hero.astro';
+import DeviceExplorer from '../../components/DeviceExplorer.astro';
+import DeviceTypes from '../../components/DeviceTypes.astro';
+import Brands from '../../components/Brands.astro';
+import Services from '../../components/Services.astro';
+import EarMold from '../../components/EarMold.astro';
+import Process from '../../components/Process.astro';
+import Center from '../../components/Center.astro';
+import Reviews from '../../components/Reviews.astro';
+import Faq from '../../components/Faq.astro';
+import Contact from '../../components/Contact.astro';
+
+const locale = 'en' as const;
+const c = getContent(locale);
+---
+
+<Base locale={locale} c={c} home>
+  <Hero locale={locale} c={c} />
+  <DeviceExplorer locale={locale} c={c} />
+  <DeviceTypes locale={locale} c={c} />
+  <Brands locale={locale} c={c} />
+  <Services locale={locale} c={c} />
+  <EarMold locale={locale} c={c} />
+  <Process locale={locale} c={c} />
+  <Center locale={locale} c={c} />
+  <Reviews locale={locale} c={c} />
+  <Faq locale={locale} c={c} />
+  <Contact locale={locale} c={c} />
+</Base>

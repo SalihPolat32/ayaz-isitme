@@ -1,0 +1,206 @@
+---
+import type { Locale, SiteContent } from '../content/types';
+import { business } from '../config/business';
+import Icon from './Icon.astro';
+interface Props { locale: Locale; c: SiteContent }
+const { c } = Astro.props;
+const r = c.reviews;
+const seeAllUrl = business.google.shareUrl;
+const writeUrl = business.google.writeReviewUrl || seeAllUrl;
+---
+
+<section class="section section--soft rv" id="yorumlar" aria-labelledby="rv-title" data-reviews data-state="idle" data-see-all={seeAllUrl}>
+  <div class="container">
+    <div class="rv__head reveal">
+      <div>
+        <p class="eyebrow">{r.eyebrow}</p>
+        <h2 id="rv-title">{r.h2}</h2>
+        <p class="lead">{r.lead}</p>
+      </div>
+      <div class="rv__score" data-score hidden>
+        <div class="rv__num" data-rating>–</div>
+        <div>
+          <div class="stars" data-stars aria-hidden="true"></div>
+          <div class="small muted" data-count></div>
+          <div class="small muted">{r.ratingLabel}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="rv__list" data-list aria-live="polite"></div>
+
+    <div class="rv__offline card card--pad reveal" data-offline>
+      <div class="rv__glogo" aria-hidden="true">G</div>
+      <div>
+        <h3>{r.offline}</h3>
+        <p class="small muted">{r.offlineText}</p>
+      </div>
+      <div class="rv__actions">
+        <a class="btn btn--primary" href={seeAllUrl} target="_blank" rel="noopener" data-track="reviews_click"><Icon name="external" />{r.seeAll}</a>
+        <a class="btn btn--outline" href={writeUrl} target="_blank" rel="noopener" data-track="review_write_click"><Icon name="star" />{r.write}</a>
+      </div>
+    </div>
+
+    <div class="rv__foot reveal" data-foot hidden>
+      <p class="small muted"><span class="rv__attr">Google Maps</span> · {r.attribution} {r.apiNote}</p>
+      <div class="rv__actions">
+        <a class="btn btn--outline btn--sm" href={seeAllUrl} target="_blank" rel="noopener" data-track="reviews_click"><Icon name="external" />{r.seeAll}</a>
+        <a class="btn btn--outline btn--sm" href={writeUrl} target="_blank" rel="noopener" data-track="review_write_click"><Icon name="star" />{r.write}</a>
+      </div>
+    </div>
+  </div>
+
+  <template data-review-tpl>
+    <article class="rvc card card--pad">
+      <header class="rvc__head">
+        <span class="rvc__avatar" data-avatar></span>
+        <div>
+          <a class="rvc__author" data-author target="_blank" rel="noopener nofollow"></a>
+          <div class="small muted" data-time></div>
+        </div>
+        <span class="stars" data-stars aria-hidden="true"></span>
+      </header>
+      <p class="rvc__text" data-text></p>
+      <a class="rvc__link small" data-link target="_blank" rel="noopener nofollow">Google</a>
+    </article>
+  </template>
+</section>
+
+<style>
+  .rv__head {
+    display: grid;
+    gap: var(--space-5);
+    align-items: center;
+    margin-bottom: clamp(2rem, 1.5rem + 2vw, 3rem);
+  }
+  @media (min-width: 900px) {
+    .rv__head {
+      grid-template-columns: 1fr auto;
+    }
+  }
+  .rv__score {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    padding: 1rem 1.25rem;
+    border-radius: var(--r-lg);
+    background: var(--surface);
+    border: 1px solid var(--line);
+  }
+  .rv__num {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 2.6rem;
+    line-height: 1;
+  }
+  .stars {
+    display: inline-flex;
+    gap: 2px;
+    color: #f5a524;
+  }
+  .stars :global(.icon) {
+    width: 1rem;
+    height: 1rem;
+  }
+  .rv__list {
+    display: grid;
+    gap: 1rem;
+  }
+  @media (min-width: 720px) {
+    .rv__list {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  @media (min-width: 1100px) {
+    .rv__list {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+  .rv__offline {
+    display: grid;
+    gap: 1rem;
+    align-items: center;
+  }
+  @media (min-width: 800px) {
+    .rv__offline {
+      grid-template-columns: auto 1fr auto;
+    }
+  }
+  [data-state='ready'] .rv__offline {
+    display: none;
+  }
+  .rv__glogo {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: var(--surface-2);
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 1.6rem;
+    color: var(--ink);
+  }
+  .rv__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+  }
+  .rv__foot {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: var(--space-5);
+  }
+  .rvc {
+    display: grid;
+    gap: 0.75rem;
+    align-content: start;
+  }
+  .rvc__head {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 0.75rem;
+    align-items: center;
+  }
+  .rvc__avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: var(--accent-soft);
+    color: var(--accent-text);
+    display: grid;
+    place-items: center;
+    font-weight: 800;
+    font-family: var(--font-display);
+    overflow: hidden;
+  }
+  .rvc__avatar :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .rvc__author {
+    font-weight: 700;
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .rvc__text {
+    color: var(--ink-2);
+    font-size: var(--text-sm);
+    display: -webkit-box;
+    -webkit-line-clamp: 6;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .rvc__link {
+    justify-self: start;
+  }
+  .rv__attr {
+    font-family: Roboto, var(--font-body);
+    font-weight: 500;
+    color: var(--ink);
+  }
+</style>

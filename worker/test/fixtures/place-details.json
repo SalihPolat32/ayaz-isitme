@@ -1,0 +1,53 @@
+{
+  "name": "places/ChIJ_EXAMPLE_PLACE_ID",
+  "id": "ChIJ_EXAMPLE_PLACE_ID",
+  "displayName": { "text": "Örnek İşitme Merkezi", "languageCode": "tr" },
+  "rating": 4.8,
+  "userRatingCount": 57,
+  "googleMapsUri": "https://maps.google.com/?cid=1234567890",
+  "reviews": [
+    {
+      "name": "places/ChIJ_EXAMPLE_PLACE_ID/reviews/AbCdEf1",
+      "relativePublishTimeDescription": "2 hafta önce",
+      "rating": 5,
+      "text": { "text": "Çok ilgili ve güler yüzlü bir ekip. Cihazım için harika bir deneyim oldu.", "languageCode": "tr" },
+      "originalText": { "text": "Çok ilgili ve güler yüzlü bir ekip. Cihazım için harika bir deneyim oldu.", "languageCode": "tr" },
+      "authorAttribution": {
+        "displayName": "Ayşe Y.",
+        "uri": "https://www.google.com/maps/contrib/1111111111111111111/reviews",
+        "photoUri": "https://lh3.googleusercontent.com/a/example-1=s128-c0x00000000-cc-rp-mo"
+      },
+      "publishTime": "2026-09-10T08:15:30.123456Z",
+      "flagContentUri": "https://www.google.com/local/review/rap/report?postId=AbCdEf1",
+      "googleMapsUri": "https://www.google.com/maps/reviews/data=!4m6!14m5!1m4!2m3!1sAbCdEf1"
+    },
+    {
+      "name": "places/ChIJ_EXAMPLE_PLACE_ID/reviews/AbCdEf2",
+      "relativePublishTimeDescription": "bir ay önce",
+      "rating": 4,
+      "text": { "text": "Great service, translated text.", "languageCode": "en" },
+      "originalText": { "text": "Harika hizmet.", "languageCode": "tr" },
+      "authorAttribution": {
+        "displayName": "Mehmet K.",
+        "uri": "https://www.google.com/maps/contrib/2222222222222222222/reviews",
+        "photoUri": "https://lh3.googleusercontent.com/a/example-2=s128-c0x00000000-cc-rp-mo"
+      },
+      "publishTime": "2026-08-20T17:40:00Z",
+      "flagContentUri": "https://www.google.com/local/review/rap/report?postId=AbCdEf2",
+      "googleMapsUri": "https://www.google.com/maps/reviews/data=!4m6!14m5!1m4!2m3!1sAbCdEf2"
+    },
+    {
+      "name": "places/ChIJ_EXAMPLE_PLACE_ID/reviews/AbCdEf3",
+      "relativePublishTimeDescription": "3 ay önce",
+      "rating": 5,
+      "authorAttribution": {
+        "displayName": "Fatma D.",
+        "uri": "https://www.google.com/maps/contrib/3333333333333333333/reviews",
+        "photoUri": "https://lh3.googleusercontent.com/a/example-3=s128-c0x00000000-cc-rp-mo"
+      },
+      "publishTime": "2026-06-01T09:00:00Z",
+      "flagContentUri": "https://www.google.com/local/review/rap/report?postId=AbCdEf3",
+      "googleMapsUri": "https://www.google.com/maps/reviews/data=!4m6!14m5!1m4!2m3!1sAbCdEf3"
+    }
+  ]
+}

@@ -1,0 +1,207 @@
+---
+import type { Locale, SiteContent } from '../content/types';
+import { business, canShow } from '../config/business';
+import { legalPaths } from '../i18n';
+import Icon from './Icon.astro';
+interface Props { locale: Locale; c: SiteContent }
+const { locale, c } = Astro.props;
+const ct = c.contact;
+const f = ct.form;
+const info = ct.info;
+---
+
+<section class="section cx" id="iletisim" aria-labelledby="cx-title">
+  <div class="container">
+    <div class="section-head reveal">
+      <p class="eyebrow">{ct.eyebrow}</p>
+      <h2 id="cx-title">{ct.h2}</h2>
+      <p class="lead">{ct.lead}</p>
+    </div>
+
+    <div class="cx__grid">
+      <form class="card card--pad cx__form reveal" data-appointment-form novalidate aria-labelledby="cx-form-title" method="post" action="#iletisim">
+        <h3 id="cx-form-title">{f.title}</h3>
+        <p class="notice cx__fallback" data-fallback-notice hidden><Icon name="info" />{f.fallbackNotice}</p>
+
+        <div class="field">
+          <label for="f-name">{f.name}</label>
+          <input class="input" id="f-name" name="name" aria-describedby="f-name-error" type="text" autocomplete="name" required minlength="2" maxlength="80" />
+          <p class="error" id="f-name-error" data-error-for="name" aria-live="polite"></p>
+        </div>
+        <div class="field">
+          <label for="f-phone">{f.phone}</label>
+          <input class="input" id="f-phone" name="phone" aria-describedby="f-phone-error" type="tel" inputmode="tel" autocomplete="tel" required placeholder="05xx xxx xx xx" />
+          <p class="error" id="f-phone-error" data-error-for="phone" aria-live="polite"></p>
+        </div>
+        <div class="field">
+          <label for="f-time">{f.time}</label>
+          <select class="input" id="f-time" name="time">
+            {f.timeOptions.map((o) => <option value={o}>{o}</option>)}
+          </select>
+        </div>
+        <p class="hint">{f.note}</p>
+
+        <label class="cx__consent">
+          <input type="checkbox" name="consent" aria-describedby="f-consent-error" required />
+          <span>{f.consent} <a href={legalPaths[locale] + '#aydinlatma'} target="_blank" rel="noopener">{f.consentLink}</a></span>
+        </label>
+        <p class="error" id="f-consent-error" data-error-for="consent" aria-live="polite"></p>
+
+        <!-- Bot tuzağı: kullanıcılar görmez -->
+        <div class="cx__hp" aria-hidden="true">
+          <label for="f-website">Website</label>
+          <input id="f-website" name="website" type="text" tabindex="-1" autocomplete="off" />
+        </div>
+        <input type="hidden" name="t" value="" data-form-ts />
+        <input type="hidden" name="topic" value="" data-form-topic />
+        <div class="cx__turnstile" data-turnstile hidden></div>
+
+        <button class="btn btn--primary btn--lg cx__submit" type="submit" data-submit data-label-default={f.submit} data-label-wa={f.submitWhatsapp} data-label-sending={f.sending}>
+          <Icon name="send" /><span>{f.submit}</span>
+        </button>
+        <div class="cx__status" data-status role="status" aria-live="polite"></div>
+        <template data-tpl-success>
+          <div class="notice notice--ok"><Icon name="check" /><div><strong>{f.successTitle}</strong><p>{f.successText}</p></div></div>
+        </template>
+        <template data-tpl-error>
+          <div class="notice notice--err"><Icon name="alert" /><div><strong>{f.errorTitle}</strong><p>{f.errorText}</p></div></div>
+        </template>
+      </form>
+
+      <div class="cx__info reveal" style="--reveal-delay:100ms">
+        <div class="card card--pad">
+          <ul class="cx__list">
+            <li><Icon name="map-pin" /><div><strong>{info.address}</strong><span>{business.address.line}</span></div></li>
+            <li><Icon name="phone" aria-describedby="f-phone-error" /><div><strong>{info.phone}</strong><a href={business.phone.href} data-track="phone_click">{business.phone.display}</a></div></li>
+            <li><Icon name="whatsapp" /><div><strong>{info.whatsapp}</strong><a href={business.whatsapp.href} target="_blank" rel="noopener" data-track="whatsapp_click">{business.phone.display}</a></div></li>
+            <li><Icon name="mail" /><div><strong>{info.email}</strong><a href={`mailto:${business.email}`}>{business.email}</a></div></li>
+            {canShow(business.hours) && <li><Icon name="clock" /><div><strong>{info.hours}</strong><span>{info.hoursValue}<br /><span class="small muted">{info.closed}</span></span></div></li>}
+          </ul>
+          <div class="cluster mt-5">
+            <a class="btn btn--whatsapp" href={business.whatsapp.href} target="_blank" rel="noopener" data-track="whatsapp_click"><Icon name="whatsapp" />WhatsApp</a>
+            <a class="btn btn--outline" href={business.google.directionsUrl} target="_blank" rel="noopener" data-track="directions_click"><Icon name="navigation" />{info.directions}</a>
+          </div>
+        </div>
+
+        <div class="cx__map card" data-map data-src={business.google.mapsEmbedUrl}>
+          <div class="cx__mapph" data-map-placeholder>
+            <Icon name="map-pin" />
+            <p><strong>{business.brand}</strong><br />{business.address.line}</p>
+            <button type="button" class="btn btn--navy btn--sm" data-map-load><Icon name="globe" />{info.loadMap}</button>
+            <p class="small muted">{info.mapNote}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .cx__grid {
+    display: grid;
+    gap: var(--space-6);
+    align-items: start;
+  }
+  @media (min-width: 960px) {
+    .cx__grid {
+      grid-template-columns: 1.05fr 0.95fr;
+    }
+  }
+  .cx__form {
+    display: grid;
+    gap: 1rem;
+  }
+  .cx__form h3 {
+    font-size: 1.35rem;
+  }
+  .cx__consent {
+    display: flex;
+    gap: 0.7rem;
+    align-items: flex-start;
+    font-size: var(--text-sm);
+    color: var(--ink-2);
+    cursor: pointer;
+  }
+  .cx__consent input {
+    width: 20px;
+    height: 20px;
+    margin-top: 0.15rem;
+    flex: none;
+    accent-color: var(--accent);
+  }
+  .cx__hp {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+  .cx__submit {
+    width: 100%;
+  }
+  .cx__submit.is-wa {
+    --btn-bg: var(--whatsapp);
+  }
+  .cx__info {
+    display: grid;
+    gap: 1rem;
+  }
+  .cx__list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 1rem;
+  }
+  .cx__list li {
+    display: flex;
+    gap: 0.8rem;
+    align-items: flex-start;
+  }
+  .cx__list li .icon {
+    flex: none;
+    color: var(--accent);
+    margin-top: 0.25rem;
+  }
+  .cx__list li div {
+    display: grid;
+  }
+  .cx__list strong {
+    font-size: var(--text-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ink-3);
+  }
+  .cx__map {
+    overflow: hidden;
+    aspect-ratio: 16 / 10;
+    position: relative;
+    background:
+      linear-gradient(rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.6)),
+      repeating-linear-gradient(0deg, var(--surface-2) 0 1px, transparent 1px 28px),
+      repeating-linear-gradient(90deg, var(--surface-2) 0 1px, transparent 1px 28px),
+      var(--surface);
+  }
+  .cx__mapph {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-content: center;
+    justify-items: center;
+    gap: 0.75rem;
+    text-align: center;
+    padding: 1.5rem;
+  }
+  .cx__mapph .icon {
+    width: 2rem;
+    height: 2rem;
+    color: var(--accent);
+  }
+  .cx__map :global(iframe) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+</style>

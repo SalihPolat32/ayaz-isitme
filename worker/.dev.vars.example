@@ -1,0 +1,22 @@
+# Kopyalayın: cp .dev.vars.example .dev.vars   (.dev.vars git'e girmez)
+# Boş bırakılan her değer ilgili özelliği kapatır (mock e-posta, Turnstile atlanır, yorumlar 503).
+# Üretimde bu değerler `npx wrangler secret put <AD>` ile girilir; wrangler.jsonc'a yazılmaz.
+
+# E-posta sağlayıcısı (MAIL_PROVIDER wrangler.jsonc "vars" içinde; burada geçici olarak ezilebilir)
+# MAIL_PROVIDER=resend
+RESEND_API_KEY=
+BREVO_API_KEY=
+
+# Cloudflare Turnstile gizli anahtarı. Test için: 1x0000000000000000000000000000000AA (her zaman geçer)
+TURNSTILE_SECRET_KEY=
+
+# Google Places API (New) — yalnızca "Places API (New)" ile sınırlandırılmış sunucu anahtarı
+GOOGLE_PLACES_API_KEY=
+GOOGLE_PLACE_ID=
+
+# İsteğe bağlı ikinci kanal
+TELEGRAM_BOT_TOKEN=
+TELEGRAM_CHAT_ID=
+
+# Yorum önbelleği (varsayılan 0 = kapalı; bkz. README §5.3). Yerelde denemek için:
+# REVIEWS_CACHE_TTL=21600

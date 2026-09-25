@@ -1,0 +1,62 @@
+[
+  {
+    "path": "/",
+    "width": 320,
+    "overflow": false
+  },
+  {
+    "path": "/",
+    "width": 393,
+    "overflow": false
+  },
+  {
+    "path": "/",
+    "width": 768,
+    "overflow": false
+  },
+  {
+    "path": "/",
+    "width": 1024,
+    "overflow": false
+  },
+  {
+    "path": "/",
+    "width": 1280,
+    "overflow": false
+  },
+  {
+    "path": "/",
+    "width": 1440,
+    "overflow": false
+  },
+  {
+    "path": "/en/",
+    "width": 320,
+    "overflow": false
+  },
+  {
+    "path": "/en/",
+    "width": 393,
+    "overflow": false
+  },
+  {
+    "path": "/en/",
+    "width": 768,
+    "overflow": false
+  },
+  {
+    "path": "/en/",
+    "width": 1024,
+    "overflow": false
+  },
+  {
+    "path": "/en/",
+    "width": 1280,
+    "overflow": false
+  },
+  {
+    "path": "/en/",
+    "width": 1440,
+    "overflow": false
+  }
+]

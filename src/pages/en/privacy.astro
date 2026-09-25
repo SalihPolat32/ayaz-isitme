@@ -1,0 +1,12 @@
+---
+import Base from '../../layouts/Base.astro';
+import LegalPage from '../../components/LegalPage.astro';
+import { getContent } from '../../i18n';
+import { legalEn } from '../../content/legal/en';
+const locale = 'en' as const;
+const c = getContent(locale);
+---
+
+<Base locale={locale} c={c} title={`${legalEn.title} | Ayaz Hearing Center`} description={legalEn.description} alternates={{ tr: '/gizlilik/', en: '/en/privacy/' }}>
+  <LegalPage locale={locale} c={c} legal={legalEn} />
+</Base>

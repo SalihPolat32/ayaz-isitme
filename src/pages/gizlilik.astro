@@ -1,0 +1,12 @@
+---
+import Base from '../layouts/Base.astro';
+import LegalPage from '../components/LegalPage.astro';
+import { getContent } from '../i18n';
+import { legalTr } from '../content/legal/tr';
+const locale = 'tr' as const;
+const c = getContent(locale);
+---
+
+<Base locale={locale} c={c} title={`${legalTr.title} | Ayaz İşitme Merkezi`} description={legalTr.description} alternates={{ tr: '/gizlilik/', en: '/en/privacy/' }}>
+  <LegalPage locale={locale} c={c} legal={legalTr} />
+</Base>
