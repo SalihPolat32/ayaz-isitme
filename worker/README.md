@@ -106,7 +106,7 @@ Yerelde aynı adlar `.dev.vars` dosyasından okunur (`.gitignore`'da).
 kanal ulaşamadıysa `502 delivery_failed` döner (ön yüz WhatsApp'a yönlendirir).
 
 Bildirim içeriği: ad soyad, telefon (hem `0507 155 11 51` hem `+905071551151`, `tel:` bağlantılı),
-tercih edilen zaman, dil, Europe/Istanbul zaman damgası, formun gönderildiği sayfa (sorgu dizesi
+tercih edilen zaman, (bir cihaz/hizmet kartından gelindiyse) kartın konusu — geçersizse sessizce atılır —, dil, Europe/Istanbul zaman damgası, formun gönderildiği sayfa (sorgu dizesi
 atılır), ülke kodu. Konu: `Yeni randevu talebi — keciorenisitme.com`.
 
 ---
@@ -208,13 +208,14 @@ Yanıt biçimi:
 {
   "ok": true, "attribution": "Google", "name": "…", "rating": 4.8, "userRatingCount": 57,
   "googleMapsUri": "https://maps.google.com/?cid=…",
-  "reviews": [{ "author": "…", "authorUri": "…", "authorPhoto": "…", "rating": 5, "text": "…",
+  "reviews": [{ "id": "AbCdEf1", "author": "…", "authorUri": "…", "authorPhoto": "…", "rating": 5, "text": "…",
                 "translated": false, "relativeTime": "2 hafta önce", "publishTime": "2026-09-10T08:15:30Z",
                 "reviewUri": "https://www.google.com/maps/reviews/…", "flagUri": "…" }],
   "fetchedAt": "2026-09-25T07:00:00.000Z"
 }
 ```
 
+- `id` = `Review.name` (`places/{placeId}/reviews/{id}`) son parçası (yoksa `""`); `publishTime` = `Review.publishTime`. İkisi de ön yüzün tekrar/çıkarılmış yorum eşleştirmesi içindir (INTEGRATIONS.md §5). `id` sonradan eklenen, geriye dönük uyumlu bir alandır.
 - Yanıttaki `googleMapsUri` (işletme), her yorumun `reviewUri` (`Review.googleMapsUri`) ve `flagUri` (`Review.flagContentUri`) alanları politika için taşınır.
 - Bloğa **Google Maps logosu** (veya yer yoksa "Google Maps" metni, değiştirilmemiş) eklenir; blok görsel olarak ayrılır.
 - Her yorumda yazar avatarı + adı (`authorUri`'ye bağlantılı), yıldız, metin, `relativeTime`,
@@ -260,7 +261,7 @@ hesabı tek hesapla sınırlayın. Repo *Settings → Secrets and variables → 
 name: Deploy Worker
 on:
   push:
-    branches: [main]
+    branches: [master]   # deponun varsayılan dalı
     paths: ["worker/**"]
 jobs:
   deploy:
@@ -361,8 +362,16 @@ bilinmeyen yol `404 not_found`, yanlış yöntem `405 method_not_allowed`; bekle
 ## 9. Gizlilik / KVKK notları
 
 - Form verisi hiçbir yerde saklanmaz; yalnızca e-posta/Telegram olarak iletilir.
-- Loglarda telefon maskelenir (`+90507*****51`), ad ve serbest metin loglanmaz; IP loglanmaz
-  (yalnızca ülke kodu). `observability` açıkken Cloudflare istek loglarını kendi saklama süresince tutar.
+- Worker kodunun yazdığı log satırlarında telefon maskelenir (`+90507*****51`), ülke kodu ve iletim sonucu
+  yer alır; ad, serbest metin ve IP adresi bu satırlara yazılmaz.
+- Workers Logs'ta Cloudflare'in otomatik **çağrı (invocation) logları kapalıdır**
+  (`wrangler.jsonc` > `observability.logs.invocation_logs: false`; izleme de kapalı: `observability.traces.enabled: false`).
+  Bu loglar açık olsaydı her istek için istek üst verisi (yöntem, URL, başlıklar vb.) otomatik kaydedilirdi ve
+  gizlilik metninde anlatılmadığı için açılmamalıdır; açılırsa önce metin güncellenir (`CONTENT-VERIFICATION.md` §7).
+  Kalan log satırları Cloudflare'de hesabın planına bağlı süre boyunca tutulur; bu süre gizlilik metnine
+  `business.legal.retention.technicalLogsDays` olarak işletme tarafından yazılır. Cloudflare'in log kayıtlarına
+  eklediği teknik üst veri için: https://developers.cloudflare.com/workers/observability/logs/workers-logs/
+- `npx wrangler tail` canlı akıştır, saklanmaz; yalnızca o an izleyen geliştiriciye görünür.
 - Yanıtlar gönderilen kişisel veriyi geri yansıtmaz; hata gövdelerinde yalnızca kodlar bulunur.
 - Yorumlar varsayılan olarak saklanmaz; önbellek açılırsa yalnızca uçta, en fazla `REVIEWS_CACHE_TTL + REVIEWS_CACHE_STALE_TTL` süreyle durur.
 - Güvenlik başlıkları her yanıtta: `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`,

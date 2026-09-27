@@ -38,6 +38,10 @@ export function initForm(cfg: RuntimeConfig): void {
   const waMode = !cfg.apiBase;
   let turnstileId: string | null = null;
   let started = false;
+  // JS yoksa gönder düğmesi devre dışı kalır (form hiçbir sunucuya veri göndermez); betik hazır olunca açılır
+  submit.disabled = false;
+  // Zaman tuzağı sayfa açılışından ölçülür (ilk odaktan değil): hızlı otomatik doldurma gerçek kullanıcıyı engellemesin
+  tsInput.value = String(Date.now());
   let inFlight = false;
   let turnstileRequested = false;
 
@@ -50,7 +54,6 @@ export function initForm(cfg: RuntimeConfig): void {
   const onStart = () => {
     if (started) return;
     started = true;
-    tsInput.value = String(Date.now());
     track('appointment_start', { mode: waMode ? 'whatsapp' : 'api' });
     if (!waMode && cfg.turnstile && turnstileEl) loadTurnstile();
   };
@@ -76,12 +79,13 @@ export function initForm(cfg: RuntimeConfig): void {
     if (el) el.textContent = msg;
     if (input) input.setAttribute('aria-invalid', msg ? 'true' : 'false');
   };
-  const validation = (() => {
-    // Mesajlar bileşen tarafından content'ten gelir; burada dil bazlı sabitler yedek olarak tutulur.
-    return cfg.locale === 'tr'
-      ? { name: 'Lütfen adınızı ve soyadınızı yazın.', phone: 'Lütfen geçerli bir telefon numarası yazın (ör. 05xx xxx xx xx).', consent: 'Devam etmek için aydınlatma metnini onaylayın.' }
-      : { name: 'Please enter your full name.', phone: 'Please enter a valid phone number (e.g. 05xx xxx xx xx).', consent: 'Please confirm the privacy notice to continue.' };
-  })();
+  // Mesajlar content'ten gelir (Contact.astro data-msg-*): onay kutusu mesajı hukuki metin özetine (text-hash) dahildir,
+  // yani gösterilen metin = onaylanan metin. Sabitler yalnızca öznitelik eksikse yedektir.
+  const validation = {
+    name: form.dataset.msgName || (cfg.locale === 'tr' ? 'Lütfen adınızı ve soyadınızı yazın.' : 'Please enter your full name.'),
+    phone: form.dataset.msgPhone || (cfg.locale === 'tr' ? 'Lütfen geçerli bir telefon numarası yazın (ör. 05xx xxx xx xx).' : 'Please enter a valid phone number (e.g. 05xx xxx xx xx).'),
+    consent: form.dataset.msgConsent || (cfg.locale === 'tr' ? 'Devam etmek için aydınlatma metnini onaylayın.' : 'Please confirm the privacy notice to continue.'),
+  };
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -134,6 +138,7 @@ export function initForm(cfg: RuntimeConfig): void {
           name,
           phone,
           time,
+          topic: topic || undefined,
           consent: true,
           website: honey,
           t: Number(tsInput.value) || Date.now(),
@@ -146,7 +151,7 @@ export function initForm(cfg: RuntimeConfig): void {
         status.replaceChildren(tplOk.content.cloneNode(true));
         form.reset();
         started = false;
-        tsInput.value = '';
+        tsInput.value = String(Date.now());
         track('appointment_submit_success');
       } else if (res.ok && data.ok && !data.delivered) {
         status.innerHTML = `<div class="notice notice--warn">${m.notDelivered}</div>`;

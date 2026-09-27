@@ -1,0 +1,239 @@
+{
+  "_note": "Sıralama: 3 bağımsız okuma (güven, risk, çeşitlilik) + Borda sayımı, 26 Eyl 2026; kategoriler 26 Eyl 2026 (Tur 5) yeniden sınıflandırıldı. exclude[].category: 'legal-risk' = gösterilmez (açık sağlık sonucu iddiası, rakip kıyası/kötüleme, marka/model adı, fiyat ya da doğrulanamaz üstünlük iddiası, olası çıkar çatışması); 'editorial' = gösterilir, sırada geride. enExclude[].category: 'translation-error' = İngilizce sayfada gösterilmez (Google çevirisi özgünü çarpıtıyor); 'editorial' = gösterilir, geride. Kategori değişince `node scripts/import-google-reviews.mjs <Takeout>` çalıştırın. UYARI: hukuk incelemesi Google yorumlarının sitede yayınını yasak buldu (bkz. CONTENT-VERIFICATION.md §9) — bu liste yalnızca karusel modu için.",
+  "pin": [
+    "Ci9DQUlRQUNvZENodHljRjlvT2xjNFJ6aG9PVkJwTkhaNVEyZDRkSFJNY1ZGQlZVRRAB",
+    "Ci9DQUlRQUNvZENodHljRjlvT205QmFsSjVVbmxrWjBsNGVqSlRTRXBDZEZSTGJHYxAB",
+    "Ci9DQUlRQUNvZENodHljRjlvT25BNVRYcHNWVTFqU1hJMFVHbFdZM2w2YzNscFdHYxAB",
+    "Ci9DQUlRQUNvZENodHljRjlvT2tGU1NVNTBNa2t3V2tKbWVsRkRUUzFDY1hwRVlXYxAB",
+    "Ci9DQUlRQUNvZENodHljRjlvT25JMFJteElOVEJOYlhkV01WTklTa3AzT0ZkclVrRRAB",
+    "Ci9DQUlRQUNvZENodHljRjlvT21KdWFESnplamMxVmxZeU1TMHdiV0pIUkRKSGEwRRAB",
+    "Ci9DQUlRQUNvZENodHljRjlvT2pZd1FtbDVaRXQxZUV0dGIxcHFiSGRQYzFsZlduYxAB",
+    "ChdDSUhNMG9nS0VJQ0FnSURiN0xic29nRRAB",
+    "ChZDSUhNMG9nS0VJQ0FnSURibnVUUWJBEAE",
+    "Ci9DQUlRQUNvZENodHljRjlvT2pabGVITXlZM1ZNYm0xclQwTldTVFJHTTFSSVMzYxAB",
+    "Ci9DQUlRQUNvZENodHljRjlvT2w5bE1HdG1Na0ZRTFV0T2VHVlhWRWxmVVc4MWFIYxAB",
+    "Ci9DQUlRQUNvZENodHljRjlvT2kxYVdrczNVV1pyT1doMVIyeFRNbWhLTkdrdE9FRRAB"
+  ],
+  "enPin": [
+    "Ci9DQUlRQUNvZENodHljRjlvT2xjNFJ6aG9PVkJwTkhaNVEyZDRkSFJNY1ZGQlZVRRAB",
+    "Ci9DQUlRQUNvZENodHljRjlvT205QmFsSjVVbmxrWjBsNGVqSlRTRXBDZEZSTGJHYxAB",
+    "Ci9DQUlRQUNvZENodHljRjlvT25BNVRYcHNWVTFqU1hJMFVHbFdZM2w2YzNscFdHYxAB",
+    "Ci9DQUlRQUNvZENodHljRjlvT2tGU1NVNTBNa2t3V2tKbWVsRkRUUzFDY1hwRVlXYxAB",
+    "Ci9DQUlRQUNvZENodHljRjlvT25JMFJteElOVEJOYlhkV01WTklTa3AzT0ZkclVrRRAB",
+    "ChdDSUhNMG9nS0VJQ0FnSURicVBHU3pnRRAB",
+    "Ci9DQUlRQUNvZENodHljRjlvT2pZd1FtbDVaRXQxZUV0dGIxcHFiSGRQYzFsZlduYxAB",
+    "ChdDSUhNMG9nS0VJQ0FnSURiN0xic29nRRAB",
+    "ChZDSUhNMG9nS0VJQ0FnSURibnVUUWJBEAE",
+    "Ci9DQUlRQUNvZENodHljRjlvT25oV1luQmtZbEkwWnpoTE5rVkJXazU1UkVacmVrRRAB",
+    "Ci9DQUlRQUNvZENodHljRjlvT2pseVVUVkVWelF0Ums5SE9FWTBia2hTV0ZBNFZXYxAB",
+    "Ci9DQUlRQUNvZENodHljRjlvT2kxYVdrczNVV1pyT1doMVIyeFRNbWhLTkdrdE9FRRAB"
+  ],
+  "exclude": [
+    {
+      "id": "ChdDSUhNMG9nS0VJQ0FnSUM5emYzQ293RRAB",
+      "category": "legal-risk",
+      "reason": "Salih P.: yazar adı, profili yöneten Google hesabındaki adla aynı. Bu tek başına yazarın işletmeyle bağlantılı olduğunu KANITLAMAZ; olası çıkar çatışması (TEYİT EDİLMEDİ). İşletme sahibi teyit etmeli: bağlantı yoksa kategori 'editorial' yapılıp yeniden içe aktarılabilir."
+    },
+    {
+      "id": "ChZDSUhNMG9nS0VJQ0FnSURibnN6ZE5BEAE",
+      "category": "legal-risk",
+      "reason": "gizem: kesin sağlık sonucu iddiası ('babamın duyma ile ilgili sorunu kalmadı') ve diğer merkezler hakkında olumsuz kıyas ('Bir kaç işitme merkezine gitmemize rağmen ... çözememiştik')."
+    },
+    {
+      "id": "Ci9DQUlRQUNvZENodHljRjlvT2xsc2VuRkVRVTFTUVZVNFgxZDRhVlJ1TWpSMk9GRRAB",
+      "category": "legal-risk",
+      "reason": "Emir Ö.: rakip kıyası ('diğer firmalardan daha çok ilgilendi', 'bir çok cihaz bayisi gezdik')."
+    },
+    {
+      "id": "ChZDSUhNMG9nS0VJQ0FnSURiNkt5M2VnEAE",
+      "category": "legal-risk",
+      "reason": "Sadullah K.: rakip kıyası ('Diğer firmalara göre ilgi alakası ve samimiyeti daha iyiydi')."
+    },
+    {
+      "id": "ChdDSUhNMG9nS0VJQ0FnSURiMk1fRzBRRRAB",
+      "category": "legal-risk",
+      "reason": "Arda G.: fiyat iddiası ('makul fiyatları') ve doğrulanamaz üstünlük iddiası ('kalite ve güvenin tek adresi')."
+    },
+    {
+      "id": "Ci9DQUlRQUNvZENodHljRjlvT25sWk5XbDFSeTFWYVd4UFRHZzVhMkUwZFZCUGRVRRAB",
+      "category": "editorial",
+      "reason": "Durak D.: sağlık sonucu, rakip, marka/model, fiyat ya da üstünlük iddiası yok. Önceki gerekçe ('naif' ifadesi, 'cihazın arkasında duran') üslupla ilgili; geri alındı, sırada geride."
+    },
+    {
+      "id": "ChdDSUhNMG9nS0VJQ0FnSUNkaGJ1dDJBRRAB",
+      "category": "editorial",
+      "reason": "Mert K.: 'Yeni açılan bir işletme' tarihli bir ifade; 'Emre kardeşim' Türkçede yaygın hitaptır, akrabalık kanıtı değildir. Hukuki risk yok; geri alındı, sırada geride."
+    },
+    {
+      "id": "ChZDSUhNMG9nS0VJQ0FnSURicUozOEd3EAE",
+      "category": "editorial",
+      "reason": "Tanki T.: 'yeni açılmış' tarihli bir ifade; hukuki risk yok. Geri alındı, sırada geride."
+    },
+    {
+      "id": "ChdDSUhNMG9nS0VJQ0FnSURiNkxyaXZ3RRAB",
+      "category": "editorial",
+      "reason": "Oğuz A.: 'Yeni açılmış' tarihli ifade, 'muhteşem' öznel beğeni (kıyas/üstünlük iddiası değil). Geri alındı, sırada geride."
+    },
+    {
+      "id": "Ci9DQUlRQUNvZENodHljRjlvT21kcU1VTXpXVFptTTNacFRUZFZiM1ZRY1doME1IYxAB",
+      "category": "editorial",
+      "reason": "Durmuş K.: 'Emre kardeşimin' yaygın hitap, 'mükemmel' öznel beğeni. Hukuki risk yok; geri alındı, sırada geride."
+    },
+    {
+      "id": "Ci9DQUlRQUNvZENodHljRjlvT25GNFlYbGZhMUZ3TUhCQk5rWjNlbmRNUVVJMWNIYxAB",
+      "category": "editorial",
+      "reason": "Burak T.: işitme cihazı için halk ağzında 'kulaklık' denmiş; marka/model yok. Geri alındı, sırada geride."
+    },
+    {
+      "id": "ChZDSUhNMG9nS0VJQ0FnTUNJdHJXVk9nEAE",
+      "category": "editorial",
+      "reason": "Mehmet A.: 'kulaklık' ve argo ('süper di', 'Şiddetli tavsiye ederim'); marka/model yok. Geri alındı, sırada geride."
+    },
+    {
+      "id": "ChdDSUhNMG9nS0VJQ0FnTUNJdHJfVXJnRRAB",
+      "category": "editorial",
+      "reason": "emrah V.: kısa metin ('Çok güzel paketlenmiş memnun kaldım'); marka/model yok. Geri alındı, sırada geride."
+    },
+    {
+      "id": "ChdDSUhNMG9nS0VJQ0FnSURiNG9QQm9nRRAB",
+      "category": "editorial",
+      "reason": "Samet D.: kısa/zayıf övgü ('Gayet yeterli'). Geri alındı, sırada geride."
+    },
+    {
+      "id": "ChZDSUhNMG9nS0VJQ0FnTUNJbnN6c09BEAE",
+      "category": "editorial",
+      "reason": "ERAY Y.: çok kısa ('Aldık gayet güzel'). Geri alındı, sırada geride."
+    },
+    {
+      "id": "ChdDSUhNMG9nS0VJQ0FnSUM5eGFIN19nRRAB",
+      "category": "editorial",
+      "reason": "OSMAN: 'aldığım işitme cihazı 1 ay oldu ... hiçbir sorunla karşılaşmadım' cihazın arızasız çalıştığını söyler; işitme/sağlık sonucu iddiası değil, marka/model yok. Geri alındı, sırada geride. (Yazarın kendi kullanımını anlatan yorum; KVKK m.6 değerlendirmesi tüm yorumlar için ortak — CONTENT-VERIFICATION.md §9.)"
+    },
+    {
+      "id": "ChdDSUhNMG9nS0VJQ0FnTUNJdnRQWnV3RRAB",
+      "category": "editorial",
+      "reason": "Fatih İ.: genel cihaz memnuniyeti ('cihazı tam anlattığı gibi ... sorunsuz çalışıyor'); marka/model/sağlık sonucu yok. Geri alındı, sırada geride."
+    },
+    {
+      "id": "Ci9DQUlRQUNvZENodHljRjlvT2xsSE5XTXljRTVhVnpKQ2N6aGxRWFoxTURZM1dHYxAB",
+      "category": "editorial",
+      "reason": "Hulya T.: genel 'Cihazlardan çok memnunuz'; marka/model yok. Geri alındı, sırada geride."
+    },
+    {
+      "id": "ChZDSUhNMG9nS0VJQ0FnSURiMUluaVhREAE",
+      "category": "editorial",
+      "reason": "AhmetBugra A.: genel 'Kaliteli ürün'; marka/model yok. Geri alındı, sırada geride."
+    },
+    {
+      "id": "ChdDSUhNMG9nS0VJQ0FnSURiMkxUaDRBRRAB",
+      "category": "editorial",
+      "reason": "Efe Y.: genel 'cihazlar çok kaliteli'; marka/model yok. Geri alındı, sırada geride."
+    },
+    {
+      "id": "ChZDSUhNMG9nS0VJQ0FnSUNEajV5Mkp3EAE",
+      "category": "editorial",
+      "reason": "Ahmet A.: genel 'çok memnunuz cihazdan'; marka/model yok. Geri alındı, sırada geride."
+    },
+    {
+      "id": "ChdDSUhNMG9nS0VJQ0FnTUNJa2VhWjVnRRAB",
+      "category": "editorial",
+      "reason": "Nisanur E.: 'aldığım ürünlerden ve hizmetlerden' genel teşekkür; marka/model yok. Geri alındı, sırada geride."
+    }
+  ],
+  "enExclude": [
+    {
+      "id": "ChZDSUhNMG9nS0VJQ0FnSUNkaGVhVk1REAE",
+      "category": "translation-error",
+      "reason": "Abdullah A.: Google çevirisi özgünü çarpıtıyor — 'konturollü ne ayaz işitmeye götüreceğim' (kontrole Ayaz İşitme'ye götüreceğim) → 'to hear about the cold'. Yalnız TR'de."
+    },
+    {
+      "id": "Ci9DQUlRQUNvZENodHljRjlvT25GNFlYbGZhMUZ3TUhCQk5rWjNlbmRNUVVJMWNIYxAB",
+      "category": "translation-error",
+      "reason": "Burak T.: 'kulaklık' (burada işitme cihazı) → 'headphones'; İngilizcede satın alınan ürünü yanlış anlatır. Yalnız TR'de."
+    },
+    {
+      "id": "ChZDSUhNMG9nS0VJQ0FnTUNJdHJXVk9nEAE",
+      "category": "translation-error",
+      "reason": "Mehmet A.: 'kulaklık' → 'headphones' (ürünü yanlış anlatır). Yalnız TR'de."
+    },
+    {
+      "id": "Ci9DQUlRQUNvZENodHljRjlvT21kcU1VTXpXVFptTTNacFRUZFZiM1ZRY1doME1IYxAB",
+      "category": "translation-error",
+      "reason": "Durmuş K.: hitap 'Emre kardeşim' → 'My brother Emre'; İngilizcede akrabalık varmış gibi okunur. Yalnız TR'de."
+    },
+    {
+      "id": "ChdDSUhNMG9nS0VJQ0FnSUNkaGJ1dDJBRRAB",
+      "category": "translation-error",
+      "reason": "Mert K.: hitap 'Emre kardeşim' → 'my brother Emre' (akrabalık varmış gibi okunur). Yalnız TR'de."
+    },
+    {
+      "id": "Ci9DQUlRQUNvZENodHljRjlvT2xsc2VuRkVRVTFTUVZVNFgxZDRhVlJ1TWpSMk9GRRAB",
+      "category": "legal-risk",
+      "reason": "Emir Ö.: zaten 'legal-risk' ile her iki dilde çıkarıldı."
+    },
+    {
+      "id": "ChdDSUhNMG9nS0VJQ0FnSURiMk1fRzBRRRAB",
+      "category": "legal-risk",
+      "reason": "Arda G.: zaten 'legal-risk' ile her iki dilde çıkarıldı."
+    },
+    {
+      "id": "ChZDSUhNMG9nS0VJQ0FnSURiNkt5M2VnEAE",
+      "category": "legal-risk",
+      "reason": "Sadullah K.: zaten 'legal-risk' ile her iki dilde çıkarıldı."
+    },
+    {
+      "id": "ChZDSUhNMG9nS0VJQ0FnSURibnN6ZE5BEAE",
+      "category": "legal-risk",
+      "reason": "gizem: zaten 'legal-risk' ile her iki dilde çıkarıldı."
+    },
+    {
+      "id": "Ci9DQUlRQUNvZENodHljRjlvT25kR2FYSXRaWEExWDBwVFZsUmZZV2x0VEdod2IzYxAB",
+      "category": "editorial",
+      "reason": "Makbule Ç.: çeviri biraz kusurlu ('very well-received requests') ama anlamı korunuyor. İngilizcede de gösterilir, geride."
+    },
+    {
+      "id": "Ci9DQUlRQUNvZENodHljRjlvT25sWk5XbDFSeTFWYVd4UFRHZzVhMkUwZFZCUGRVRRAB",
+      "category": "editorial",
+      "reason": "Durak D.: çeviri özgüne sadık. İngilizcede de gösterilir, geride."
+    },
+    {
+      "id": "ChZDSUhNMG9nS0VJQ0FnTUNJbnN6c09BEAE",
+      "category": "editorial",
+      "reason": "ERAY Y.: 'Aldık' → 'We received it' (küçük kayma, anlam korunuyor). İngilizcede de gösterilir, geride."
+    },
+    {
+      "id": "ChdDSUhNMG9nS0VJQ0FnTUNJOW9pMnVBRRAB",
+      "category": "editorial",
+      "reason": "yazar (tek kelimelik kullanıcı adı): 'Cihazı aldım' → 'I received the device' (küçük kayma). İngilizcede de gösterilir, geride."
+    },
+    {
+      "id": "Ci9DQUlRQUNvZENodHljRjlvT2trdFkyZzRWRGt4U1dReGRVWnpRVjlGYVU5WFVVRRAB",
+      "category": "editorial",
+      "reason": "Derya A.: çeviri özgüne sadık. İngilizcede de gösterilir, geride."
+    },
+    {
+      "id": "Ci9DQUlRQUNvZENodHljRjlvT2pabGVITXlZM1ZNYm0xclQwTldTVFJHTTFSSVMzYxAB",
+      "category": "editorial",
+      "reason": "İsmail K.: 'işlemlerimiz' → 'paperwork' yorum katıyor ama anlamı bozmuyor. İngilizcede de gösterilir, geride."
+    },
+    {
+      "id": "Ci9DQUlRQUNvZENodHljRjlvT21KdWFESnplamMxVmxZeU1TMHdiV0pIUkRKSGEwRRAB",
+      "category": "editorial",
+      "reason": "Zahide K.: 'başvurumuzda' → 'application' (küçük kayma). İngilizcede de gösterilir, geride."
+    },
+    {
+      "id": "Ci9DQUlRQUNvZENodHljRjlvT2w5bE1HdG1Na0ZRTFV0T2VHVlhWRWxmVVc4MWFIYxAB",
+      "category": "translation-error",
+      "reason": "Aynur D.: 'Eşim için' → 'for my wife' — Google çevirisi cinsiyet varsayıyor (yazarın eşi erkek olabilir); aile bilgisini yanlış aktarır ('my brother Emre' ile aynı tür hata). Yalnız TR sayfada."
+    },
+    {
+      "id": "ChdDSUhNMG9nS0VJQ0FnSUM5eGFIN19nRRAB",
+      "category": "editorial",
+      "reason": "OSMAN: çeviri özgüne sadık. İngilizcede de gösterilir, geride."
+    }
+  ],
+  "_displayNamesNote": "displayNames: { \"<yorum kimliği>\": \"<gösterilecek ad>\" } — isteğe bağlı, işletme sahibinin kararı. Tek kelimelik ad (ör. ad ve soyadın bitişik yazıldığı bir kullanıcı adı) 'Ad S.' kuralıyla kısaltılamaz ve olduğu gibi görünür; bu, yazarın Google'daki kendi herkese açık görünen adıdır. Sahip yorum başına başka bir biçim verebilir (yine 'Ad S.' kuralından geçer). Yalnızca statik kartın görünen adını değiştirir; parmak izleri Google'daki adla hesaplanır. Boş = değişiklik yok. Değiştirince içe aktarıcıyı yeniden çalıştırın.",
+  "displayNames": {
+    "ChdDSUhNMG9nS0VJQ0FnTUNJOW9pMnVBRRAB": "Samet Ö."
+  }
+}

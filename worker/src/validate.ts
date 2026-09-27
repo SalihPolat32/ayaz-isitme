@@ -15,6 +15,8 @@ export interface AppointmentInput {
   t?: unknown; // formun açıldığı zaman (ms)
   turnstileToken?: unknown;
   locale?: unknown;
+  /** Kartın konusu (ör. "BTE", "Kulak kalıbı"): kullanıcı yazmaz; geçersizse sessizce atılır */
+  topic?: unknown;
 }
 
 /** Doğrulanmış, normalize edilmiş veri. */
@@ -23,6 +25,7 @@ export interface AppointmentData {
   /** E.164, ör. +905071551151 */
   phone: string;
   time?: string;
+  topic?: string;
   locale: Locale;
 }
 
@@ -140,6 +143,9 @@ export function validateAppointment(body: unknown): ValidationResult {
 
   const data: AppointmentData = { name: name.value, phone, locale: parseLocale(input.locale) };
   if (time.value) data.time = time.value;
+  // Konu yardımcı bilgidir: geçersiz/uzun ise formu reddetmez, yalnızca eklenmez
+  const topic = sanitizeTime(input.topic);
+  if (topic.ok && topic.value) data.topic = topic.value;
   return { ok: true, data };
 }
 

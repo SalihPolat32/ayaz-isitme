@@ -1,15 +1,66 @@
 ---
 import type { Locale, SiteContent } from '../content/types';
 import { business } from '../config/business';
+import { PUBLIC_REVIEWS_DISPLAY } from 'astro:env/client';
+import { reviewsFor, reviewsSummary, reviewsGuard, resolveReviewsMode, warnIfSnapshotStale, shortName, formatApproxDate } from '../content/reviews';
 import Icon from './Icon.astro';
-interface Props { locale: Locale; c: SiteContent }
-const { c } = Astro.props;
+interface Props { locale: Locale; c: SiteContent; display?: 'carousel' | 'link' }
+const { locale, c } = Astro.props;
+/** 'link' = yorum metni/puan/adet yok, yalnızca Google profiline bağlantı (bkz. business.reviewsDisplay). */
+const mode = resolveReviewsMode(Astro.props.display, PUBLIC_REVIEWS_DISPLAY, business.reviewsDisplay);
+// Takeout görüntüsü 90 günden eskiyse derleme konsoluna uyarı (yalnızca yorumlar gösterildiğinde anlamlı)
+if (mode === 'carousel') warnIfSnapshotStale();
+/**
+ * Canlı API koruması: çıkarılan her yorum için bir kayıt (t/i/m özetleri + sıralı kelime özetleri; metin/ad/tarih değil) —
+ * yalnızca karusel modunda sayfaya yazılır. İçerik yalnızca `fp` / `w` anahtarlı JSON kayıtlarıdır: `[tim]` + 8 hex anahtarlar ve boşlukla ayrılmış 8 hex kelime özetleri (düz metin, ad ya da tarih yok; HTML kaçışı gerekmez).
+ */
+const guardJson = mode === 'carousel' ? JSON.stringify(reviewsGuard(locale)) : '[]';
 const r = c.reviews;
-const seeAllUrl = business.google.shareUrl;
+const lm = r.linkMode;
+const seeAllUrl = business.google.placeUrl || business.google.shareUrl;
 const writeUrl = business.google.writeReviewUrl || seeAllUrl;
+const items = (mode === 'carousel' ? reviewsFor(locale) : []).map((it) => {
+  const useEn = locale === 'en' && !!it.textEn;
+  return {
+    author: business.reviewsShowFullNames ? it.author : shortName(it.author),
+    rating: it.rating,
+    text: useEn ? it.textEn! : it.text,
+    translated: useEn,
+    lang: useEn ? 'en' : 'tr',
+    date: formatApproxDate(it.approxDate, locale),
+    initial: it.author.trim().charAt(0).toLocaleUpperCase('tr-TR'),
+    fp: (it.fp ?? []).join(' '),
+    // EN sayfasında özgün TR metin (yalnızca canlı yorum benzerliği için; görünmez): Google çevirmeden özgünü döndürürse
+    altText: useEn ? it.text : undefined,
+  };
+});
+const starLabel = (n: number) => (locale === 'tr' ? `5 üzerinden ${n}` : `${n} out of 5`);
+const sum = reviewsSummary;
+const asOf = new Intl.DateTimeFormat(locale === 'tr' ? 'tr-TR' : 'en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(sum.asOf + 'T00:00:00Z'));
+const ratingText = locale === 'tr' ? sum.rating.toFixed(1).replace('.', ',') : sum.rating.toFixed(1);
+const asOfText = locale === 'tr' ? `Google · ${asOf} itibarıyla` : `Google · as of ${asOf}`;
 ---
 
-<section class="section section--soft rv" id="yorumlar" aria-labelledby="rv-title" data-reviews data-state="idle" data-see-all={seeAllUrl}>
+{mode === 'link' ? (
+<section class="section section--soft rv rv--link" id="yorumlar" aria-labelledby="rv-title" data-reviews-mode="link">
+  <div class="container">
+    <div class="rvl card reveal">
+      <span class="rvl__g" aria-hidden="true">G</span>
+      <div class="rvl__body">
+        <p class="eyebrow">{lm.eyebrow}</p>
+        <h2 id="rv-title">{lm.h2}</h2>
+        <p class="lead">{lm.lead}</p>
+        <div class="rv__actions">
+          <a class="btn btn--primary btn--sm" href={seeAllUrl} target="_blank" rel="noopener" data-track="reviews_click"><Icon name="external" />{lm.seeAll}</a>
+          <a class="btn btn--outline btn--sm" href={writeUrl} target="_blank" rel="noopener" data-track="review_write_click"><Icon name="external" />{lm.write}</a>
+        </div>
+        <p class="small muted rvl__note">{lm.note}</p>
+      </div>
+    </div>
+  </div>
+</section>
+) : (
+<section class="section section--soft rv" id="yorumlar" aria-labelledby="rv-title" data-reviews data-reviews-mode="carousel" data-full-names={String(business.reviewsShowFullNames)} data-state="static" data-see-all={seeAllUrl}>
   <div class="container">
     <div class="rv__head reveal">
       <div>
@@ -17,61 +68,123 @@ const writeUrl = business.google.writeReviewUrl || seeAllUrl;
         <h2 id="rv-title">{r.h2}</h2>
         <p class="lead">{r.lead}</p>
       </div>
-      <div class="rv__score" data-score hidden>
-        <div class="rv__num" data-rating>–</div>
+      <!-- Erişilebilir ad görünen metni içerir (WCAG 2.5.3): "Google puanı:" ve "/ 5" yalnız ekran okuyucuya -->
+      <a class="rv__score" data-score href={seeAllUrl} target="_blank" rel="noopener" data-track="reviews_click">
+        <span class="sr-only">{r.ratingLabel}: </span>
+        <div class="rv__num"><span data-rating>{ratingText}</span><span class="sr-only"> / 5,</span></div>
         <div>
-          <div class="stars" data-stars aria-hidden="true"></div>
-          <div class="small muted" data-count></div>
-          <div class="small muted">{r.ratingLabel}</div>
+          <div class="stars" data-stars aria-hidden="true">{Array.from({ length: Math.round(sum.rating) }).map(() => <Icon name="star" />)}</div>
+          <div class="small rv__count" data-count>{r.countLabel(sum.count)}</div>
+          <div class="small muted" data-asof>{asOfText}</div>
+        </div>
+      </a>
+    </div>
+
+    <div class="rvc-wrap reveal" data-carousel role="region" aria-roledescription="carousel" aria-label={r.carousel.label}>
+      <div class="rv__track" data-list tabindex="0" role="group" aria-label={r.carousel.label}>
+        {items.map((it, i) => (
+          <div class="rvc card" role="group" aria-roledescription="slide" aria-label={`${r.carousel.slide} ${i + 1} / ${items.length}`} data-fp={it.fp} data-alt-text={it.altText}>
+            <span class="rvc__quote" aria-hidden="true"><Icon name="quote" /></span>
+            <span class="stars" data-stars role="img" aria-label={starLabel(it.rating)}>
+              {Array.from({ length: it.rating }).map(() => <Icon name="star" />)}
+            </span>
+            <p class="rvc__text" data-text lang={it.lang}>{it.text}</p>
+            {it.translated && <p class="rvc__tr small muted">Translated by Google</p>}
+            <footer class="rvc__foot">
+              <span class="rvc__avatar" data-avatar aria-hidden="true">{it.initial}</span>
+              <span class="rvc__meta">
+                <span class="rvc__author" data-author>{it.author}</span>
+                <span class="small muted" data-time>{it.date}</span>
+              </span>
+              <span class="rvc__badge"><span class="rvc__g" aria-hidden="true">G</span>{r.carousel.googleBadge}</span>
+            </footer>
+          </div>
+        ))}
+      </div>
+      <div class="rvc-controls">
+        <div class="rvc-nav">
+          <button type="button" class="btn btn--icon btn--outline" data-prev aria-label={r.carousel.prev}><Icon name="chevron-left" /></button>
+          <button type="button" class="btn btn--icon btn--outline" data-next aria-label={r.carousel.next}><Icon name="chevron-right" /></button>
+          <button type="button" class="btn btn--icon btn--outline" data-play aria-label={r.carousel.pause} data-label-pause={r.carousel.pause} data-label-play={r.carousel.play}><Icon name="pause" /></button>
+        </div>
+        <div class="rvc-dots" data-dots role="group" aria-label={r.carousel.label}></div>
+        <div class="rvc-progress" data-progress hidden>
+          <span class="small muted" data-progress-text aria-live="polite"></span>
+          <span class="rvc-bar" aria-hidden="true"><span data-progress-bar></span></span>
         </div>
       </div>
     </div>
 
-    <div class="rv__list" data-list aria-live="polite"></div>
-
-    <div class="rv__offline card card--pad reveal" data-offline>
-      <div class="rv__glogo" aria-hidden="true">G</div>
-      <div>
-        <h3>{r.offline}</h3>
-        <p class="small muted">{r.offlineText}</p>
-      </div>
+    <div class="rv__foot reveal">
+      <p class="small muted" data-note data-static-note={r.selectionNote} data-api-note={r.attribution + ' ' + r.apiNote}>{r.selectionNote}</p>
       <div class="rv__actions">
-        <a class="btn btn--primary" href={seeAllUrl} target="_blank" rel="noopener" data-track="reviews_click"><Icon name="external" />{r.seeAll}</a>
-        <a class="btn btn--outline" href={writeUrl} target="_blank" rel="noopener" data-track="review_write_click"><Icon name="star" />{r.write}</a>
-      </div>
-    </div>
-
-    <div class="rv__foot reveal" data-foot hidden>
-      <p class="small muted"><span class="rv__attr">Google Maps</span> · {r.attribution} {r.apiNote}</p>
-      <div class="rv__actions">
-        <a class="btn btn--outline btn--sm" href={seeAllUrl} target="_blank" rel="noopener" data-track="reviews_click"><Icon name="external" />{r.seeAll}</a>
+        <a class="btn btn--primary btn--sm" href={seeAllUrl} target="_blank" rel="noopener" data-track="reviews_click"><Icon name="external" />{r.seeAll}</a>
         <a class="btn btn--outline btn--sm" href={writeUrl} target="_blank" rel="noopener" data-track="review_write_click"><Icon name="star" />{r.write}</a>
       </div>
     </div>
   </div>
 
+  <script type="application/json" data-reviews-guard set:html={guardJson} />
   <template data-review-tpl>
-    <article class="rvc card card--pad">
-      <header class="rvc__head">
-        <span class="rvc__avatar" data-avatar></span>
-        <div>
-          <a class="rvc__author" data-author target="_blank" rel="noopener nofollow"></a>
-          <div class="small muted" data-time></div>
-        </div>
-        <span class="stars" data-stars aria-hidden="true"></span>
-      </header>
+    <div class="rvc card" role="group" aria-roledescription="slide">
+      <span class="rvc__quote" aria-hidden="true"><Icon name="quote" /></span>
+      <span class="stars" data-stars aria-hidden="true"></span>
       <p class="rvc__text" data-text></p>
-      <a class="rvc__link small" data-link target="_blank" rel="noopener nofollow">Google</a>
-    </article>
+      <footer class="rvc__foot">
+        <span class="rvc__avatar" data-avatar aria-hidden="true"></span>
+        <span class="rvc__meta">
+          <a class="rvc__author" data-author target="_blank" rel="noopener nofollow"></a>
+          <span class="small muted" data-time></span>
+        </span>
+        <a class="rvc__badge" data-link target="_blank" rel="noopener nofollow"><span class="rvc__g" aria-hidden="true">G</span>Google Maps</a>
+      </footer>
+    </div>
   </template>
 </section>
+)}
 
 <style>
+  .rvl {
+    display: grid;
+    gap: var(--space-5);
+    align-items: start;
+    padding: clamp(1.5rem, 1rem + 2vw, 2.5rem);
+    max-width: 56rem;
+    margin-inline: auto;
+  }
+  @media (min-width: 720px) {
+    .rvl {
+      grid-template-columns: auto 1fr;
+    }
+  }
+  .rvl__g {
+    display: grid;
+    place-items: center;
+    width: 3.25rem;
+    height: 3.25rem;
+    border-radius: 50%;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    font-weight: 800;
+    font-size: 1.5rem;
+    color: #4285f4;
+    box-shadow: var(--shadow-1);
+  }
+  .rvl__body h2 {
+    margin-block: 0.25rem 0.5rem;
+  }
+  .rvl__body .rv__actions {
+    margin-top: var(--space-4);
+  }
+  .rvl__note {
+    margin-top: var(--space-3);
+    margin-bottom: 0;
+  }
   .rv__head {
     display: grid;
     gap: var(--space-5);
     align-items: center;
-    margin-bottom: clamp(2rem, 1.5rem + 2vw, 3rem);
+    margin-bottom: clamp(1.5rem, 1rem + 2vw, 2.5rem);
   }
   @media (min-width: 900px) {
     .rv__head {
@@ -86,6 +199,19 @@ const writeUrl = business.google.writeReviewUrl || seeAllUrl;
     border-radius: var(--r-lg);
     background: var(--surface);
     border: 1px solid var(--line);
+    color: var(--ink);
+    text-decoration: none;
+    box-shadow: var(--shadow-1);
+    transition: box-shadow var(--dur-1), border-color var(--dur-1);
+  }
+  .rv__score:hover {
+    border-color: var(--line-strong);
+    box-shadow: var(--shadow-2);
+    color: var(--ink);
+  }
+  .rv__count {
+    font-weight: 700;
+    color: var(--ink);
   }
   .rv__num {
     font-family: var(--font-display);
@@ -102,72 +228,95 @@ const writeUrl = business.google.writeReviewUrl || seeAllUrl;
     width: 1rem;
     height: 1rem;
   }
-  .rv__list {
-    display: grid;
+
+  /* Kaydırıcı */
+  .rvc-wrap {
+    position: relative;
+  }
+  /* Klavyeyle odaklanıp ok tuşlarıyla kaydırılabilir; halka kırpılmasın diye içe çizilir */
+  .rv__track:focus-visible {
+    outline-offset: -3px;
+  }
+  .rv__track {
+    display: flex;
     gap: 1rem;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    padding: 0.25rem 0.25rem 1rem;
+    margin: -0.25rem -0.25rem 0;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
   }
-  @media (min-width: 720px) {
-    .rv__list {
-      grid-template-columns: repeat(2, 1fr);
-    }
-  }
-  @media (min-width: 1100px) {
-    .rv__list {
-      grid-template-columns: repeat(3, 1fr);
-    }
-  }
-  .rv__offline {
-    display: grid;
-    gap: 1rem;
-    align-items: center;
-  }
-  @media (min-width: 800px) {
-    .rv__offline {
-      grid-template-columns: auto 1fr auto;
-    }
-  }
-  [data-state='ready'] .rv__offline {
+  .rv__track::-webkit-scrollbar {
     display: none;
   }
-  .rv__glogo {
-    width: 56px;
-    height: 56px;
-    border-radius: 50%;
-    display: grid;
-    place-items: center;
-    background: var(--surface-2);
-    font-family: var(--font-display);
-    font-weight: 800;
-    font-size: 1.6rem;
-    color: var(--ink);
+  @media (prefers-reduced-motion: reduce) {
+    .rv__track {
+      scroll-behavior: auto;
+    }
   }
-  .rv__actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.6rem;
-  }
-  .rv__foot {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: var(--space-5);
-  }
+  /* Esnek sütun: alt bilgi (ayraç + ad) her kartta en altta → yan yana kartlarda aynı hizada */
   .rvc {
-    display: grid;
-    gap: 0.75rem;
-    align-content: start;
+    flex: 0 0 min(100%, 22rem);
+    scroll-snap-align: start;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    padding: 1.25rem 1.25rem 1.1rem;
+    position: relative;
+    min-height: 13rem;
   }
-  .rvc__head {
+  @media (min-width: 640px) {
+    .rvc {
+      flex-basis: calc(50% - 0.5rem);
+    }
+  }
+  @media (min-width: 1024px) {
+    .rvc {
+      flex-basis: calc((100% - 2rem) / 3);
+    }
+  }
+  .rvc__quote {
+    position: absolute;
+    top: 0.9rem;
+    right: 1rem;
+    color: var(--accent-soft-2);
+  }
+  .rvc__quote :global(.icon) {
+    width: 1.6rem;
+    height: 1.6rem;
+    fill: currentColor;
+    stroke: none;
+  }
+  .rvc__text {
+    color: var(--ink-2);
+    font-size: var(--text-sm);
+    display: -webkit-box;
+    -webkit-line-clamp: 7;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  /* Dar ekran / %200–400 yakınlaştırma: metin kısaltılmaz, tamamı okunur (WCAG 1.4.10) */
+  @media (max-width: 699px) {
+    .rvc__text {
+      display: block;
+      -webkit-line-clamp: unset;
+      overflow: visible;
+    }
+  }
+  .rvc__foot {
+    margin-top: auto;
     display: grid;
     grid-template-columns: auto 1fr auto;
-    gap: 0.75rem;
+    gap: 0.7rem;
     align-items: center;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--line);
   }
   .rvc__avatar {
-    width: 42px;
-    height: 42px;
+    width: 38px;
+    height: 38px;
     border-radius: 50%;
     background: var(--accent-soft);
     color: var(--accent-text);
@@ -182,25 +331,132 @@ const writeUrl = business.google.writeReviewUrl || seeAllUrl;
     height: 100%;
     object-fit: cover;
   }
+  .rvc__meta {
+    display: grid;
+    min-width: 0;
+  }
+  /* Ad kesilmez (yakınlaştırmada da okunur); kelime ortasından değil, yalnız sığmazsa bölünür */
   .rvc__author {
     font-weight: 700;
     color: var(--ink);
     text-decoration: none;
+    overflow-wrap: break-word;
   }
-  .rvc__text {
-    color: var(--ink-2);
-    font-size: var(--text-sm);
-    display: -webkit-box;
-    -webkit-line-clamp: 6;
-    -webkit-box-orient: vertical;
+  /* Dar kartta "Google yorumu" rozeti alt satıra iner: ad + tarih tek satırda kalır, ayraçlar kartlar arasında hizalı */
+  .rvc {
+    container-type: inline-size;
+  }
+  @container (max-width: 22rem) {
+    .rvc__foot {
+      grid-template-columns: auto 1fr;
+    }
+    .rvc__badge {
+      grid-column: 1 / -1;
+    }
+  }
+  .rvc__badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: var(--text-xs);
+    color: var(--ink-3);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .rvc__g {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: var(--surface-2);
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 0.75rem;
+    color: var(--ink);
+  }
+  .rvc-controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 0.25rem;
+  }
+  .rvc-nav {
+    display: flex;
+    gap: 0.5rem;
+  }
+  .rvc-nav [aria-pressed='false'] {
+    --btn-bg: var(--accent-soft);
+    --btn-bd: var(--accent);
+    --btn-fg: var(--accent-text);
+  }
+  .rvc-dots {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    justify-content: flex-end;
+  }
+  .rvc-dots button {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--line-strong);
+    padding: 0;
+    position: relative;
+  }
+  .rvc-dots button::before {
+    content: '';
+    position: absolute;
+    inset: -8px;
+  }
+  .rvc-dots button[aria-current='true'] {
+    background: var(--accent);
+    transform: scale(1.25);
+  }
+  .rvc__tr {
+    margin: -0.25rem 0 0;
+    font-size: var(--text-xs);
+  }
+  .rvc-progress {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex: 0 1 12rem;
+    min-width: 0;
+  }
+  [data-progress-text] {
+    white-space: nowrap;
+  }
+  .rvc-bar {
+    flex: 1 1 auto;
+    min-width: 2rem;
+    height: 4px;
+    border-radius: 4px;
+    background: var(--line);
     overflow: hidden;
   }
-  .rvc__link {
-    justify-self: start;
+  .rvc-bar span {
+    display: block;
+    height: 100%;
+    width: 0;
+    background: var(--accent);
+    transition: width var(--dur-2) var(--ease-out);
   }
-  .rv__attr {
-    font-family: Roboto, var(--font-body);
-    font-weight: 500;
-    color: var(--ink);
+  .rv__foot {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: var(--space-5);
+  }
+  .rv__foot p {
+    max-width: 60ch;
+  }
+  .rv__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
   }
 </style>

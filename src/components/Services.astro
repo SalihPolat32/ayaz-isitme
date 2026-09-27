@@ -1,10 +1,42 @@
 ---
 import type { Locale, SiteContent } from '../content/types';
 import Icon from './Icon.astro';
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import ofis1 from '../assets/ofis/ofis-1.jpg';
+import ofis5 from '../assets/ofis/ofis-5.jpg';
+import moldImg from '../assets/device/molds/skeleton.png';
+import thumbIte from '../assets/device/views/thumb-ite.png';
+import thumbRic from '../assets/device/views/thumb-ric.png';
+import thumbCic from '../assets/device/views/thumb-cic.png';
+import thumbBte from '../assets/device/views/thumb-bte.png';
 interface Props { locale: Locale; c: SiteContent }
 const { c } = Astro.props;
 const s = c.services;
 type IconName = Parameters<typeof Icon>[0]['name'];
+/** Merkez fotoğrafının alt metni galeriyle aynı kaynaktan (TR/EN) */
+const photoAlt = (key: string) => c.center.photos.find((p) => p.key === key)?.alt ?? '';
+/** Kart görselleri: merkezin gerçek fotoğrafları veya temsili cihaz render'ları (süs; metin kartta). */
+type Visual =
+  | { kind: 'photo'; src: ImageMetadata; alt: string; pos: string }
+  | { kind: 'renders'; srcs: ImageMetadata[]; flat?: boolean }
+  | { kind: 'battery' }
+  | { kind: 'icon' };
+const visuals: Record<string, Visual> = {
+  test: { kind: 'photo', src: ofis5, alt: photoAlt('ofis-5'), pos: '50% 62%' },
+  secim: { kind: 'renders', srcs: [thumbIte, thumbRic, thumbCic] },
+  uygulama: { kind: 'photo', src: ofis1, alt: photoAlt('ofis-1'), pos: '52% 48%' },
+  // Kalıp render'ı beyaz zeminli (şeffaf akrilik): multiply ile gradyana dikişsiz oturur
+  kalip: { kind: 'renders', srcs: [moldImg], flat: true },
+  pil: { kind: 'battery' },
+  bakim: { kind: 'renders', srcs: [thumbBte] },
+};
+/** Pil boyutu → uluslararası renk kodu (IEC): 10 sarı, 312 kahverengi, 13 turuncu */
+const cells = [
+  { size: '10', color: '#f2c230', ink: '#5a4600' },
+  { size: '312', color: '#8b5a2b', ink: '#fff' },
+  { size: '13', color: '#ef8a23', ink: '#fff' },
+];
 ---
 
 <section class="section section--soft sv" id="hizmetler" aria-labelledby="sv-title">
@@ -15,45 +47,146 @@ type IconName = Parameters<typeof Icon>[0]['name'];
       <p class="lead">{s.lead}</p>
     </div>
     <div class="grid grid--2 grid--3">
-      {s.items.map((it, i) => (
-        <article class="card card--pad card--hover sv__card reveal" style={`--reveal-delay:${(i % 3) * 60}ms`} id={`hizmet-${it.id}`}>
-          <div class="sv__top">
-            <span class="sv__icon"><Icon name={it.icon as IconName} /></span>
-            {it.badge && <span class="pill">{it.badge}</span>}
-          </div>
-          <h3>{it.title}</h3>
-          <p class="small muted">{it.text}</p>
-        </article>
-      ))}
+      {s.items.map((it, i) => {
+        // Görseli tanımlanmamış kart (ör. koşullu SGK kartı): büyük ikon, yeni bilgi eklemeden
+        const v: Visual = visuals[it.id] ?? { kind: 'icon' };
+        return (
+          <article class="card card--hover sv__card reveal" style={`--reveal-delay:${(i % 3) * 60}ms`} id={`hizmet-${it.id}`}>
+            <div class:list={['sv__vis', `sv__vis--${v.kind}`]}>
+              {v.kind === 'photo' && (
+                <Image src={v.src} alt={v.alt} widths={[420, 840]} sizes="(min-width: 1024px) 380px, (min-width: 720px) 46vw, 92vw" loading="lazy" decoding="async" class="sv__photo" style={`object-position:${v.pos}`} />
+              )}
+              {v.kind === 'renders' && (
+                <span class:list={['sv__renders', { 'sv__renders--flat': v.flat }]} aria-hidden="true">
+                  {v.srcs.map((src) => <Image src={src} alt="" widths={[120, 240]} sizes="110px" loading="lazy" decoding="async" class="sv__render" />)}
+                </span>
+              )}
+              {v.kind === 'icon' && <span class="sv__bigicon" aria-hidden="true"><Icon name={it.icon as IconName} /></span>}
+              {v.kind === 'battery' && (
+                <svg class="sv__battery" viewBox="0 0 200 110" aria-hidden="true">
+                  {cells.map((cell, k) => (
+                    <g transform={`translate(${52 + k * 48} 56)`}>
+                      <circle r="31" fill="#c9d1d7" stroke="#9aa6af" stroke-width="2" />
+                      <circle r="23" fill={cell.color} />
+                      <rect x="17" y="-7" width="22" height="14" rx="4" fill={cell.color} />
+                      <text y="6" text-anchor="middle" font-size="15" font-weight="800" fill={cell.ink}>{cell.size}</text>
+                    </g>
+                  ))}
+                </svg>
+              )}
+              <span class="sv__icon"><Icon name={it.icon as IconName} /></span>
+            </div>
+            <div class="sv__body">
+              <div class="sv__titlerow">
+                <h3>{it.title}</h3>
+                {it.badge && <span class="pill">{it.badge}</span>}
+              </div>
+              <p class="small muted">{it.text}</p>
+            </div>
+          </article>
+        );
+      })}
     </div>
   </div>
 </section>
 
 <style>
   .sv__card {
+    overflow: hidden;
     display: grid;
-    gap: 0.75rem;
-    align-content: start;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto 1fr;
   }
-  .sv__top {
+  .sv__vis {
+    position: relative;
+    height: 170px;
+    display: grid;
+    place-items: center;
+    background: linear-gradient(160deg, var(--accent-soft) 0%, var(--surface) 90%);
+  }
+  .sv__photo {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .sv__renders {
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
   }
+  .sv__render {
+    width: auto;
+    height: 112px;
+    max-width: 110px;
+    object-fit: contain;
+    filter: drop-shadow(0 8px 10px rgba(17, 43, 60, 0.18));
+  }
+  .sv__renders .sv__render:not(:only-child) {
+    height: 92px;
+    min-width: 0;
+    max-width: min(88px, calc((100% - 1rem) / 3));
+  }
+  .sv__renders {
+    width: 100%;
+    padding-inline: 0.75rem;
+  }
+  .sv__renders--flat .sv__render {
+    height: 132px;
+    mix-blend-mode: multiply;
+    filter: none;
+  }
+  .sv__bigicon {
+    color: var(--accent);
+    opacity: 0.55;
+  }
+  .sv__bigicon :global(.icon) {
+    width: 4rem;
+    height: 4rem;
+    stroke-width: 1.5;
+  }
+  .sv__battery {
+    width: min(78%, 220px);
+    height: auto;
+  }
+  .sv__battery text {
+    font-family: var(--font-display);
+  }
+  /* Görselin sol altına taşan ikon rozeti */
   .sv__icon {
-    width: 52px;
-    height: 52px;
-    border-radius: 16px;
+    position: absolute;
+    left: 1.1rem;
+    bottom: -22px;
+    z-index: 1;
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
     display: grid;
     place-items: center;
     background: var(--navy);
     color: #fff;
+    box-shadow: 0 0 0 4px var(--surface);
   }
-  .sv__icon .icon {
-    width: 1.5rem;
-    height: 1.5rem;
+  /* Icon ayrı bileşen: kapsamlı stil onun <svg>'sine ulaşmaz, bu yüzden :global(.icon) */
+  .sv__icon :global(.icon) {
+    width: 1.35rem;
+    height: 1.35rem;
+  }
+  .sv__body {
+    display: grid;
+    gap: 0.45rem;
+    align-content: start;
+    padding: 2.1rem 1.25rem 1.4rem;
+  }
+  .sv__titlerow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
   }
   .sv__card h3 {
-    font-size: 1.2rem;
+    font-size: 1.15rem;
   }
 </style>

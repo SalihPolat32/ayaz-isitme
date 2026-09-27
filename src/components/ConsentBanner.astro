@@ -1,36 +1,52 @@
 ---
 import type { Locale, SiteContent } from '../content/types';
 import { legalPaths } from '../i18n';
+import { legalContextFromEnv } from '../content/legal/facts';
+import { legalEnvFromBuild } from '../content/legal/env';
+import { consentView } from '../content/legal/consent-view';
 import Icon from './Icon.astro';
 interface Props { locale: Locale; c: SiteContent }
 const { locale, c } = Astro.props;
+// Gizlilik sayfasıyla aynı derleme bağlamı: panel yalnızca kimliği tanımlı hizmetleri adlandırır ve yalnızca onlar için izin ister.
+// Hiç isteğe bağlı hizmet yoksa yalnızca bilgilendirme gösterilir (kategori yok, tek "Anladım" düğmesi; seçim "hayır/hayır" kaydedilir).
+const { env, reviewsMode } = legalEnvFromBuild();
+const view = consentView(c.consent, legalContextFromEnv(env, reviewsMode));
+const choice = view.mode === 'choice';
 ---
 
-<section class="consent" id="consent" role="region" aria-labelledby="consent-title" data-consent hidden>
+<section class="consent" id="consent" role="region" aria-labelledby="consent-title" data-consent data-consent-mode={view.mode} data-consent-services={view.services.join(',')} hidden>
   <div class="consent__card">
     <div class="consent__head">
       <Icon name="cookie" />
-      <h2 id="consent-title">{c.consent.title}</h2>
+      <h2 id="consent-title">{view.title}</h2>
     </div>
-    <p class="consent__text">{c.consent.text} <a href={legalPaths[locale]}>{c.consent.policyLink}</a></p>
+    <p class="consent__text">{view.text} <a href={`${legalPaths[locale]}#cerez`}>{c.consent.policyLink}</a></p>
 
-    <div class="consent__cats" data-consent-cats hidden>
-      {c.consent.categories.map((cat) => (
-        <label class="consent__cat">
-          <input type="checkbox" name={cat.key} checked={cat.key === 'necessary'} disabled={cat.locked} data-consent-cat={cat.key} />
-          <span class="consent__catbody">
-            <span class="consent__catlabel">{cat.label}</span>
-            <span class="consent__cattext">{cat.text}</span>
-          </span>
-        </label>
-      ))}
-    </div>
+    {choice && (
+      <div class="consent__cats" id="consent-cats" data-consent-cats hidden>
+        {view.categories.map((cat) => (
+          <label class="consent__cat">
+            <input type="checkbox" name={cat.key} checked={cat.key === 'necessary'} disabled={cat.locked} data-consent-cat={cat.key} />
+            <span class="consent__catbody">
+              <span class="consent__catlabel">{cat.label}</span>
+              <span class="consent__cattext">{cat.text}</span>
+            </span>
+          </label>
+        ))}
+      </div>
+    )}
 
     <div class="consent__actions">
-      <button class="btn btn--primary btn--sm" type="button" data-consent-accept>{c.consent.acceptAll}</button>
-      <button class="btn btn--outline btn--sm" type="button" data-consent-reject>{c.consent.rejectAll}</button>
-      <button class="btn btn--ghost btn--sm" type="button" data-consent-manage aria-expanded="false" aria-controls="consent-cats">{c.consent.manage}</button>
-      <button class="btn btn--navy btn--sm" type="button" data-consent-save hidden>{c.consent.save}</button>
+      {choice ? (
+        <>
+          <button class="btn btn--primary btn--sm" type="button" data-consent-accept>{c.consent.acceptAll}</button>
+          <button class="btn btn--outline btn--sm" type="button" data-consent-reject>{c.consent.rejectAll}</button>
+          <button class="btn btn--ghost btn--sm" type="button" data-consent-manage aria-expanded="false" aria-controls="consent-cats">{c.consent.manage}</button>
+          <button class="btn btn--navy btn--sm" type="button" data-consent-save hidden>{c.consent.save}</button>
+        </>
+      ) : (
+        <button class="btn btn--primary btn--sm" type="button" data-consent-reject>{c.consent.acknowledge}</button>
+      )}
     </div>
   </div>
 </section>
@@ -75,7 +91,8 @@ const { locale, c } = Astro.props;
     align-items: center;
     gap: 0.5rem;
   }
-  .consent__head .icon {
+  /* Icon ayrı bileşen: kapsamlı stil onun <svg>'sine ulaşmaz, bu yüzden :global(.icon) */
+  .consent__head :global(.icon) {
     color: var(--accent);
   }
   .consent__head h2 {

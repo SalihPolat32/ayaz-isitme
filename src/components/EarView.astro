@@ -1,0 +1,344 @@
+---
+/**
+ * Yandan görünen sol kulak illüstrasyonu + cihazın kulakta duruşu.
+ * Cihaz katmanları src/assets/device/views/*.png dosyalarından gelir (3B modelden render).
+ * Kulak arkası türlerde gövde kepçenin ARKASINDA, kablo/hortum kepçenin ÜSTÜNDE çizilir.
+ */
+import type { ImageMetadata } from 'astro';
+import { getImage } from 'astro:assets';
+
+interface Props { type: 'bte' | 'ric' | 'ite' | 'itc' | 'cic' | 'iic'; label?: string; class?: string }
+const { type, label, class: cls = '' } = Astro.props;
+/** Her örnek için benzersiz id öneki: gizli sekmedeki tanımlara referans verilince Chrome çizmez. */
+const uid = `ev-${type}`;
+
+// Yalnız kulak çiziminde kullanılan katmanlar (içe aktarılan her görselin özgünü derlemeye kopyalanır; joker kullanılmaz).
+// BTE/RIC her zaman kompozittir (ear-* + anchors.json); *-body/*-front tek katman yedeği bu yüzden listede yok.
+const views = import.meta.glob<{ default: ImageMetadata }>('../assets/device/views/{ite,itc,cic,iic,ear-bte-body,ear-bte-mold,ear-ric-body,ear-ric-receiver}.png', { eager: true });
+const anchorFiles = import.meta.glob<{ default: Record<string, AnchorSet> }>('../assets/device/views/anchors.json', { eager: true });
+type Vec = [number, number];
+interface AnchorSet { width: number; height: number; mmPerPx?: number; [k: string]: unknown }
+const anchorData: Record<string, AnchorSet> = Object.values(anchorFiles)[0]?.default ?? {};
+const anchorOf = (name: string): AnchorSet | null => anchorData[name] ?? anchorData[`${name}.png`] ?? null;
+const view = (name: string): ImageMetadata | null => views[`../assets/device/views/${name}.png`]?.default ?? null;
+
+/**
+ * Yerleşim (viewBox 0 0 400 520): x, y = katmanın sol-üst köşesi; h = yükseklik; rotate = derece (saat yönü),
+ * dönme merkezi (px, py) viewBox koordinatında. Kulak arkası türlerde iki katman aynı dönüşümü paylaşır,
+ * böylece kanca/kablo bağlantısı gövdeden kopmaz.
+ */
+type Place = { x: number; y: number; h: number; rotate?: number; px?: number; py?: number };
+type Layout = { back?: string; front?: string; place: Place; opacity?: number; ghost?: boolean };
+const layout: Record<Props['type'], Layout> = {
+  // Sağ kulak, yandan: heliks solda (kulak arkası), yüz sağda; kanal ≈ (258, 300).
+  bte: { back: 'bte-body', front: 'bte-front', place: { x: 30, y: 20, h: 320, rotate: 0 }, ghost: true },
+  ric: { back: 'ric-body', front: 'ric-front', place: { x: 40, y: 40, h: 290, rotate: 0 }, ghost: true },
+  // Kulak içi türler: ITE kepçeyi (konka) doldurur, ITC kanal girişinde; ikisi yaklaşık gerçek ölçekte (render
+  // yüksekliği × 0,045 mm/px × U; ITE ≈ 1,1×). CIC ve IIC kanalın derininde → yalnızca dış ucu görünür, bu yüzden
+  // bilerek küçük çizilir (derinlik ipucu). Görünen boy sırası: ITE > ITC > CIC > IIC (IIC soluk).
+  ite: { front: 'ite', place: { x: 176, y: 221, h: 146 } },
+  itc: { front: 'itc', place: { x: 209, y: 246, h: 104 } },
+  cic: { front: 'cic', place: { x: 224, y: 265, h: 76 } },
+  iic: { front: 'iic', place: { x: 236, y: 274, h: 56 }, opacity: 0.45 },
+};
+const L = layout[type];
+const backImg = L.back ? view(L.back) : null;
+const frontImg = L.front ? view(L.front) : null;
+const refImg = frontImg ?? backImg;
+const P = L.place;
+const W = refImg ? (refImg.width / refImg.height) * P.h : 0;
+const tf = P.rotate ? `rotate(${P.rotate} ${P.px ?? P.x + W / 2} ${P.py ?? P.y + P.h / 2})` : undefined;
+/**
+ * SVG <image> tembel yüklenmez (gizli sekmelerde de iner). Bu yüzden `href` yerine `data-href` yazılır ve
+ * src/scripts/ear-lazy.ts bölüm görüş alanına yaklaşınca (≈ 800 px önce) adresleri koyar (ilk açılışta LCP ile bant
+ * genişliği yarışmaz). Ayrıca katmanlar derlemede görüntülenme
+ * boyutunun ≈2 katına küçültülüp WebP'ye çevrilir: kart en fazla 260 px, viewBox 400 → 0,65 × 2 ≈ 1,3.
+ */
+const optimise = async (img: ImageMetadata | null, h: number) =>
+  img ? (await getImage({ src: img, height: Math.min(img.height, Math.round(h * 1.3)), format: 'webp', quality: 82, layout: 'none' })).src : '';
+
+/* ---------- Bağlantı noktalı kompozit (BTE / RIC) ----------
+ * Gövde+kanca ve kalıp/alıcı ayrı render'lardır; hortum/kablo SVG'de, render'lardaki bağlantı
+ * noktalarından (anchors.json) çizilir → bağlantılar her zaman birebir.
+ * Ölçek: kulak ≈ 65 mm ≈ 455 birim → U birim/mm; görüntü pikseli = mmPerPx mm. Tüm parçalar GERÇEK
+ * ölçekte (scale 1): gövde, kalıp, hortum çapı ve kablo aynı mm → birim oranıyla çizilir.
+ */
+const U = 7.0;
+type Pose = { at: Vec; rotate: number; flip?: boolean; scale?: number };
+const rot = (v: Vec, deg: number): Vec => {
+  const a = (deg * Math.PI) / 180;
+  return [v[0] * Math.cos(a) - v[1] * Math.sin(a), v[0] * Math.sin(a) + v[1] * Math.cos(a)];
+};
+const place = (a: AnchorSet, anchor: Vec, pose: Pose) => {
+  const k = (a.mmPerPx ?? 0.045) * U * (pose.scale ?? 1);
+  const fx = pose.flip ? -1 : 1;
+  const map = (p: Vec): Vec => {
+    const r = rot([fx * (p[0] - anchor[0]) * k, (p[1] - anchor[1]) * k], pose.rotate);
+    return [pose.at[0] + r[0], pose.at[1] + r[1]];
+  };
+  /** Yön vektörü (görüntü uzayı) → sahne uzayı */
+  const dir = (d: Vec): Vec => rot([fx * d[0], d[1]], pose.rotate);
+  const transform = `translate(${pose.at[0]} ${pose.at[1]}) rotate(${pose.rotate}) scale(${fx * k} ${k}) translate(${-anchor[0]} ${-anchor[1]})`;
+  return { k, map, dir, transform, w: a.width, h: a.height };
+};
+const vecOf = (a: AnchorSet | null, key: string): Vec | null => {
+  const v = a?.[key] as unknown;
+  if (Array.isArray(v) && v.length === 2) return v as Vec;
+  if (v && typeof v === 'object' && 'x' in v && 'y' in v) return [Number((v as { x: number }).x), Number((v as { y: number }).y)];
+  return null;
+};
+const numOf = (a: AnchorSet | null, key: string, fb: number): number => (typeof a?.[key] === 'number' ? (a[key] as number) : fb);
+/**
+ * Ayarlanabilir pozlar (viewBox). Kanal ≈ (260, 302), konka merkezi ≈ (240, 286), kulak üst kenarı x=238'de y≈70.
+ * Gövdeler kulak kepçesinin ARKASINDA. RIC: üst omuz heliksin üstünden ≈ 2,5 mm görünür.
+ * BTE (referans görsellerdeki gibi): kancanın iç kavsi heliks kenarının ≈ 1,8 mm üstünde, kulağın üstüne OTURUR;
+ * kancanın yükselen kolu ve somunu kulağın arkasında kalır, ön kolu heliksin önünden iner. Gövde hafifçe öne
+ * döndürülmüş (6°), arka kenarı (düğmeler) kepçenin arka kenarından ince bir şerit hâlinde görünür.
+ */
+const POSES: { bte: { body: Pose; mold: Pose }; ric: { body: Pose; recv: Pose } } = {
+  bte: { body: { at: [263, 123], rotate: 6 }, mold: { at: [228, 314], rotate: 30, flip: true } },
+  ric: { body: { at: [164, 25], rotate: 14 }, recv: { at: [264, 300], rotate: 0 } },
+};
+/** BTE kalıbı (ear-bte-mold.png) hortum yuvasının üst halkası, PNG pikseli: dış/iç elips (render'dan ölçüldü).
+ * Ölçüldüğü PNG boyutu `src` alanında; yeniden render sonrası boyut değişirse tests/ear-constants.test.ts düşer → yeniden ölçün. */
+const MOLD_BORE = { cx: 195.5, cy: 50, rxO: 50, ryO: 26, rxI: 38, ryI: 13, tilt: 5, wallBottom: 110, src: { w: 297, h: 434 } };
+/** BTE gövde PNG'sinde kancanın ön (inen) kolu: kulak kenarının ÖNÜNDE çizilir (x ≥ 430 px, y ≤ 350 px). */
+const HOOK_FRONT = { x: 430, y: 0, w: 263, h: 352, src: { w: 692, h: 1162 } };
+/** Nozul uzunluğu: hortum nozulun üstüne ≈ 3,6 mm geçer (kanca uç halkasına kadar). */
+const NOZZLE_MM = 3.6;
+/** RIC alıcı kablosu (modelde Ø 0,8 mm). */
+const WIRE_MM = 0.8;
+
+type Tube = { d: string; shadow: string; hi: string; hiSoft: string; rimA: string; rimB: string; lumA: string; lumB: string; back: string; width: number; lumen: number };
+type Composite = {
+  kind: 'tube' | 'wire';
+  bodySrc: string; bodyT: string; bodyW: number; bodyH: number;
+  partSrc: string; partT: string; partW: number; partH: number;
+  tube?: Tube; wire?: { d: string; width: number };
+};
+const f1 = (n: number) => n.toFixed(1);
+const poly = (pts: Vec[]) => 'M ' + pts.map((p) => `${f1(p[0])} ${f1(p[1])}`).join(' L ');
+/** Kübik Bézier örnekleme */
+const cubic = (a: Vec, b: Vec, c: Vec, d: Vec, n: number): Vec[] =>
+  Array.from({ length: n + 1 }, (_, i) => {
+    const t = i / n, u = 1 - t;
+    return [0, 1].map((j) => u * u * u * a[j]! + 3 * u * u * t * b[j]! + 3 * u * t * t * c[j]! + t * t * t * d[j]!) as Vec;
+  });
+/** Çoklu çizginin normali yönünde kaydırılmış kopyası (sabit taraf; ışık sol-üstten). */
+const offsetOf = (pts: Vec[], side: number) => {
+  const m = pts[Math.floor(pts.length / 2)]!; const m1 = pts[Math.floor(pts.length / 2) + 1]!;
+  const nm: Vec = [-(m1[1] - m[1]), m1[0] - m[0]];
+  const sgn = nm[0] * -0.7 + nm[1] * -0.7 >= 0 ? 1 : -1;
+  return (dist: number): Vec[] =>
+    pts.map((p, i) => {
+      const a = pts[Math.max(0, i - 1)]!; const b = pts[Math.min(pts.length - 1, i + 1)]!;
+      const tx = b[0] - a[0], ty = b[1] - a[1]; const l = Math.hypot(tx, ty) || 1;
+      return [p[0] + (sgn * side * -ty / l) * dist, p[1] + (sgn * side * tx / l) * dist] as Vec;
+    });
+};
+
+let composite: Composite | null = null;
+if (type === 'bte' || type === 'ric') {
+  const bodyName = type === 'bte' ? 'ear-bte-body' : 'ear-ric-body';
+  const partName = type === 'bte' ? 'ear-bte-mold' : 'ear-ric-receiver';
+  const aBody = anchorOf(bodyName); const aPart = anchorOf(partName);
+  const iBody = view(bodyName); const iPart = view(partName);
+  const startKey = type === 'bte' ? 'hookTip' : 'wireExit';
+  const dirKey = type === 'bte' ? 'hookTipDir' : 'wireExitDir';
+  const endKey = type === 'bte' ? 'tubeInlet' : 'wireInlet';
+  const s0 = vecOf(aBody, startKey); const d0 = vecOf(aBody, dirKey) ?? [1, 0];
+  const e0 = vecOf(aPart, endKey); const c0 = vecOf(aPart, 'center') ?? e0;
+  if (aBody && aPart && iBody && iPart && s0 && e0 && c0) {
+    const pb = place(aBody, s0, POSES[type].body);
+    const pp = place(aPart, c0, type === 'bte' ? POSES.bte.mold : POSES.ric.recv);
+    const S = pb.map(s0);
+    const D = pb.dir(d0);
+    const inDir = pp.dir(vecOf(aPart, type === 'bte' ? 'tubeInletDir' : 'wireInletDir') ?? [0, -1]);
+    // BTE: hortum, yuvanın ağzından (halka merkezi) ≈ 0,8 mm içeri girer; ön halka sonra üstüne çizilir.
+    const E = type === 'bte' ? pp.map([MOLD_BORE.cx, MOLD_BORE.cy]) : pp.map(e0);
+    const dist = Math.hypot(E[0] - S[0], E[1] - S[1]);
+    const lead1 = Math.min(90, dist * (type === 'bte' ? 0.42 : 0.45));
+    const lead2 = Math.min(80, dist * (type === 'bte' ? 0.36 : 0.4));
+    const P1: Vec = [S[0] + D[0] * lead1, S[1] + D[1] * lead1];
+    const P2: Vec = [E[0] + inDir[0] * lead2, E[1] + inDir[1] * lead2];
+    const [bodySrc, partSrc] = await Promise.all([
+      getImage({ src: iBody, height: Math.min(iBody.height, Math.round(iBody.height * pb.k * 1.6)), format: 'webp', quality: 84 }).then((r) => r.src),
+      getImage({ src: iPart, height: Math.min(iPart.height, Math.round(iPart.height * pp.k * 1.6)), format: 'webp', quality: 84 }).then((r) => r.src),
+    ]);
+    composite = { kind: type === 'bte' ? 'tube' : 'wire', bodySrc, bodyT: pb.transform, bodyW: pb.w, bodyH: pb.h, partSrc, partT: pp.transform, partW: pp.w, partH: pp.h };
+    if (type === 'bte') {
+      const T = numOf(aBody, 'tubeOuterMm', numOf(aPart, 'tubeOuterMm', 3.3)) * U;
+      const Lm = numOf(aBody, 'tubeInnerMm', numOf(aPart, 'tubeInnerMm', 1.9)) * U;
+      const nz = NOZZLE_MM * U;
+      const S0: Vec = [S[0] - D[0] * nz, S[1] - D[1] * nz];
+      const Ein: Vec = [E[0] - inDir[0] * 0.9 * U, E[1] - inDir[1] * 0.9 * U];
+      const pts: Vec[] = [...cubic(S0, [S0[0] + D[0] * nz * 0.5, S0[1] + D[1] * nz * 0.5], [S[0] - D[0] * nz * 0.2, S[1] - D[1] * nz * 0.2], S, 6).slice(0, -1), ...cubic(S, P1, P2, E, 72), Ein];
+      const off = offsetOf(pts, 1);
+      composite.tube = {
+        d: poly(pts), shadow: poly(off(-T * 0.18)), back: poly(off(T * 0.06)),
+        hi: poly(off(T * 0.27)), hiSoft: poly(off(T * 0.2)),
+        rimA: poly(off(T / 2 - 0.8)), rimB: poly(off(-(T / 2 - 0.8))),
+        lumA: poly(off(Lm / 2)), lumB: poly(off(-Lm / 2)),
+        width: T, lumen: Lm,
+      };
+    } else {
+      composite.wire = { d: `M ${f1(S[0])} ${f1(S[1])} C ${f1(P1[0])} ${f1(P1[1])} ${f1(P2[0])} ${f1(P2[1])} ${f1(E[0])} ${f1(E[1])}`, width: WIRE_MM * U };
+    }
+  }
+}
+/** Kalıp yuvasının ön (yakın) halkası + yuva duvarı: hortumun ucunu örter → hortum yuvaya GİRER. PNG pikseli. */
+const lipPath = (() => {
+  const b = MOLD_BORE;
+  const t = (b.tilt * Math.PI) / 180;
+  const pt = (rx: number, ry: number, a: number): string => {
+    const x = rx * Math.cos(a), y = ry * Math.sin(a);
+    return `${f1(b.cx + x * Math.cos(t) - y * Math.sin(t))} ${f1(b.cy + x * Math.sin(t) + y * Math.cos(t))}`;
+  };
+  const arc = (rx: number, ry: number, from: number, to: number, n = 24) =>
+    Array.from({ length: n + 1 }, (_, i) => pt(rx, ry, from + ((to - from) * i) / n));
+  // Yuva duvarı (halkanın merkez çizgisinden aşağısı; dış elipsin alt yarısı bunun içinde kalır) − iç elipsin
+  // alt yarısı (evenodd): hortum ağızdan içeri girerken yalnızca yakın halka ve duvar üstüne gelir.
+  const wall = `M ${pt(b.rxO + 1.5, 0, Math.PI)} L ${f1(b.cx - b.rxO - 4)} ${b.wallBottom} L ${f1(b.cx + b.rxO + 6)} ${b.wallBottom} L ${pt(b.rxO + 1.5, 0, 0)} Z`;
+  const innerLow = arc(b.rxI, b.ryI, 0, Math.PI);
+  return `${wall} M ${innerLow.join(' L ')} Z`;
+})();
+const legacy = !composite;
+// Tek katmanlı (legacy) yol yalnız kompozit kurulamadıysa: kompozitte bu varyantlar hiç kullanılmaz, üretilmesin
+const backSrc = legacy ? await optimise(backImg, P.h) : '';
+const frontSrc = legacy ? await optimise(frontImg, P.h) : '';
+---
+
+<svg class:list={['earview', cls]} viewBox="-20 -70 440 590" role={label ? 'img' : undefined} aria-label={label} aria-hidden={label ? undefined : 'true'} focusable="false">
+  <defs>
+    <linearGradient id={`${uid}-bg`} x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#ecd5c5"/><stop offset="0.45" stop-color="#f4e6dc"/><stop offset="1" stop-color="#f7efe9"/></linearGradient>
+    <radialGradient id={`${uid}-auricle`} cx="0.42" cy="0.40" r="0.78"><stop offset="0" stop-color="#fbe2cf"/><stop offset="0.55" stop-color="#f2c1a1"/><stop offset="0.85" stop-color="#e7a27f"/><stop offset="1" stop-color="#d98d69"/></radialGradient>
+    <radialGradient id={`${uid}-concha`} cx="0.62" cy="0.58" r="0.66"><stop offset="0" stop-color="#9c5a41"/><stop offset="0.45" stop-color="#bf7657"/><stop offset="0.8" stop-color="#dc9a79"/><stop offset="1" stop-color="#ebb393"/></radialGradient>
+    <radialGradient id={`${uid}-canal`} cx="0.55" cy="0.45" r="0.6"><stop offset="0" stop-color="#1f0e0a"/><stop offset="0.55" stop-color="#4d251a"/><stop offset="1" stop-color="#8a4b35"/></radialGradient>
+    <radialGradient id={`${uid}-lobe`} cx="0.45" cy="0.35" r="0.7"><stop offset="0" stop-color="#f7d0b8"/><stop offset="1" stop-color="#e39a79"/></radialGradient>
+    <linearGradient id={`${uid}-hi`} x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff5ec" stop-opacity="0.95"/><stop offset="1" stop-color="#fff5ec" stop-opacity="0.1"/></linearGradient>
+    <filter id={`${uid}-b8`} x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="8"/></filter>
+    <filter id={`${uid}-b4`} x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="4"/></filter>
+    <filter id={`${uid}-b2`} x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="1.8"/></filter>
+    <!-- İnce/uzun yollar (hortum, kablo) için: nesne kutusuna göre % bölge, 20 birim genişliğindeki yolda bulanıklığı düz bir çizgiyle kesiyordu → kullanıcı uzayında tüm kart -->
+    <filter id={`${uid}-bs`} filterUnits="userSpaceOnUse" x="-20" y="-70" width="440" height="590"><feGaussianBlur stdDeviation="4"/></filter>
+    <filter id={`${uid}-shadow`} x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="5" stdDeviation="5" flood-color="#5a2f1f" flood-opacity="0.32"/></filter>
+    <path id={`${uid}-outline`} d="M 138 50 C 76 44, 36 132, 50 234 C 62 328, 106 434, 180 478 C 238 512, 298 478, 308 418 C 322 356, 336 244, 308 162 C 282 84, 204 32, 138 50 Z"/>
+    <clipPath id={`${uid}-clip`}><use href={`#${uid}-outline`}/></clipPath>
+    {composite?.tube && (
+      <>
+        <clipPath id={`${uid}-hook`}><rect x={HOOK_FRONT.x} y={HOOK_FRONT.y} width={HOOK_FRONT.w} height={HOOK_FRONT.h} /></clipPath>
+        <clipPath id={`${uid}-lip`}><path d={lipPath} clip-rule="evenodd" /></clipPath>
+      </>
+    )}
+  </defs>
+
+  <rect x="-20" y="-70" width="440" height="590" rx="30" fill={`url(#${uid}-bg)`}/>
+  <!-- saç çizgisi ve kulak arkası (baş) gölgesi -->
+  <path d="M -20 -70 L 100 -70 C 50 10, 22 130, 14 262 C 8 344, 26 440, 54 520 L -20 520 Z" fill="#6f4634" opacity="0.10" filter={`url(#${uid}-b8)`}/>
+
+  <!-- KULAK ARKASI KATMANI: gövde kepçenin arkasında -->
+  {legacy && backSrc && (
+    <image data-href={backSrc} x={P.x} y={P.y} width={W} height={P.h} transform={tf} filter={`url(#${uid}-shadow)`} />
+  )}
+  {composite && (
+    <image data-href={composite.bodySrc} x="0" y="0" width={composite.bodyW} height={composite.bodyH} transform={composite.bodyT} filter={`url(#${uid}-shadow)`} />
+  )}
+
+  <!-- kepçenin başa düşen gölgesi -->
+  <path d="M 128 62 C 66 70, 36 148, 54 244 C 70 338, 114 442, 182 484 C 234 512, 292 488, 306 432 L 302 384 C 290 434, 250 478, 198 460 C 140 428, 98 334, 88 242 C 80 160, 104 94, 150 70 Z" fill="#9c5a40" opacity="0.45" filter={`url(#${uid}-b8)`}/>
+  <use href={`#${uid}-outline`} fill={`url(#${uid}-auricle)`}/>
+  <g clip-path={`url(#${uid}-clip)`}>
+    <!-- skafa oluğu -->
+    <path d="M 110 100 C 80 150, 80 244, 100 322 C 116 380, 150 430, 198 456 C 160 414, 134 352, 126 290 C 118 220, 122 148, 150 104 Z" fill="#cf8b6b" opacity="0.6" filter={`url(#${uid}-b4)`}/>
+    <!-- heliks: kalın kıvrık kenar -->
+    <path d="M 132 70 C 86 86, 62 160, 72 246 C 84 332, 128 428, 194 460" fill="none" stroke="#c07c5d" stroke-width="32" stroke-linecap="round" opacity="0.5" filter={`url(#${uid}-b4)`}/>
+    <path d="M 126 64 C 80 80, 56 158, 66 246 C 78 334, 122 432, 194 466" fill="none" stroke={`url(#${uid}-hi)`} stroke-width="12" stroke-linecap="round" filter={`url(#${uid}-b2)`}/>
+    <path d="M 134 56 C 194 38, 268 82, 296 160 C 310 200, 314 240, 312 280" fill="none" stroke={`url(#${uid}-hi)`} stroke-width="11" stroke-linecap="round" opacity="0.85" filter={`url(#${uid}-b2)`}/>
+    <path d="M 142 76 C 196 62, 256 100, 280 164" fill="none" stroke="#c07c5d" stroke-width="18" stroke-linecap="round" opacity="0.4" filter={`url(#${uid}-b4)`}/>
+    <!-- antiheliks (Y) ve üçgen çukur -->
+    <path d="M 150 118 C 196 104, 238 116, 262 150 C 240 132, 200 124, 168 134 Z" fill="#c9866a" opacity="0.55" filter={`url(#${uid}-b4)`}/>
+    <path d="M 178 128 C 150 178, 148 262, 174 332 C 192 376, 220 400, 252 408" fill="none" stroke="#bf7a5c" stroke-width="30" stroke-linecap="round" opacity="0.45" filter={`url(#${uid}-b4)`}/>
+    <path d="M 178 124 C 150 174, 148 262, 174 332 C 192 376, 220 400, 252 408" fill="none" stroke="#f8dcc9" stroke-width="12" stroke-linecap="round" opacity="0.95" filter={`url(#${uid}-b2)`}/>
+    <path d="M 178 126 C 196 102, 228 94, 256 110" fill="none" stroke="#f8dcc9" stroke-width="11" stroke-linecap="round" opacity="0.9" filter={`url(#${uid}-b2)`}/>
+    <path d="M 178 126 C 204 118, 236 130, 256 152" fill="none" stroke="#f3cdb5" stroke-width="9" stroke-linecap="round" opacity="0.7" filter={`url(#${uid}-b2)`}/>
+    <!-- konka (cymba + cavum) -->
+    <path d="M 214 186 C 172 196, 168 302, 204 348 C 236 388, 288 368, 296 310 C 304 250, 260 178, 214 186 Z" fill={`url(#${uid}-concha)`}/>
+    <path d="M 214 186 C 172 196, 168 302, 204 348 C 236 388, 288 368, 296 310 C 304 250, 260 178, 214 186 Z" fill="none" stroke="#9a5840" stroke-width="12" opacity="0.5" filter={`url(#${uid}-b4)`}/>
+    <!-- heliks kökü (crus) konkayı ikiye böler -->
+    <path d="M 296 238 C 270 232, 238 236, 214 252" fill="none" stroke="#d99a7c" stroke-width="14" stroke-linecap="round" opacity="0.9" filter={`url(#${uid}-b2)`}/>
+    <path d="M 294 232 C 268 226, 238 230, 216 246" fill="none" stroke="#f6d5c1" stroke-width="4" stroke-linecap="round" opacity="0.7" filter={`url(#${uid}-b2)`}/>
+    <!-- kanal girişi -->
+    <ellipse cx="260" cy="302" rx="32" ry="36" fill="#43200f" opacity="0.5" filter={`url(#${uid}-b4)`}/>
+    <ellipse cx="260" cy="302" rx="20" ry="25" fill={`url(#${uid}-canal)`}/>
+    <!-- tragus -->
+    <path d="M 286 256 C 316 260, 328 298, 306 334 C 294 352, 274 346, 270 324 C 268 300, 270 274, 286 256 Z" fill="#eebc9e"/>
+    <path d="M 294 264 C 314 274, 318 304, 302 330" fill="none" stroke="#fdeadc" stroke-width="6" stroke-linecap="round" opacity="0.8" filter={`url(#${uid}-b2)`}/>
+    <path d="M 276 262 C 266 292, 268 318, 280 340" fill="none" stroke="#a5634a" stroke-width="10" stroke-linecap="round" opacity="0.5" filter={`url(#${uid}-b4)`}/>
+    <!-- antitragus + intertragik çentik -->
+    <path d="M 214 380 C 240 366, 272 372, 284 394 C 268 410, 236 414, 212 400 Z" fill="#e8b394"/>
+    <path d="M 222 384 C 244 374, 268 380, 278 394" fill="none" stroke="#fdeadc" stroke-width="5" stroke-linecap="round" opacity="0.75" filter={`url(#${uid}-b2)`}/>
+    <!-- kulak memesi -->
+    <path d="M 150 420 C 176 462, 214 486, 250 480 C 288 474, 304 446, 300 420 C 280 440, 250 450, 214 440 C 188 434, 166 426, 150 420 Z" fill={`url(#${uid}-lobe)`} opacity="0.9"/>
+    <ellipse cx="226" cy="458" rx="34" ry="14" fill="#fde6d6" opacity="0.35" filter={`url(#${uid}-b8)`}/>
+  </g>
+  <use href={`#${uid}-outline`} fill="none" stroke="#b86f4f" stroke-width="1.6" opacity="0.55"/>
+
+  <!-- kulak arkasında kalan gövde: hafif "röntgen" görünümü (nerede durduğunu anlatmak için) -->
+  {legacy && backSrc && L.ghost && (
+    <g clip-path={`url(#${uid}-clip)`} opacity="0.22"><image data-href={backSrc} x={P.x} y={P.y} width={W} height={P.h} transform={tf} /></g>
+  )}
+  {composite && (
+    <>
+      <g clip-path={`url(#${uid}-clip)`} opacity="0.2"><image data-href={composite.bodySrc} x="0" y="0" width={composite.bodyW} height={composite.bodyH} transform={composite.bodyT} /></g>
+      {composite.tube && (
+        <>
+          {/* kancanın öne inen kolu kulak kenarının ÖNÜNDE (kulak arkasında kalmaz) */}
+          <g transform={composite.bodyT}><image data-href={composite.bodySrc} x="0" y="0" width={composite.bodyW} height={composite.bodyH} clip-path={`url(#${uid}-hook)`} /></g>
+          <image data-href={composite.partSrc} x="0" y="0" width={composite.partW} height={composite.partH} transform={composite.partT} filter={`url(#${uid}-shadow)`} />
+          {/* kalıbın kanal çıkıntısı tragusun arkasına girer */}
+          <g class="ev-tragus"><path d="M 286 256 C 316 260, 328 298, 306 334 C 294 352, 274 346, 270 324 C 268 300, 270 274, 286 256 Z" fill="#eebc9e"/><path d="M 294 264 C 314 274, 318 304, 302 330" fill="none" stroke="#fdeadc" stroke-width="6" stroke-linecap="round" opacity="0.8" filter={`url(#${uid}-b2)`}/><path d="M 272 268 C 264 294, 266 318, 278 338" fill="none" stroke="#a5634a" stroke-width="7" stroke-linecap="round" opacity="0.45" filter={`url(#${uid}-b2)`}/></g>
+          {/* #13 PVC hortum, gerçek çap (Ø dış/iç, anchors.json): şeffaf gövde, koyu lümen, parlama, yumuşak gölge */}
+          <g class="ev-tube">
+            <path d={composite.tube.shadow} fill="none" stroke="#4a2616" stroke-opacity="0.24" stroke-width={composite.tube.width * 0.85} stroke-linecap="butt" transform="translate(2.5 4.5)" filter={`url(#${uid}-bs)`} />
+            <path d={composite.tube.d} fill="none" stroke="#e4ecf0" stroke-opacity="0.62" stroke-width={composite.tube.width} stroke-linecap="butt" />
+            <path d={composite.tube.back} fill="none" stroke="#ffffff" stroke-opacity="0.32" stroke-width={composite.tube.width * 0.6} stroke-linecap="butt" />
+            <path d={composite.tube.d} fill="none" stroke="#a9bcc6" stroke-opacity="0.34" stroke-width={composite.tube.lumen} stroke-linecap="butt" />
+            <path d={composite.tube.lumA} fill="none" stroke="#8ea3ae" stroke-opacity="0.35" stroke-width="0.8" />
+            <path d={composite.tube.lumB} fill="none" stroke="#8ea3ae" stroke-opacity="0.45" stroke-width="0.9" />
+            <path d={composite.tube.rimA} fill="none" stroke="#a7b8c1" stroke-opacity="0.8" stroke-width="1.2" />
+            <path d={composite.tube.rimB} fill="none" stroke="#8b9ea9" stroke-opacity="0.85" stroke-width="1.4" />
+            <path d={composite.tube.hiSoft} fill="none" stroke="#ffffff" stroke-opacity="0.5" stroke-width="4.5" />
+            <path d={composite.tube.hi} fill="none" stroke="#ffffff" stroke-opacity="0.95" stroke-width="1.8" />
+          </g>
+          {/* kalıp yuvasının yakın halkası hortumun ucunu örter: hortum yuvaya girer */}
+          <g transform={composite.partT}><image data-href={composite.partSrc} x="0" y="0" width={composite.partW} height={composite.partH} clip-path={`url(#${uid}-lip)`} /></g>
+        </>
+      )}
+      {composite.wire && (
+        <>
+          <path d={composite.wire.d} fill="none" stroke="#5a2f1f" stroke-opacity="0.2" stroke-width={composite.wire.width + 1} stroke-linecap="round" transform="translate(1.5 3)" filter={`url(#${uid}-b2)`} />
+          <path d={composite.wire.d} fill="none" stroke="#7d868d" stroke-width={composite.wire.width} stroke-linecap="round" />
+          <path d={composite.wire.d} fill="none" stroke="#f1f4f6" stroke-width={composite.wire.width * 0.42} stroke-linecap="round" transform="translate(-0.7 -0.5)" />
+          <image data-href={composite.partSrc} x="0" y="0" width={composite.partW} height={composite.partH} transform={composite.partT} filter={`url(#${uid}-shadow)`} />
+          {/* alıcı kanalda, tragusun arkasında */}
+          <g class="ev-tragus"><path d="M 286 256 C 316 260, 328 298, 306 334 C 294 352, 274 346, 270 324 C 268 300, 270 274, 286 256 Z" fill="#eebc9e"/><path d="M 294 264 C 314 274, 318 304, 302 330" fill="none" stroke="#fdeadc" stroke-width="6" stroke-linecap="round" opacity="0.8" filter={`url(#${uid}-b2)`}/><path d="M 272 268 C 264 294, 266 318, 278 338" fill="none" stroke="#a5634a" stroke-width="7" stroke-linecap="round" opacity="0.45" filter={`url(#${uid}-b2)`}/></g>
+        </>
+      )}
+    </>
+  )}
+  <!-- ÖN KATMAN: kanca/hortum/kablo ya da kulak içi cihaz -->
+  {legacy && frontSrc && (
+    <image data-href={frontSrc} x={P.x} y={P.y} width={W} height={P.h} transform={tf} opacity={L.opacity ?? 1} filter={L.opacity ? undefined : `url(#${uid}-shadow)`} />
+  )}
+  {type === 'iic' && <circle cx="260" cy="302" r="30" fill="none" stroke="#fff3e8" stroke-width="2" stroke-dasharray="4 4" opacity="0.9"/>}
+</svg>
+
+<style>
+  .earview {
+    width: 100%;
+    height: auto;
+    max-width: 240px;
+    display: block;
+    border-radius: 20px;
+  }
+</style>

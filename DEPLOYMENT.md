@@ -1,8 +1,10 @@
 # Dağıtım — keciorenisitme.com
 
 ## Mevcut durum
-- Canlı site: GitHub Pages, repo `SalihPolat32/ayaz-isitme`, dal `master`, `CNAME = keciorenisitme.com`, statik HTML kökten servis ediliyor.
-- Yeni site: Astro 7 (Node ≥ 22.12; `.nvmrc` = 24). Çıktı `dist/` — yine tamamen statik.
+- Canlı site: Astro v2, commit `e851804` (25 Eyl 2026), repo `SalihPolat32/ayaz-isitme`, dal `master`; GitHub Pages kaynağı **GitHub Actions** (`.github/workflows/deploy.yml`), `CNAME = keciorenisitme.com`.
+- Eski statik site yedekte: dal `master-backup` ve etiket `v1-static-2026-09-25` (`4a927e0`); ayrıca yerel git yedeği `ayaz-isitme-master-yedek-2026-09-25.bundle` (depo dışında).
+- Yerel yeni sürüm (Tur 3–8): commit/push yapılmadı. **Üretim derlemesi, gizlilik metni için işletme bilgileri doldurulana kadar bilinçli olarak durur** (aşağıda "Yayın öncesi").
+- Node ≥ 22.12; `.nvmrc` = 24. Çıktı `dist/` — tamamen statik.
 
 ## Yerel çalıştırma
 ```bash
@@ -19,18 +21,18 @@ npm test           # vitest
 `PUBLIC_SITE_ENV` `production` değilse tüm sayfalar `noindex, nofollow` üretir. Preview'ı ayrı bir GitHub Pages projesinde veya Cloudflare Pages'te yayınlayıp indeksleme kapalı test edebilirsiniz.
 
 ## Production (GitHub Pages)
-1. Yeni kodu repoya **ayrı dalda** (ör. `v2`) gönderin; `master`'a merge etmeden önce preview'ı onaylayın.
-2. Repo > Settings > Pages > **Source: GitHub Actions**.
-3. Repo > Settings > Secrets and variables > Actions > **Variables**: `PUBLIC_API_BASE`, `PUBLIC_GA4_ID`, `PUBLIC_GADS_ID`, `PUBLIC_GADS_APPOINTMENT_LABEL`, `PUBLIC_META_PIXEL_ID`, `PUBLIC_TURNSTILE_SITE_KEY` (boş bırakılabilir). `PUBLIC_SITE_ENV=production` iş akışında sabit.
-4. `.github/workflows/deploy.yml` her `master` push'unda build edip yayınlar. `public/CNAME` özel alan adını korur; DNS değişmez.
-5. İlk yayından sonra: `https://keciorenisitme.com/`, `/en/`, `/gizlilik/`, `/en/privacy/`, `/sitemap-index.xml`, `/robots.txt`, `/og.jpg` kontrol.
+1. Pages kaynağı zaten **GitHub Actions**. `deploy.yml` her `master` push'unda `npm run build` (astro check + build, `PUBLIC_SITE_ENV=production`) çalıştırıp yayınlar; derleme durursa yayın yapılmaz, canlı sürüm kalır.
+2. Repo > Settings > Secrets and variables > Actions > **Variables** (hepsi isteğe bağlı, şu an tanımlı değil): `PUBLIC_API_BASE`, `PUBLIC_GA4_ID`, `PUBLIC_GADS_ID`, `PUBLIC_GADS_APPOINTMENT_LABEL`, `PUBLIC_META_PIXEL_ID`, `PUBLIC_OPENAI_PIXEL_ID`, `PUBLIC_TURNSTILE_SITE_KEY`, `PUBLIC_REVIEWS_DISPLAY` (`carousel` | `link`). Bir değişken eklemek gizlilik metnini ve onay özetini değiştirir → yeni onay gerekir.
+3. `ALLOW_INCOMPLETE_LEGAL` yalnızca yerel QA derlemesi içindir (yer tutucular + noindex); `deploy.yml`'de **asla** tanımlanmaz.
+4. `public/CNAME` özel alan adını korur; DNS değişmez.
+5. Yayından sonra: `https://keciorenisitme.com/`, `/en/`, `/gizlilik/`, `/en/privacy/`, `/sitemap-index.xml`, `/robots.txt`, `/og.jpg` kontrol; `/dev/viewer/` artık 404 olmalı.
 
 ## URL koruma
 | Eski URL | Yeni | Not |
 |---|---|---|
 | `/` | `/` | aynı |
 | `/en/` | `/en/` | aynı |
-| `/#about`, `/#services`, `/#products`, `/#gallery`, `/#blog`, `/#faq`, `/#contact` | `/#merkezimiz`, `/#hizmetler`, `/#cihazlar`, `/#merkezimiz`, `/#cihazlar`, `/#sss`, `/#iletisim` | Hash'ler indekslenmez; reklam/sosyal medya bağlantılarında kullanılmışsa güncelleyin. İsterseniz eski hash'ler için küçük bir JS yönlendirmesi eklenebilir. |
+| `/#home`, `/#about`, `/#services`, `/#products`, `/#gallery`, `/#blog`, `/#faq`, `/#contact` | `/#ana`, `/#merkezimiz`, `/#hizmetler`, `/#cihazlar`, `/#merkezimiz`, `/#sss`, `/#sss`, `/#iletisim` | Hash'ler indekslenmez. Eski hash'ler `src/scripts/nav.ts` (`legacyAnchors`) ile yeni bölüme kaydırılır; reklam/sosyal medya bağlantılarında yine de yeni adresleri kullanın. |
 | `/sitemap.xml` | `/sitemap-index.xml` | robots.txt güncel. Search Console'da yeni sitemap'i gönderin. |
 | `/assets/img/...` | yok | Eski görsel yolları kaldırıldı; dış bağlantı yoksa sorun değil. |
 
@@ -38,13 +40,14 @@ npm test           # vitest
 `worker/README.md` — `wrangler deploy` veya `.github/workflows` içine `cloudflare/wrangler-action` eklenerek otomatik.
 
 ## Geri dönüş planı
-GitHub Pages'te önceki `master` commit'ine (`4a927e0`, 13 Nis 2026) dönmek: Pages kaynağını tekrar "Deploy from a branch: master / root" yapmak ya da `v2` merge'ünü geri almak yeterlidir; DNS'e dokunulmaz.
+- v2'nin önceki sürümüne: `master`'ı `e851804`'e geri almak (revert) → Actions yeniden yayınlar.
+- Eski statik siteye: Pages kaynağını "Deploy from a branch: `master-backup` / root" yapmak. DNS'e dokunulmaz.
+- Yerel tam yedek: `ayaz-isitme-master-yedek-2026-09-25.bundle` (`git clone <bundle>`).
 
 ## Yayın öncesi kısa liste
-- [ ] CONTENT-VERIFICATION.md teyitleri (saatler, SGK, ücretsiz test, unvan)
-- [ ] Hukuki metinler avukat onayı; `[•]` alanları dolduruldu
-- [ ] `PUBLIC_SITE_ENV=production` (noindex kalkar)
-- [ ] Place ID + Worker (isteğe bağlı) veya WhatsApp modunda kal
-- [ ] GA4 kimliği kararı
-- [ ] Gerçek cihazda mobil test (Android Chrome, iOS Safari), Lighthouse mobil raporu
-- [ ] Search Console sitemap
+- [ ] İşletme bilgileri (`CONTENT-VERIFICATION.md` §7 / `AYAZ-ISLETME-SORULARI.md`): 1–5 doldurulur → derleme nihai metni ve onay nesnesini basar → metin okunur → `textApproval` kopyalanır. Tahmin yazılmaz.
+- [ ] `CONTENT-VERIFICATION.md` açık teyitleri (SGK, ücretsiz test, unvan, ikinci telefon, fotoğraftaki kişinin izni) — teyitsizler yayına girmez.
+- [ ] Yorum gösterim modu kararı (`carousel` | `link`); hukuki değerlendirme `CONTENT-VERIFICATION.md` §9.
+- [ ] Canlı yorum API'si açılacaksa: önce Places yorum kimliği = Takeout kimliği doğrulaması (`INTEGRATIONS.md` §5, risk 12).
+- [ ] GA4/Ads/Meta kimlik kararı (eklenirse metin onayı yenilenir).
+- [ ] Gerçek cihazda mobil test (Android Chrome, iOS Safari); Search Console sitemap.

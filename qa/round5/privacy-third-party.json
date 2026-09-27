@@ -1,0 +1,181 @@
+{
+  "generatedAt": "2026-09-26T20:18:14.195Z",
+  "note": "İzinsiz (çerez paneline dokunulmamış) yeni tarayıcı bağlamı; tüm çerçevelerin istekleri. Çerez değerleri yazılmaz. Üretici: tests/e2e/privacy-all-frames.spec.ts",
+  "projects": {
+    "mobile": {
+      "baseURL": "http://127.0.0.1:4322",
+      "viewport": {
+        "width": 412,
+        "height": 839
+      },
+      "pages": [
+        "/",
+        "/en/"
+      ],
+      "consentGiven": false,
+      "requestCount": 68,
+      "thirdPartyRequestCount": 34,
+      "thirdPartyHosts": [
+        {
+          "host": "maps.googleapis.com",
+          "count": 28,
+          "frames": [
+            "iframe:https://www.google.com"
+          ],
+          "types": [
+            "script",
+            "xhr",
+            "image"
+          ],
+          "paths": [
+            "/maps/api",
+            "/maps-api-v3/api"
+          ]
+        },
+        {
+          "host": "www.google.com",
+          "count": 4,
+          "frames": [
+            "other"
+          ],
+          "types": [
+            "document"
+          ],
+          "paths": [
+            "/maps",
+            "/maps/embed"
+          ]
+        },
+        {
+          "host": "maps.gstatic.com",
+          "count": 2,
+          "frames": [
+            "iframe:https://www.google.com"
+          ],
+          "types": [
+            "script"
+          ],
+          "paths": [
+            "/maps-api-v3/embed"
+          ]
+        }
+      ],
+      "trackingRequests": [],
+      "cookies": [],
+      "setCookieHeaders": [],
+      "firstPartyLocalStorageKeys": [],
+      "browser": "153.0.8010.12"
+    },
+    "desktop": {
+      "baseURL": "http://127.0.0.1:4322",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "pages": [
+        "/",
+        "/en/"
+      ],
+      "consentGiven": false,
+      "requestCount": 128,
+      "thirdPartyRequestCount": 85,
+      "thirdPartyHosts": [
+        {
+          "host": "maps.googleapis.com",
+          "count": 38,
+          "frames": [
+            "iframe:https://www.google.com"
+          ],
+          "types": [
+            "script",
+            "xhr",
+            "image"
+          ],
+          "paths": [
+            "/maps/api",
+            "/maps-api-v3/api",
+            "/$rpc/google.internal.maps.mapsjs.v1.MapsJsInternalService"
+          ]
+        },
+        {
+          "host": "www.google.com",
+          "count": 26,
+          "frames": [
+            "other",
+            "iframe:https://www.google.com"
+          ],
+          "types": [
+            "document",
+            "image",
+            "xhr"
+          ],
+          "paths": [
+            "/maps",
+            "/maps/embed",
+            "/maps/vt"
+          ]
+        },
+        {
+          "host": "fonts.gstatic.com",
+          "count": 11,
+          "frames": [
+            "iframe:https://www.google.com"
+          ],
+          "types": [
+            "font"
+          ],
+          "paths": [
+            "/s/roboto",
+            "/s/googlesanstext"
+          ]
+        },
+        {
+          "host": "maps.gstatic.com",
+          "count": 4,
+          "frames": [
+            "iframe:https://www.google.com"
+          ],
+          "types": [
+            "script",
+            "image"
+          ],
+          "paths": [
+            "/maps-api-v3/embed",
+            "/mapfiles/openhand_8_8.cur"
+          ]
+        },
+        {
+          "host": "fonts.googleapis.com",
+          "count": 4,
+          "frames": [
+            "iframe:https://www.google.com"
+          ],
+          "types": [
+            "stylesheet"
+          ],
+          "paths": [
+            "/css"
+          ]
+        },
+        {
+          "host": "places.googleapis.com",
+          "count": 2,
+          "frames": [
+            "iframe:https://www.google.com"
+          ],
+          "types": [
+            "xhr"
+          ],
+          "paths": [
+            "/$rpc/google.maps.places.v1.Places"
+          ]
+        }
+      ],
+      "trackingRequests": [],
+      "cookies": [],
+      "setCookieHeaders": [],
+      "firstPartyLocalStorageKeys": [],
+      "browser": "153.0.8010.12"
+    }
+  }
+}

@@ -1,0 +1,359 @@
+---
+/**
+ * GELİŞTİRME SAYFASI — 3B cihaz görüntüleyici testi (RIC / BTE / CIC + render ön ayarları).
+ * Yalnızca `astro dev` sırasında /dev/viewer/ olarak eklenir (astro.config.mjs > ayaz-dev-pages); üretim derlemesine girmez. noindex.
+ *
+ * Betikler için açığa çıkarılanlar (yalnızca DEV):
+ *   window.__ayazViewer                — ViewerController (index.ts açar)
+ *   window.__ayazRender(kind, opts)    — çevrimdışı ön ayar render'ı (render.ts)
+ *   window.__ayazRenderMold(style, o)  — kulak kalıbı biçimleri render'ı (molds.ts)
+ */
+import '../styles/global.css';
+---
+
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Dev · 3B cihaz görüntüleyici</title>
+    <style>
+      .wrap {
+        max-width: 1040px;
+        margin: 0 auto;
+        padding: var(--space-6) var(--gutter);
+      }
+      h1 {
+        font-family: var(--font-display);
+        font-size: var(--h3);
+        margin: 0 0 var(--space-4);
+      }
+      .stage {
+        position: relative;
+        width: 720px;
+        height: 520px;
+        max-width: 100%;
+        border-radius: var(--r-lg);
+        background: linear-gradient(180deg, var(--surface) 0%, var(--surface-2) 100%);
+        box-shadow: var(--shadow-2);
+        overflow: hidden;
+      }
+      .stage canvas {
+        display: block;
+        width: 100%;
+        height: 100%;
+        outline: none;
+        cursor: grab;
+      }
+      .stage canvas:focus-visible {
+        box-shadow: inset var(--ring);
+      }
+      .hotspots {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+      }
+      .dot {
+        position: absolute;
+        left: 0;
+        top: 0;
+        pointer-events: auto;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transform: translate(-50%, -50%);
+        transition: opacity var(--dur-1) var(--ease-out);
+        cursor: pointer;
+        border: 0;
+        background: none;
+        padding: 0;
+        font: inherit;
+        color: var(--ink);
+      }
+      .dot[data-hidden='true'] {
+        opacity: 0;
+        pointer-events: none;
+      }
+      .dot i {
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        background: var(--accent);
+        box-shadow: 0 0 0 4px rgba(8, 127, 140, 0.25), var(--shadow-1);
+      }
+      .dot span {
+        font-size: var(--text-xs);
+        background: rgba(255, 255, 255, 0.92);
+        padding: 2px 8px;
+        border-radius: var(--r-pill);
+        box-shadow: var(--shadow-1);
+        white-space: nowrap;
+      }
+      .status {
+        position: absolute;
+        left: 12px;
+        bottom: 8px;
+        margin: 0;
+        font-size: var(--text-xs);
+        color: var(--ink-3);
+        pointer-events: none;
+      }
+      .controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-3);
+        align-items: center;
+        margin-top: var(--space-4);
+      }
+      .controls button,
+      .controls select {
+        font: inherit;
+        padding: 6px 14px;
+        border-radius: var(--r-pill);
+        border: 1px solid var(--line-strong);
+        background: var(--surface);
+        cursor: pointer;
+      }
+      .controls button[aria-pressed='true'] {
+        background: var(--accent);
+        color: #fff;
+        border-color: var(--accent);
+      }
+      .controls input[type='range'] {
+        width: 220px;
+      }
+      .group {
+        display: inline-flex;
+        gap: 4px;
+        align-items: center;
+      }
+      .meta {
+        font-size: var(--text-sm);
+        color: var(--ink-2);
+      }
+      #capture,
+      #render-out {
+        max-width: 100%;
+        margin-top: var(--space-4);
+        border: 1px solid var(--line);
+        background: repeating-conic-gradient(#eee 0 25%, #fff 0 50%) 0 0 / 20px 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="wrap">
+      <h1>3B cihaz görüntüleyici (dev)</h1>
+      <div class="stage" id="stage">
+        <canvas id="viewer-canvas" tabindex="0" aria-label="Temsili işitme cihazı, döndürülebilir 3B model"></canvas>
+        <div class="hotspots" id="hotspots" aria-hidden="true"></div>
+        <p class="status" id="status">Yükleniyor…</p>
+      </div>
+      <div class="controls" id="device-switch" role="group" aria-label="Cihaz tipi">
+        <span class="group">
+          <button type="button" data-device="ric" aria-pressed="true">RIC (312)</button>
+          <button type="button" data-device="bte" aria-pressed="false">BTE (13)</button>
+          <button type="button" data-device="cic" aria-pressed="false">CIC (10)</button>
+        </span>
+        <span class="meta" id="tri"></span>
+      </div>
+      <div class="controls">
+        <label>Parçala <input id="explode" type="range" min="0" max="100" value="0" /></label>
+        <button id="btn-explode" type="button">Parçala</button>
+        <button id="btn-assemble" type="button">Birleştir</button>
+        <button id="btn-door" type="button" aria-pressed="false">Pil kapağı</button>
+        <button id="btn-reset" type="button">Sıfırla</button>
+        <button id="btn-capture" type="button">Poster yakala (1200×900)</button>
+        <label><input id="autorotate" type="checkbox" checked /> Otomatik dön</label>
+      </div>
+      <div class="controls">
+        <label
+          >Render ön ayarı
+          <select id="render-kind">
+            <option value="ric">ric</option>
+            <option value="bte">bte</option>
+            <option value="cic">cic</option>
+            <option value="ite">ite (tam kabuk, 13)</option>
+            <option value="itc">itc (yarım kabuk, 312)</option>
+            <option value="iic">iic (dip kanal, 10)</option>
+          </select>
+        </label>
+        <label
+          >Katman
+          <select id="render-layer">
+            <option value="all">tümü</option>
+            <option value="body">body (kulak arkası)</option>
+            <option value="front">front (kulak üstü)</option>
+          </select>
+        </label>
+        <label><input id="render-door" type="checkbox" /> Kapak açık</label>
+        <label><input id="render-home" type="checkbox" /> Ana bakış (küçük resim)</label>
+        <button id="btn-render" type="button">Render (1200 px)</button>
+        <span class="meta" id="render-meta"></span>
+      </div>
+      <p class="meta" id="meta">
+        Klavye: ← → ↑ ↓ döndür · + − yaklaştır · r sıfırla · e parçala · b pil kapağı. Noktalara tıklayınca parçaya odaklanır
+        (pil/kapak noktaları kapağı açar).
+      </p>
+      <img id="capture" alt="" hidden />
+      <img id="render-out" alt="" hidden />
+    </main>
+
+    <script>
+      import type { DeviceType, PartId, ViewerController } from '../scripts/viewer/types.ts';
+      import { PART_IDS } from '../scripts/viewer/types.ts';
+      import { renderDeviceView, type RenderViewOptions, type RenderViewResult } from '../scripts/viewer/render.ts';
+      import type { RenderKind } from '../scripts/viewer/model.ts';
+      import { renderMoldStyle, type MoldRenderOptions, type MoldRenderResult, type MoldStyle } from '../scripts/viewer/molds.ts';
+
+      declare global {
+        interface Window {
+          __ayazRender?: (kind: RenderKind, opts?: RenderViewOptions) => RenderViewResult;
+          __ayazRenderMold?: (style: MoldStyle, opts?: MoldRenderOptions) => MoldRenderResult;
+        }
+      }
+
+      const LABELS: Record<string, string> = {
+        mics: 'Mikrofonlar',
+        mic: 'Mikrofon',
+        body: 'Gövde',
+        shell: 'Kabuk',
+        faceplate: 'Faceplate',
+        button: 'Düğme',
+        wire: 'Alıcı kablosu',
+        receiver: 'Alıcı',
+        dome: 'Dome',
+        hook: 'Kulak kancası',
+        tube: 'Hortum',
+        earmold: 'Kulak kalıbı',
+        'battery-door': 'Pil kapağı',
+        battery: 'Pil',
+        vent: 'Havalandırma',
+        'pull-string': 'Çıkarma ipi',
+        'receiver-outlet': 'Ses çıkışı',
+      };
+
+      const $ = <T extends HTMLElement>(id: string): T => document.getElementById(id) as T;
+      const stage = $<HTMLDivElement>('stage');
+      const canvas = $<HTMLCanvasElement>('viewer-canvas');
+      const hotspots = $<HTMLDivElement>('hotspots');
+      const status = $<HTMLParagraphElement>('status');
+      const range = $<HTMLInputElement>('explode');
+      const autorotate = $<HTMLInputElement>('autorotate');
+      const captureImg = $<HTMLImageElement>('capture');
+      const renderImg = $<HTMLImageElement>('render-out');
+      const doorBtn = $<HTMLButtonElement>('btn-door');
+      const triEl = $<HTMLSpanElement>('tri');
+
+      // Çevrimdışı render, görüntüleyiciden bağımsız (WebGL yoksa da hata verir, betik yakalar)
+      window.__ayazRender = (kind, opts) => renderDeviceView(kind, opts);
+      window.__ayazRenderMold = (style, opts) => renderMoldStyle(style, opts);
+
+      let controller: ViewerController | null = null;
+      const dots = new Map<PartId, HTMLButtonElement>();
+      const buildDots = (type: DeviceType) => {
+        hotspots.replaceChildren();
+        dots.clear();
+        for (const id of PART_IDS[type]) {
+          const b = document.createElement('button');
+          b.type = 'button';
+          b.className = 'dot';
+          b.dataset.part = id;
+          b.dataset.hidden = 'true';
+          b.innerHTML = `<i></i><span>${LABELS[id] ?? id}</span>`;
+          b.addEventListener('click', () => controller?.focusPart(id));
+          hotspots.appendChild(b);
+          dots.set(id, b);
+        }
+      };
+      buildDots('ric');
+
+      const { mountDeviceViewer, isWebGLAvailable } = await import('../scripts/viewer/index.ts');
+
+      if (!isWebGLAvailable()) {
+        status.textContent = 'WebGL2 yok — statik poster gösterilecek.';
+      } else {
+        let syncingRange = false;
+
+        controller = await mountDeviceViewer(stage, {
+          canvas,
+          deviceType: 'ric',
+          onReady: () => {
+            status.textContent = 'Hazır';
+          },
+          onInteract: () => {
+            status.textContent = 'Etkileşim algılandı (otomatik dönüş durdu)';
+          },
+          onHotspot: (id, x, y, visible) => {
+            const el = dots.get(id);
+            if (!el) return;
+            el.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) translate(-50%, -50%)`;
+            el.dataset.hidden = visible ? 'false' : 'true';
+          },
+          onDoorChange: (open) => doorBtn.setAttribute('aria-pressed', String(open)),
+          onDeviceChange: (type) => {
+            status.textContent = `Model: ${type.toUpperCase()}`;
+            for (const b of document.querySelectorAll<HTMLButtonElement>('[data-device]')) {
+              b.setAttribute('aria-pressed', String(b.dataset.device === type));
+            }
+          },
+          onAutoRotateChange: (on) => {
+            autorotate.checked = on;
+          },
+        });
+
+        for (const b of document.querySelectorAll<HTMLButtonElement>('[data-device]')) {
+          b.addEventListener('click', async () => {
+            const type = b.dataset.device as DeviceType;
+            buildDots(type);
+            await controller?.setDeviceType(type);
+          });
+        }
+
+        range.addEventListener('input', () => {
+          if (syncingRange) return;
+          controller?.setExplode(Number(range.value) / 100, false);
+        });
+        $('btn-explode').addEventListener('click', () => controller?.explode());
+        $('btn-assemble').addEventListener('click', () => controller?.assemble());
+        doorBtn.addEventListener('click', () => controller?.toggleBatteryDoor());
+        $('btn-reset').addEventListener('click', () => controller?.reset());
+        $('btn-capture').addEventListener('click', () => {
+          const url = controller?.captureImage(1200, 900) ?? '';
+          if (url) {
+            captureImg.src = url;
+            captureImg.hidden = false;
+          }
+        });
+        autorotate.addEventListener('change', () => controller?.setAutoRotate(autorotate.checked));
+
+        // Kaydırıcıyı tween ile senkron tut
+        const tick = () => {
+          if (controller) {
+            syncingRange = true;
+            range.value = String(Math.round(controller.getExplode() * 100));
+            syncingRange = false;
+          }
+          requestAnimationFrame(tick);
+        };
+        requestAnimationFrame(tick);
+      }
+
+      $('btn-render').addEventListener('click', () => {
+        const kind = $<HTMLSelectElement>('render-kind').value as RenderKind;
+        const layer = $<HTMLSelectElement>('render-layer').value as RenderViewOptions['layer'];
+        const doorOpen = $<HTMLInputElement>('render-door').checked;
+        const home = $<HTMLInputElement>('render-home').checked;
+        try {
+          const r = renderDeviceView(kind, home ? { layer, doorOpen, dir: 'home', fit: 0.9 } : { layer, doorOpen });
+          renderImg.src = r.dataUrl;
+          renderImg.hidden = false;
+          $('render-meta').textContent = `${r.width}×${r.height} px · ${r.mmPerPx.toFixed(4)} mm/px · ${r.triangleCount} üçgen`;
+          triEl.textContent = '';
+        } catch (err) {
+          $('render-meta').textContent = `Render hatası: ${(err as Error).message}`;
+        }
+      });
+    </script>
+  </body>
+</html>

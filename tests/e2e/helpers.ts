@@ -5,7 +5,16 @@ export const THIRD_PARTY = ['googletagmanager.com', 'google-analytics.com', 'fac
 
 export function watchRequests(page: Page) {
   const urls: string[] = [];
-  page.on('request', (r) => urls.push(r.url()));
+  // Yalnızca sitenin kendi (ana) çerçevesi: iletişimdeki Google Haritalar gömmesi bilinçli bir üçüncü taraf
+  // iframe'idir ve kendi alt isteklerini yapar; bu test sitenin izinsiz izleme betiği yüklemediğini doğrular.
+  // TÜM çerçeveleri (harita iframe'i dahil) kapsayan izinsiz izleme kanıtı: privacy-all-frames.spec.ts
+  page.on('request', (r) => {
+    try {
+      if (r.frame() === page.mainFrame()) urls.push(r.url());
+    } catch {
+      urls.push(r.url());
+    }
+  });
   return {
     thirdParty: () => urls.filter((u) => THIRD_PARTY.some((d) => u.includes(d))),
     all: () => urls,

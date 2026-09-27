@@ -21,6 +21,70 @@ export interface Verified<T> {
   note?: string;
 }
 
+/** Hukuki metinlerde adı geçebilecek bildirim kanalları (Worker: MAIL_PROVIDER + ilgili gizli anahtarlar). */
+export type NotificationChannel = 'resend' | 'brevo' | 'telegram';
+
+/** Onay kaydı. by: rol veya kısa ad ("İşletme sahibi", "Av. A. B.") — repo HERKESE AÇIK, tam ad yazmayın. */
+export interface LegalConfirmation {
+  by: string;
+  /** YYYY-AA-GG */
+  date: string;
+}
+
+/**
+ * Gizlilik / KVKK / çerez metinleri için YALNIZCA işletmenin (veya avukatının) verebileceği bilgiler.
+ * Tahminle doldurulmaz: bilinmeyen değer null kalır. PUBLIC_SITE_ENV=production derlemesi eksik alan
+ * varsa durur (src/content/legal/facts.ts, CONTENT-VERIFICATION.md §7). Önizlemede eksikler sayfada
+ * işaretli yer tutucu olarak görünür.
+ */
+export interface LegalFacts {
+  retention: {
+    /** Randevu/iletişim talepleri (form bildirimi, e-posta, telefonla alınan talep kayıtları): talebin alındığı tarihten itibaren kaç AY saklanıyor? */
+    appointmentRequestsMonths: number | null;
+    /** WhatsApp yazışmaları kaç AY saklanıyor? */
+    whatsappMonths: number | null;
+    /** Yalnızca API modu (PUBLIC_API_BASE dolu): Cloudflare Worker çalışma kayıtları (Workers Logs) kaç GÜN tutuluyor? */
+    technicalLogsDays: number | null;
+  };
+  /** Yalnızca API modu: Worker'da gerçekten etkin bildirim kanalları (ör. ['resend'] ya da ['brevo', 'telegram']). */
+  notificationChannels: readonly NotificationChannel[] | null;
+  /** KVKK m.9 yurt dışı aktarım dayanağı — avukatın yazdığı tek cümle, TR ve EN. */
+  crossBorderBasis: { tr: string; en: string } | null;
+  /** Metinde yazan hukuki sebeplerin (m.5/2-c, m.5/2-f, m.5/1 açık rıza) teyidi. */
+  legalBasesConfirmation: LegalConfirmation | null;
+  /**
+   * Metinlerin tamamının onayı: `{ by, date, version, context, hash }`.
+   *  - `version`: src/content/legal/facts.ts > LEGAL_TEXT_VERSION (insan okuyabilir sürüm etiketi).
+   *  - `context`: onaylanan derleme yapılandırmasının imzası (legalContextSignature: form modu, Turnstile,
+   *    canlı yorumlar, ölçüm kimlikleri) — metin bu yapılandırmaya göre farklı basılır.
+   *  - `hash`: onaylanan NİHAİ METNİN içerik özeti (src/content/legal/text-hash.ts > legalTextHash: bu bağlamda,
+   *    yukarıdaki alanların GERÇEK değerleriyle basılan gizlilik sayfası TR/EN, çerez paneli TR/EN, harita notu ve
+   *    form onay metni + bu alanların kendisi; yalnızca textApproval özete girmez).
+   * Sıra: önce yukarıdaki alanlar doldurulur → nihai metin önizlemede okunur → onay verilir. Yukarıdaki alanlardan
+   * biri eksikken onay kabul edilmez ve derleme özet basmaz. Değerleri elle hesaplamayın: alanlar tamamken
+   * PUBLIC_SITE_ENV=production derlemesi durduğunda hata mesajı (ve önizleme sayfasının uyarısı) bu nesneyi tam
+   * haliyle basar; by/date doldurulup olduğu gibi kopyalanır. Onaydan sonra yukarıdaki alanlardan biri (ör. saklama
+   * süresi, bildirim kanalı, m.9 cümlesi), metnin herhangi bir ifadesi ya da yapılandırma (ör. GitHub Variables'a
+   * PUBLIC_GA4_ID eklenmesi) değişince hash/context değişir, onay geçersizleşir ve yeni onay gerekir.
+   */
+  textApproval: (LegalConfirmation & { version: string; context: string; hash: string }) | null;
+}
+
+/** Yalnızca işletme/avukat yanıtıyla doldurulur (tahmin yok). Sorular: CONTENT-VERIFICATION.md §7. 27 Eyl 2026: saklama süreleri geldi; m.9 dayanağı, hukuki sebep teyidi ve metin onayı bekliyor. */
+export const legalFacts: LegalFacts = {
+  retention: {
+    /** İşletme sahibi yanıtı, 27 Eyl 2026: randevu/iletişim talepleri 6 ay saklanır. */
+    appointmentRequestsMonths: 6,
+    /** İşletme sahibi yanıtı, 27 Eyl 2026: WhatsApp yazışmaları 6 ay saklanır. */
+    whatsappMonths: 6,
+    technicalLogsDays: null,
+  },
+  notificationChannels: null,
+  crossBorderBasis: null,
+  legalBasesConfirmation: null,
+  textApproval: null,
+};
+
 export const business = {
   brand: 'Ayaz İşitme Merkezi',
   legalName: 'Ayaz İşitme Cihazları Satış ve Uygulama Merkezi',
@@ -55,20 +119,26 @@ export const business = {
     shareUrl: 'https://share.google/A7IBtvRd3n1rcFSQv',
     /** Yol tarifi (mevcut sitede kullanılan) */
     directionsUrl: 'https://maps.app.goo.gl/x7CAB5ZyCWHGagyi7',
-    /** Places API (New) Place ID — doğrulanınca doldurulur; boşken yorum API'si kapalı kalır. */
-    placeId: { value: '', status: 'unverified' as VerificationStatus },
+    /** Places API (New) Place ID — işletmenin kendi Google Takeout dışa aktarımından (26 Eyl 2026) doğrulandı. */
+    placeId: { value: 'ChIJFz--mydN0xQRGFX1eR6q5s8', status: 'verified' as VerificationStatus },
+    /** Google'ın belgelenmiş Maps URL biçimi (query_place_id): işletme kartını ve yorumları açar. */
+    placeUrl:
+      'https://www.google.com/maps/search/?api=1&query=Ayaz%20%C4%B0%C5%9Fitme%20Cihazlar%C4%B1%20Sat%C4%B1%C5%9F%20ve%20Uygulama%20Merkezi&query_place_id=ChIJFz--mydN0xQRGFX1eR6q5s8',
     /** Google İşletme Profili > "Daha fazla yorum alın" bağlantısı (resmî). Boşsa paylaşım bağlantısı kullanılır. */
     writeReviewUrl: '',
-    /** Tıklayınca yüklenen harita gömme adresi (çerez onayından bağımsız, kullanıcı eylemiyle). */
+    /** Doğrudan yüklenen harita gömmesi (işletme adı + adres sorgusu → işaretli konum). */
     mapsEmbedUrl:
-      'https://www.google.com/maps?q=A%C5%9Fa%C4%9F%C4%B1%20E%C4%9Flence%20Mahallesi%2C%20Ayval%C4%B1%20Caddesi%20No%3A26%2FA%2C%20Ke%C3%A7i%C3%B6ren%20Ankara&output=embed',
+      'https://www.google.com/maps?q=Ayaz%20%C4%B0%C5%9Fitme%20Cihazlar%C4%B1%20Sat%C4%B1%C5%9F%20ve%20Uygulama%20Merkezi%2C%20Ayval%C4%B1%20Cd.%20No%3A26%20A%2C%20A%C5%9Fa%C4%9F%C4%B1%20E%C4%9Flence%2C%2006010%20Ke%C3%A7i%C3%B6ren%20Ankara&z=17&output=embed',
   },
 
-  /** Çalışma saatleri: canlı sitedeki JSON-LD'den. İşletme yazılı teyit vermeli. */
+  /**
+   * Çalışma saatleri: Google İşletme Profili (Takeout, 26 Eyl 2026; yorumlu ana kayıt) Pzt–Cmt 09:00–19:00,
+   * Pazar kapalı; işletme tarafı 26 Eyl 2026'da bu saatlerin esas alınmasını onayladı.
+   */
   hours: {
-    status: 'unverified' as VerificationStatus,
+    status: 'verified' as VerificationStatus,
     weekly: [
-      { days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'] as const, opens: '09:00', closes: '18:00' },
+      { days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'] as const, opens: '09:00', closes: '19:00' },
     ],
     closedDays: ['Sunday'] as const,
   },
@@ -102,8 +172,25 @@ export const business = {
     observed: ['Bernafon', 'Oticon', 'Coselgi'],
   },
 
+  /** Sitedeki yorum seçkisinde yazar adları tam mı ('Ali Veli') yoksa kısa mı ('Ali V.') gösterilsin? */
+  reviewsShowFullNames: false,
+
+  /**
+   * Yorum bölümü gösterimi — PUSH ÖNCESİ KARAR GEREKLİ.
+   *  'carousel' : Google yorumları + "5,0 · 65 yorum" özeti, döngülü (kullanıcı talebi).
+   *  'link'     : Yorum metni/puan/adet YOK; yalnızca Google işletme profiline bağlantı.
+   * Hukuk incelemesi (26 Eyl 2026): Ticari Reklam ve Haksız Ticari Uygulamalar Yön. m.28/B(1),(6)
+   * (RG 1/7/2026-33297, yürürlük 1/8/2026) + Reklam Kurulu 14/2/2025 kararı, satın alımı doğrulanamayan
+   * Google yorum ve puanlarının satıcı sitesinde yayınını yasaklıyor → önerilen: 'link'.
+   * Ortam değişkeni PUBLIC_REVIEWS_DISPLAY ('carousel' | 'link') bu değeri ezer (GitHub > Variables).
+   */
+  reviewsDisplay: 'carousel' as 'carousel' | 'link',
+
   /** Kurumsal bağlantılar (doğrulananlar) */
   sameAs: ['https://maps.app.goo.gl/x7CAB5ZyCWHGagyi7', 'https://share.google/A7IBtvRd3n1rcFSQv'],
+
+  /** Hukuki metin girdileri (işletme/avukat) — bkz. legalFacts yukarıda. */
+  legal: legalFacts,
 
   /** Mevcut sitedeki GA4 kimliği (herkese açık HTML'de). .env ile etkinleşir. */
   knownAnalytics: { ga4: 'G-VRC710M0YF' },

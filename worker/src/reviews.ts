@@ -46,6 +46,12 @@ export interface PlaceDetails {
 // ---- Ön yüze dönen indirgenmiş biçim ----------------------------------------
 
 export interface TrimmedReview {
+  /**
+   * Google yorum kimliği: Review.name ("places/{placeId}/reviews/{id}") son parçası; yoksa ''.
+   * Ön yüz bunu yalnızca OLUMLU eşleşme işareti olarak kullanır (Takeout kimliğiyle aynı olduğu kanıtlanmadı).
+   * Geriye dönük uyumlu ek alan: eski istemciler yok sayar.
+   */
+  id: string;
   author: string;
   authorUri: string;
   authorPhoto: string;
@@ -54,6 +60,7 @@ export interface TrimmedReview {
   /** text çevrildiyse (text.languageCode !== originalText.languageCode) */
   translated: boolean;
   relativeTime: string;
+  /** Yayın zamanı (Review.publishTime, RFC 3339 UTC); yoksa ''. Ön yüz ay eşleşmesi için kullanır. */
   publishTime: string;
   /** Yorumun Google Maps sayfası (Review.googleMapsUri) — politika gereği bağlantı verilmeli. */
   reviewUri: string;
@@ -82,7 +89,9 @@ export function trimPlace(place: PlaceDetails, fetchedAt: string): ReviewsPayloa
     .map((r) => {
       const text = r.text?.text ?? r.originalText?.text ?? '';
       const translated = Boolean(r.text?.languageCode && r.originalText?.languageCode && r.text.languageCode !== r.originalText.languageCode);
+      const id = str(r.name).split('/').pop() ?? '';
       return {
+        id: /^[A-Za-z0-9_-]+$/.test(id) ? id : '',
         author: str(r.authorAttribution?.displayName),
         authorUri: str(r.authorAttribution?.uri),
         authorPhoto: str(r.authorAttribution?.photoUri),

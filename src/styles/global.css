@@ -10,6 +10,8 @@ html {
   -webkit-text-size-adjust: 100%;
   scroll-behavior: smooth;
   scroll-padding-top: calc(var(--header-h) + 12px);
+  /* Çerez paneli görünürken (consent.ts --consent-h) odaklanan öğe panelin altında kalmasın */
+  scroll-padding-bottom: var(--consent-h, 0px);
 }
 @media (prefers-reduced-motion: reduce) {
   html {
@@ -305,7 +307,7 @@ strong {
   --btn-bg: var(--whatsapp);
 }
 .btn--whatsapp:hover {
-  --btn-bg: #0f766a;
+  --btn-bg: #0b665c;
 }
 .btn--ghost {
   --btn-bg: transparent;
@@ -325,6 +327,16 @@ strong {
   min-height: 56px;
   padding: 0.9rem 1.7rem;
   font-size: 1.0625rem;
+}
+/* 320–359 px: büyük düğme metni ("Request an Appointment", "WhatsApp ile Gönder") tek satırda kalsın */
+@media (max-width: 359px) {
+  .btn--lg {
+    padding-inline: 1rem;
+    font-size: 1rem;
+  }
+  .btn {
+    padding-inline: 1rem;
+  }
 }
 .btn--icon {
   width: 44px;
@@ -569,4 +581,45 @@ details.acc .acc__body {
   border: 0;
   border-top: 1px solid var(--line);
   margin: 0;
+}
+
+/* ---------- Windows Yüksek Karşıtlık (forced-colors): seçili durumlar yalnız arka planla gösterilmesin ---------- */
+@media (forced-colors: active) {
+  [aria-selected='true'],
+  [aria-current='true'],
+  [aria-pressed='true'] {
+    outline: 2px solid CanvasText;
+    outline-offset: -2px;
+  }
+  :focus-visible {
+    outline: 3px solid Highlight;
+    outline-offset: 2px;
+  }
+  .input:focus {
+    outline: 2px solid Highlight;
+  }
+}
+
+/* ---------- Yazdırma (ör. gizlilik metni): sabit çubuk ve çerez paneli sayfaların üstüne basılmasın ---------- */
+@media print {
+  .mbar,
+  .consent,
+  .hdr,
+  .skip-link {
+    display: none !important;
+  }
+  body {
+    padding-bottom: 0 !important;
+  }
+  .reveal {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+/* Çerez paneli görünürken sayfa sonunda paneli karşılayan boşluk (masaüstü; mobilde MobileBar.astro kendi payına ekler) */
+@media (min-width: 900px) {
+  body {
+    padding-bottom: var(--consent-h, 0px);
+  }
 }

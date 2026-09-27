@@ -39,7 +39,8 @@ const { c } = Astro.props;
     font-weight: 700;
     font-size: 0.8rem;
   }
-  .mbar a .icon {
+  /* Icon ayrı bileşen: kapsamlı stil onun <svg>'sine ulaşmaz, bu yüzden :global(.icon) */
+  .mbar a :global(.icon) {
     width: 1.35rem;
     height: 1.35rem;
   }
@@ -55,7 +56,11 @@ const { c } = Astro.props;
 <style is:global>
   @media (max-width: 899px) {
     body {
-      padding-bottom: calc(60px + env(safe-area-inset-bottom));
+      padding-bottom: calc(60px + env(safe-area-inset-bottom) + var(--consent-h, 0px));
+    }
+    /* Odaklanan / kaydırılarak getirilen öğe (ör. 3B sahnenin alttaki pil kapağı noktası) sabit çubuğun altında kalmasın */
+    html {
+      scroll-padding-bottom: calc(72px + env(safe-area-inset-bottom) + var(--consent-h, 0px));
     }
   }
 </style>

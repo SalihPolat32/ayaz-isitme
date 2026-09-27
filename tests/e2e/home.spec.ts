@@ -36,7 +36,7 @@ test.describe('Ana sayfa', () => {
   test('cihaz türü sekmeleri: tıklama ve klavye', async ({ page }) => {
     await page.goto('/#cihazlar');
     await dismissConsent(page);
-    const tabs = page.getByRole('tab');
+    const tabs = page.locator('[data-tabs]').getByRole('tab');
     await expect(tabs).toHaveCount(6);
     await tabs.nth(1).click();
     await expect(tabs.nth(1)).toHaveAttribute('aria-selected', 'true');
@@ -79,14 +79,13 @@ test.describe('Ana sayfa', () => {
     await expect(first).toBeFocused();
   });
 
-  test('harita yalnızca tıklayınca yüklenir', async ({ page }) => {
-    const reqs = watchRequests(page);
+  test('harita doğrudan yüklenir (Google Maps iframe, işaretli konum)', async ({ page }) => {
     await page.goto('/#iletisim');
     await dismissConsent(page);
-    await expect(page.locator('[data-map] iframe')).toHaveCount(0);
-    expect(reqs.all().filter((u) => u.includes('google.com/maps'))).toEqual([]);
-    await page.locator('[data-map-load]').click();
-    await expect(page.locator('[data-map] iframe')).toHaveAttribute('src', /google\.com\/maps/);
+    const frame = page.locator('[data-map] iframe');
+    await expect(frame).toHaveAttribute('src', /google\.com\/maps\?q=Ayaz/);
+    await expect(frame).toHaveAttribute('title', /Google/);
+    await expect(page.locator('[data-map] [data-track="directions_click"]')).toBeVisible();
   });
 
   test('robots, sitemap, og görseli ve 404', async ({ request }) => {
@@ -97,7 +96,40 @@ test.describe('Ana sayfa', () => {
     expect(sm.ok()).toBeTruthy();
     const og = await request.get('/og.jpg');
     expect(og.headers()['content-type']).toContain('image/jpeg');
+    const ogEn = await request.get('/og-en.jpg');
+    expect(ogEn.headers()['content-type']).toContain('image/jpeg');
     const nf = await request.get('/olmayan-sayfa/');
     expect(nf.status()).toBe(404);
+  });
+});
+
+test.describe('Google yorumları (Takeout verisi)', () => {
+  test('en iyi yorum önde, 30+ kart, özet 5,0 · 65, çok sayfada sayaç', async ({ page }) => {
+    await page.goto('/#yorumlar');
+    await dismissConsent(page);
+    const cards = page.locator('[data-list] > .rvc');
+    expect(await cards.count()).toBeGreaterThanOrEqual(30);
+    await expect(cards.first().locator('[data-author]')).toHaveText('Akın E.');
+    await expect(page.locator('[data-score] [data-rating]')).toHaveText('5,0');
+    await expect(page.locator('[data-score] [data-count]')).toContainText('65');
+    await expect(page.locator('[data-progress]')).toBeVisible();
+    await expect(page.locator('[data-progress-text]')).toHaveText(/^1 \/ \d+$/);
+    await page.locator('[data-next]').click();
+    await expect(page.locator('[data-progress-text]')).not.toHaveText(/^1 \//, { timeout: 5000 });
+    // Çıkar çatışması / sağlık sonucu iddiası / rakip kıyası içeren yorumlar gösterilmez
+    await expect(page.locator('[data-list]')).not.toContainText('Salih P.');
+    await expect(page.locator('[data-list]')).not.toContainText('sorunu kalmadı');
+    await expect(page.locator('[data-list]')).not.toContainText('Diğer firmalara göre');
+  });
+
+  test('İngilizce sayfada Google çevirisi etiketiyle', async ({ page }) => {
+    await page.goto('/en/#yorumlar');
+    await dismissConsent(page);
+    const cards = page.locator('[data-list] > .rvc');
+    const first = cards.first();
+    await expect(first).toContainText('Translated by Google');
+    await expect(first.locator('[data-text]')).toHaveAttribute('lang', 'en');
+    // İngilizce sayfada yalnızca çevirisi olan yorumlar (Türkçe metin karışmaz)
+    expect(await cards.count()).toBe(await page.locator('[data-list] > .rvc [data-text][lang="en"]').count());
   });
 });

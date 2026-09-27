@@ -1,19 +1,25 @@
 ---
 import type { Locale, SiteContent } from '../content/types';
-import type { LegalSection } from '../content/legal/tr';
+import type { LegalDoc } from '../content/legal/tr';
 import Icon from './Icon.astro';
 interface Props {
   locale: Locale;
   c: SiteContent;
-  legal: { title: string; draftNotice: string; updated: string; sections: LegalSection[] };
+  /** draftNotice yalnızca eksik işletme bilgisi varken (önizleme / QA geçersiz kılma) doludur */
+  legal: Pick<LegalDoc, 'title' | 'draftNotice' | 'updated' | 'sections'>;
 }
 const { locale, legal } = Astro.props;
 const back = locale === 'tr' ? 'Ana sayfaya dön' : 'Back to home';
 const updatedLabel = locale === 'tr' ? 'Son güncelleme' : 'Last updated';
 const toc = locale === 'tr' ? 'Bu sayfada' : 'On this page';
+// Yer tutucu (<mark class="legal-todo">) yalnızca eksik işletme bilgisi varken basılır; stili de yalnızca o zaman
+// sayfaya eklenir (is:inline → paylaşılan CSS paketine girmez), tamamlanmış üretim çıktısında hiç bulunmaz.
+const placeholders = legal.sections.some((s) => s.html.includes('class="legal-todo"'));
+const todoCss = `.legal mark.legal-todo{background:#fff1b8;color:#5c3b00;outline:2px dashed #c58a00;outline-offset:1px;padding:0 .3em;border-radius:3px;font-weight:600;-webkit-box-decoration-break:clone;box-decoration-break:clone}.legal mark.legal-todo code{background:transparent;font-weight:400}`;
 ---
 
 <article class="section legal">
+  {placeholders && <style is:inline set:html={todoCss} />}
   <div class="container legal__grid">
     <aside class="legal__aside">
       <a class="btn btn--ghost btn--sm" href={locale === 'tr' ? '/' : '/en/'}><Icon name="chevron-left" />{back}</a>
@@ -27,7 +33,9 @@ const toc = locale === 'tr' ? 'Bu sayfada' : 'On this page';
     <div class="legal__body">
       <h1>{legal.title}</h1>
       <p class="muted">{updatedLabel}: {legal.updated}</p>
-      <p class="notice notice--warn"><Icon name="alert" />{legal.draftNotice}</p>
+      {legal.draftNotice && (
+        <div class="notice notice--warn legal__draft" data-legal-draft role="note"><Icon name="alert" /><div set:html={legal.draftNotice} /></div>
+      )}
       {legal.sections.map((s) => (
         <section id={s.id} class="legal__section">
           <h2>{s.title}</h2>
@@ -67,6 +75,12 @@ const toc = locale === 'tr' ? 'Bu sayfada' : 'On this page';
   }
   .legal__body {
     max-width: 76ch;
+    min-width: 0;
+  }
+  /* Uzun anahtar adları (business.legal.…) dar ekranda yatay kaydırma yaratmasın */
+  .legal__body :global(code),
+  .legal__body :global(mark) {
+    overflow-wrap: anywhere;
   }
   .legal__body h1 {
     font-size: var(--h2);
@@ -79,9 +93,31 @@ const toc = locale === 'tr' ? 'Bu sayfada' : 'On this page';
     margin-bottom: var(--space-4);
     scroll-margin-top: calc(var(--header-h) + 1rem);
   }
-  .legal__section :global(p) {
+  .legal__section :global(p),
+  .legal__section :global(li) {
     color: var(--ink-2);
+  }
+  .legal__section :global(p) {
     margin-top: 0.9rem;
+  }
+  .legal__section :global(h3) {
+    font-size: 1.1rem;
+    margin-top: var(--space-5);
+  }
+  .legal__section :global(ul) {
+    margin: 0.75rem 0 0;
+    padding-left: 1.2rem;
+    display: grid;
+    gap: 0.4rem;
+  }
+  /* KVKK m.11 bentleri: harfler (a, b, c, ç … ğ) metnin parçası, madde işareti yok */
+  .legal__section :global(ul.legal-lettered) {
+    list-style: none;
+    padding-left: 0;
+  }
+  .legal__draft ul {
+    margin: 0.5rem 0 0;
+    padding-left: 1.2rem;
   }
   .legal__section :global(.legal-table) {
     width: 100%;
@@ -98,6 +134,36 @@ const toc = locale === 'tr' ? 'Bu sayfada' : 'On this page';
   }
   .legal__section :global(.legal-table th) {
     background: var(--surface-2);
+  }
+  /* Geniş ekranda tablo hücresindeki kayıt adı (ör. ayaz.consent.v1) kelime ortasından bölünmesin */
+  @media (min-width: 641px) {
+    .legal__section :global(.legal-table code) {
+      overflow-wrap: normal;
+      white-space: nowrap;
+    }
+  }
+  /* Dar ekran: tablo satırları etiketli bloklara dönüşür (yatay kaydırma yok) */
+  @media (max-width: 640px) {
+    .legal__section :global(.legal-table thead) {
+      display: none;
+    }
+    .legal__section :global(.legal-table tr) {
+      display: block;
+      border-bottom: 1px solid var(--line);
+      padding: 0.4rem 0;
+    }
+    .legal__section :global(.legal-table td) {
+      display: block;
+      border: 0;
+      padding: 0.25rem 0;
+    }
+    .legal__section :global(.legal-table td[data-label])::before {
+      content: attr(data-label);
+      display: block;
+      font-weight: 700;
+      color: var(--ink);
+      font-size: 0.8em;
+    }
   }
   .legal__section :global(code) {
     font-size: 0.85em;

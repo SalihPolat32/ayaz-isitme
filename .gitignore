@@ -31,4 +31,16 @@ test-results/
 
 # Büyük ölçüm çıktıları (yerelde kalır)
 qa/lighthouse-*
+qa/**/lighthouse-*
 .DS_Store
+
+# Ham doğrulama kareleri depoya girmez (27 Eyl 2026 temizliğinde kaldırıldı; yeniden üretilirse de dışarıda kalır).
+# Depoya giren seçilmiş kanıt: qa/final/, qa/round5/evidence/, qa/round5/map-*.png, qa/round5/privacy-third-party.json, qa/round6/
+qa/round5/3d/
+qa/round5/ear/
+qa/round5/fix/
+qa/round5/fix2/
+qa/round5/verify/
+qa/round5/final-verify/
+# scripts/qa-screenshots.mjs yerel yardımcı: çıktısı depoya girmez
+qa/screenshots/
