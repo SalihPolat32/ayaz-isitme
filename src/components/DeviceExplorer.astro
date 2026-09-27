@@ -2,14 +2,18 @@
 import { Image } from 'astro:assets';
 import type { Locale, SiteContent } from '../content/types';
 import Icon from './Icon.astro';
-import poster from '../assets/device/ric-poster.png';
+import posterRic from '../assets/device/ric-poster.png';
+import posterBte from '../assets/device/bte-poster.png';
+import posterCic from '../assets/device/cic-poster.png';
 
 interface Props { locale: Locale; c: SiteContent }
 const { c } = Astro.props;
 const x = c.explorer;
+const posters = { ric: posterRic, bte: posterBte, cic: posterCic } as const;
+const active = 'ric';
 ---
 
-<section class="section xp" id="incele" aria-labelledby="xp-title" data-explorer data-state="idle">
+<section class="section xp" id="incele" aria-labelledby="xp-title" data-explorer data-state="idle" data-model={active}>
   <div class="container">
     <div class="section-head reveal">
       <p class="eyebrow">{x.eyebrow}</p>
@@ -17,16 +21,31 @@ const x = c.explorer;
       <p class="lead">{x.lead}</p>
     </div>
 
+    <div class="xp__switch reveal" role="group" aria-label={x.controls.modelLabel}>
+      {x.models.map((m) => (
+        <button type="button" class="xp__tab" data-model-btn={m.id} aria-pressed={m.id === active ? 'true' : 'false'}>
+          <span class="xp__tabcode">{m.label}</span>
+          <span class="xp__tabsub">{m.sub}</span>
+        </button>
+      ))}
+    </div>
+
     <div class="xp__grid">
       <div class="xp__stagewrap reveal">
         <div class="xp__stage" data-stage>
-          <Image src={poster} alt={c.hero.deviceCaption} widths={[480, 640, 800, 1000]} sizes="(min-width: 1000px) 60vw, 100vw" loading="lazy" decoding="async" class="xp__poster" data-poster />
-          <canvas class="xp__canvas" data-canvas tabindex="0" role="img" aria-label={c.hero.deviceCaption + ' — ' + x.keyboardHint}></canvas>
-          <div class="xp__hotspots" data-hotspots aria-hidden="true">
-            {x.hotspots.map((h, i) => (
-              <button type="button" class="hs" data-hotspot={h.id} tabindex="-1" aria-label={h.title} hidden>
-                <span class="hs__dot">{i + 1}</span>
-              </button>
+          {x.models.map((m) => (
+            <Image src={posters[m.id]} alt={m.caption} widths={[480, 640, 800, 1000]} sizes="(min-width: 1000px) 624px, 78vw" loading="lazy" decoding="async" class="xp__poster" data-poster data-poster-for={m.id} hidden={m.id !== active} />
+          ))}
+          <canvas class="xp__canvas" data-canvas tabindex="-1" aria-hidden="true" role="img" aria-label={x.models[0]!.caption + ' — ' + x.keyboardHint} data-hint={x.keyboardHint}></canvas>
+          <div class="xp__hotspots" data-hotspots>
+            {x.models.map((m) => (
+              <div data-hotspots-for={m.id} hidden={m.id !== active}>
+                {m.hotspots.map((h, i) => (
+                  <button type="button" class="hs" data-hotspot={h.id} tabindex="-1" aria-label={`${i + 1}. ${h.title}`} hidden>
+                    <span class="hs__dot">{i + 1}</span>
+                  </button>
+                ))}
+              </div>
             ))}
           </div>
           <div class="xp__loading" data-loading><span class="spinner" aria-hidden="true"></span>{x.loading}</div>
@@ -34,11 +53,15 @@ const x = c.explorer;
           <div class="xp__fallback" data-fallback hidden>
             <Icon name="info" />
             <div>
-              <strong>{x.fallbackTitle}</strong>
-              <p>{x.fallbackText}</p>
+              <strong data-fallback-title data-load-title={x.loadErrorTitle}>{x.fallbackTitle}</strong>
+              <p data-fallback-text data-load-text={x.loadErrorText}>{x.fallbackText}</p>
+              <button type="button" class="btn btn--outline xp__reload" data-reload hidden>{x.reloadLabel}</button>
             </div>
           </div>
         </div>
+        {x.models.map((m) => (
+          <p class="xp__caption small muted" data-caption-for={m.id} hidden={m.id !== active}>{m.caption}</p>
+        ))}
 
         <div class="xp__controls" data-controls>
           <div class="xp__range">
@@ -46,7 +69,8 @@ const x = c.explorer;
             <input type="range" id="xp-explode" min="0" max="100" value="0" step="1" data-explode-range aria-valuetext="0%" />
           </div>
           <div class="xp__buttons">
-            <button type="button" class="btn btn--outline btn--sm" data-explode-toggle aria-pressed="false" data-label-on={x.controls.assemble} data-label-off={x.controls.explode}><Icon name="layers" /><span>{x.controls.explode}</span></button>
+            <button type="button" class="btn btn--outline btn--sm" data-door aria-pressed="false"><Icon name="battery" /><span>{x.controls.door}</span></button>
+            <button type="button" class="btn btn--outline btn--sm" data-explode-toggle aria-pressed="false"><Icon name="layers" /><span>{x.controls.explode}</span></button>
             <button type="button" class="btn btn--outline btn--sm" data-reset><Icon name="refresh" />{x.controls.reset}</button>
             <button type="button" class="btn btn--outline btn--sm" data-autorotate aria-pressed="true"><Icon name="play" />{x.controls.autoRotate}</button>
           </div>
@@ -56,20 +80,22 @@ const x = c.explorer;
       </div>
 
       <div class="xp__side reveal" style="--reveal-delay:120ms">
-        <ol class="xp__parts" data-parts>
-          {x.hotspots.map((h, i) => (
-            <li>
-              <details class="part" data-part={h.id} name="xp-part">
-                <summary>
-                  <span class="part__num">{i + 1}</span>
-                  <span class="part__title">{h.title}</span>
-                  <span class="acc__chev"><Icon name="chevron-down" /></span>
-                </summary>
-                <p class="part__text">{h.text}</p>
-              </details>
-            </li>
-          ))}
-        </ol>
+        {x.models.map((m) => (
+          <ol class="xp__parts" data-parts data-parts-for={m.id} hidden={m.id !== active}>
+            {m.hotspots.map((h, i) => (
+              <li>
+                <details class="part" data-part={h.id} name={`xp-part-${m.id}`}>
+                  <summary>
+                    <span class="part__num">{i + 1}</span>
+                    <span class="part__title">{h.title}</span>
+                    <span class="acc__chev"><Icon name="chevron-down" /></span>
+                  </summary>
+                  <p class="part__text">{h.text}</p>
+                </details>
+              </li>
+            ))}
+          </ol>
+        ))}
         <a class="btn btn--primary xp__cta" href="#iletisim" data-track="appointment_start"><Icon name="calendar" />{x.cta}</a>
       </div>
     </div>
@@ -77,6 +103,67 @@ const x = c.explorer;
 </section>
 
 <style>
+  .xp__switch {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    padding: 0.35rem;
+    border-radius: var(--r-pill);
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    margin-bottom: var(--space-5);
+  }
+  /* Dar ekranda üç eşit sütun (sarılıp oval bir kütleye dönüşmez); yuvarlak köşe dikdörtgen */
+  @media (max-width: 799px) {
+    .xp__switch {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      width: 100%;
+      border-radius: var(--r-lg);
+    }
+    .xp__switch .xp__tab {
+      border-radius: var(--r-md);
+      padding-inline: 0.6rem;
+    }
+  }
+  .xp__tab {
+    display: grid;
+    gap: 0.05rem;
+    padding: 0.55rem 1.1rem;
+    min-height: 52px;
+    border-radius: var(--r-pill);
+    color: var(--ink-2);
+    text-align: left;
+    transition: background var(--dur-1), color var(--dur-1), box-shadow var(--dur-1);
+  }
+  .xp__tab:hover {
+    background: rgba(255, 255, 255, 0.7);
+  }
+  .xp__tab[aria-pressed='true'] {
+    background: var(--navy);
+    color: #fff;
+    box-shadow: var(--shadow-1);
+  }
+  .xp__tabcode {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 0.95rem;
+    letter-spacing: 0.02em;
+  }
+  .xp__tabsub {
+    font-size: var(--text-xs);
+    opacity: 0.85;
+  }
+  /* Telefonda yalnız kod (RIC / BTE / CIC): alt yazı 3–4 satıra sarılmasın; tam ad sahnenin altındaki açıklamada */
+  @media (max-width: 479px) {
+    .xp__tabsub {
+      display: none;
+    }
+    .xp__tab {
+      min-height: 44px;
+      text-align: center;
+    }
+  }
   .xp__grid {
     display: grid;
     gap: var(--space-6);
@@ -130,6 +217,9 @@ const x = c.explorer;
   }
   [data-state='ready'] .xp__poster {
     opacity: 0;
+  }
+  .xp__caption {
+    margin-top: 0.6rem;
   }
   .xp__hotspots {
     position: absolute;
@@ -229,7 +319,11 @@ const x = c.explorer;
     font-size: var(--text-sm);
     color: var(--ink-2);
   }
-  .xp__fallback .icon {
+  .xp__reload {
+    margin-top: 0.75rem;
+  }
+  /* Icon ayrı bileşen: kapsamlı stil onun <svg>'sine ulaşmaz, bu yüzden :global(.icon) */
+  .xp__fallback :global(.icon) {
     flex: none;
     color: var(--accent);
     margin-top: 0.15em;
@@ -277,7 +371,7 @@ const x = c.explorer;
     font-size: var(--text-xs);
     color: var(--ink-3);
   }
-  .xp__hint .icon {
+  .xp__hint :global(.icon) {
     flex: none;
   }
   .xp__note {
@@ -287,7 +381,7 @@ const x = c.explorer;
     font-size: var(--text-xs);
     color: var(--ink-3);
   }
-  .xp__note .icon {
+  .xp__note :global(.icon) {
     flex: none;
     margin-top: 0.1em;
   }

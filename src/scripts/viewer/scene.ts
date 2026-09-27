@@ -3,8 +3,9 @@
  * render döngüsü (yalnızca gerekince çizer), boyut/görünürlük gözlemcileri,
  * WebGL bağlam kaybı ve tam `dispose()`.
  *
- * Bu dosya modele özgü mantık içermez; `createScene()` bir `DeviceModel` alır ve
- * onu çerçeveler. Etkileşim/parçalama/vurgu mantığı `index.ts` içindedir.
+ * Bu dosya modele özgü mantık içermez; `createScene()` bir `DeviceModel` alır ve onu
+ * çerçeveler; `setModel()` ile model çalışma zamanında değiştirilebilir (yeniden çerçeveleme
+ * dahil). `createStudio()` ışık/ortam/zemin kurulumunu çevrimdışı render (render.ts) ile paylaşır.
  */
 import {
   ACESFilmicToneMapping,
@@ -18,6 +19,7 @@ import {
   PMREMGenerator,
   Scene,
   ShadowMaterial,
+  Sphere,
   Spherical,
   SRGBColorSpace,
   TOUCH,
@@ -34,15 +36,8 @@ import type { DeviceModel } from './types.ts';
 export const MAX_DPR = 1.75;
 /** Paketlenmiş model, kısa canvas kenarının bu oranını doldurur. */
 const FILL = 0.74;
-/**
- * Varsayılan bakış: ön (+X, kablo tarafı) + dış yüz (+Z), hafif üstten.
- * Kablo/alıcı/dome gövdenin önünde, kameraya yakın kalır. Ayna görünüm için x işaretini çevirin.
- */
-export const HOME_DIR = new Vector3(-0.32, 0.16, 1.0).normalize();
-/** Parçalanma t=1'de pivot bu oranda küçülür (kamera geri çekilmiş gibi) — açılmış hal çerçeveye sığar. */
-export const EXPLODE_ZOOM_OUT = 0.22;
-/** Gölge düzleminin en alt noktadan uzaklığı (sahne birimi). */
-const GROUND_GAP = 0.4;
+/** Gölge düzleminin en alt noktadan uzaklığı (sahne birimi) — açık kapak da düzlemin üstünde kalsın. */
+const GROUND_GAP = 1.1;
 
 const WORLD_UP = new Vector3(0, 1, 0);
 
@@ -54,48 +49,118 @@ export interface HomeView {
   radius: number;
 }
 
-export interface SceneOptions {
-  canvas: HTMLCanvasElement;
-  /** Görünürlük (IntersectionObserver) için gözlenen kök eleman. */
-  root: HTMLElement;
-  model: DeviceModel;
-}
+/* ----------------------------------------------------------------------------
+ * Stüdyo: ışıklar + ortam + temas gölgesi (etkileşimli sahne ve çevrimdışı render ortak)
+ * ------------------------------------------------------------------------- */
 
-export interface SceneHandle {
-  renderer: WebGLRenderer;
-  scene: Scene;
-  camera: PerspectiveCamera;
-  controls: OrbitControls;
-  /** Modelin bağlı olduğu grup (parçalanma sırasında ortalanır/küçülür). */
-  pivot: Group;
-  home: HomeView;
-  /** Bir sonraki karede çizim iste (durum değiştiyse). */
-  requestRender(): void;
-  /**
-   * Her karede, `controls.update()` öncesi çağrılır. `true` dönerse kare çizilir
-   * (tween/vurgu gibi kamera dışı değişimler için).
-   */
-  setFrameCallback(cb: ((time: number, dt: number) => boolean) | null): void;
-  /** Her çizimden sonra (hotspot projeksiyonu için). */
-  setAfterRender(cb: (() => void) | null): void;
-  /** Parçalanma oranına göre pivotu yeniden ortalar ve hafifçe küçültür (0..1). */
-  setExplodeFraming(t: number): void;
-  setUserPaused(paused: boolean): void;
-  isRunning(): boolean;
-  /** Anında tek kare çizer (döngüden bağımsız). */
-  renderOnce(): void;
-  captureImage(width?: number, height?: number): string;
+export interface Studio {
+  /** Işıkları, gölge kamerasını ve zemini modele göre konumlar. */
+  setModel(model: DeviceModel): void;
+  /** Temas gölgesi düzlemi (kompozit render için kapatılabilir). */
+  setGroundShadow(visible: boolean): void;
+  rebuildEnvironment(): void;
   dispose(): void;
 }
 
+export function configureRenderer(renderer: WebGLRenderer): void {
+  renderer.setClearColor(0x000000, 0);
+  renderer.outputColorSpace = SRGBColorSpace;
+  renderer.toneMapping = ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.0;
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = VSMShadowMap;
+}
+
+export function createStudio(scene: Scene, renderer: WebGLRenderer): Studio {
+  /* ---- ışıklar (nötr, ürün fotoğrafı) ---- */
+  // Ana ışık neredeyse tepeden: gölge modelin hemen altında, dar ve yumuşak kalır.
+  const key = new DirectionalLight(0xffffff, 1.6);
+  key.castShadow = true;
+  key.shadow.mapSize.set(256, 256); // düşük çözünürlük + geniş VSM bulanıklığı = yumuşak temas gölgesi
+  key.shadow.camera.near = 2;
+  key.shadow.camera.far = 18;
+  key.shadow.radius = 10;
+  key.shadow.blurSamples = 12;
+  key.shadow.bias = -0.0005;
+  key.shadow.normalBias = 0.02;
+  scene.add(key, key.target);
+
+  // Kenar ışığı: kameranın karşısından (arka-sol, üst)
+  const rim = new DirectionalLight(0xffffff, 0.9);
+  scene.add(rim, rim.target);
+
+  /* ---- temas gölgesi: ShadowMaterial zemin ---- */
+  const groundGeo = new PlaneGeometry(12, 12);
+  const groundMat = new ShadowMaterial({ color: 0x112b3c, opacity: 0.12 });
+  const ground = new Mesh(groundGeo, groundMat);
+  ground.rotation.x = -Math.PI / 2;
+  ground.receiveShadow = true;
+  scene.add(ground);
+
+  /* ---- ortam (RoomEnvironment → PMREM; dosya yok) ---- */
+  let envTarget: WebGLRenderTarget | null = null;
+  const rebuildEnvironment = (): void => {
+    if (envTarget) {
+      envTarget.dispose();
+      envTarget = null;
+    }
+    const pmrem = new PMREMGenerator(renderer);
+    const envScene = new RoomEnvironment();
+    envTarget = pmrem.fromScene(envScene, 0.04);
+    scene.environment = envTarget.texture;
+    scene.environmentIntensity = 0.9;
+    envScene.dispose();
+    pmrem.dispose();
+  };
+  rebuildEnvironment();
+
+  const setModel = (model: DeviceModel): void => {
+    const c = model.center;
+    key.position.copy(c).add(new Vector3(-0.18, 1, 0.22).normalize().multiplyScalar(8));
+    key.target.position.copy(c);
+    rim.position.copy(c).add(new Vector3(-0.7, 0.5, -1).normalize().multiplyScalar(8));
+    rim.target.position.copy(c);
+    // Gölge kamerası: açılmış hal + açık kapak sığsın
+    const half = Math.max(2.2, model.boundsExploded.getBoundingSphere(new Sphere()).radius * 1.35);
+    key.shadow.camera.left = -half;
+    key.shadow.camera.right = half;
+    key.shadow.camera.top = half;
+    key.shadow.camera.bottom = -half;
+    key.shadow.camera.updateProjectionMatrix();
+    ground.position.set(c.x, model.bounds.min.y - GROUND_GAP, c.z);
+  };
+
+  return {
+    setModel,
+    setGroundShadow: (visible) => {
+      ground.visible = visible;
+    },
+    rebuildEnvironment,
+    dispose: () => {
+      groundGeo.dispose();
+      groundMat.dispose();
+      key.shadow.dispose();
+      if (envTarget) {
+        envTarget.dispose();
+        envTarget = null;
+      }
+      scene.environment = null;
+      scene.remove(key, key.target, rim, rim.target, ground);
+    },
+  };
+}
+
+/* ----------------------------------------------------------------------------
+ * Sığdırma
+ * ------------------------------------------------------------------------- */
 
 /** Kök altındaki tüm mesh köşe noktalarını kök uzayında toplar (sığdırma için; dinlenme halinde çağrılır). */
-function collectPoints(root: Group): Vector3[] {
+export function collectPoints(root: Group): Vector3[] {
   const out: Vector3[] = [];
   const m = new Matrix4();
   root.traverse((o) => {
     const mesh = o as Mesh;
-    if (!mesh.isMesh) return;
+    if (!mesh.isMesh || !mesh.visible) return;
     m.identity();
     for (let node: Object3D | null = mesh; node && node !== root; node = node.parent) {
       node.updateMatrix();
@@ -157,8 +222,48 @@ export function fitView(
   return { distance, target };
 }
 
+/* ----------------------------------------------------------------------------
+ * Etkileşimli sahne
+ * ------------------------------------------------------------------------- */
+
+export interface SceneOptions {
+  canvas: HTMLCanvasElement;
+  /** Görünürlük (IntersectionObserver) için gözlenen kök eleman. */
+  root: HTMLElement;
+  model: DeviceModel;
+}
+
+export interface SceneHandle {
+  renderer: WebGLRenderer;
+  scene: Scene;
+  camera: PerspectiveCamera;
+  controls: OrbitControls;
+  /** Modelin bağlı olduğu grup (parçalanma sırasında ortalanır/küçülür). */
+  pivot: Group;
+  home: HomeView;
+  /** Modeli değiştirir ve ana bakışı yeniden hesaplar (kamerayı taşımaz; `home` güncellenir). */
+  setModel(model: DeviceModel): void;
+  /** Bir sonraki karede çizim iste (durum değiştiyse). */
+  requestRender(): void;
+  /**
+   * Her karede, `controls.update()` öncesi çağrılır. `true` dönerse kare çizilir
+   * (tween/vurgu gibi kamera dışı değişimler için).
+   */
+  setFrameCallback(cb: ((time: number, dt: number) => boolean) | null): void;
+  /** Her çizimden sonra (hotspot projeksiyonu için). */
+  setAfterRender(cb: (() => void) | null): void;
+  /** Parçalanma oranına göre pivotu yeniden ortalar ve küçültür (0..1). */
+  setExplodeFraming(t: number): void;
+  setUserPaused(paused: boolean): void;
+  isRunning(): boolean;
+  /** Anında tek kare çizer (döngüden bağımsız). */
+  renderOnce(): void;
+  captureImage(width?: number, height?: number): string;
+  dispose(): void;
+}
+
 export function createScene(opts: SceneOptions): SceneHandle {
-  const { canvas, root, model } = opts;
+  const { canvas, root } = opts;
 
   /* ---- renderer ---- */
   const renderer = new WebGLRenderer({
@@ -168,58 +273,60 @@ export function createScene(opts: SceneOptions): SceneHandle {
     powerPreference: 'high-performance',
     preserveDrawingBuffer: false,
   });
-  renderer.setClearColor(0x000000, 0);
-  renderer.outputColorSpace = SRGBColorSpace;
-  renderer.toneMapping = ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.0;
-  renderer.shadowMap.enabled = true;
-  renderer.shadowMap.type = VSMShadowMap;
+  configureRenderer(renderer);
   canvas.style.touchAction = 'pan-y';
   canvas.style.display = canvas.style.display || 'block';
 
   /* ---- sahne / kamera / pivot ---- */
   const scene = new Scene();
-  const camera = new PerspectiveCamera(35, 1, 0.1, 60);
+  const camera = new PerspectiveCamera(35, 1, 0.1, 80);
   const pivot = new Group();
   pivot.name = 'pivot';
-  // Model merkezi pivot orijinine gelsin: ölçek/kaydırma merkez etrafında olur.
-  const restCenter = model.center.clone();
-  const explodeShift = model.boundsExploded.getCenter(new Vector3()).sub(restCenter);
-  model.root.position.copy(restCenter).negate();
-  pivot.position.copy(restCenter);
-  pivot.add(model.root);
   scene.add(pivot);
+  const studio = createStudio(scene, renderer);
+
+  let model = opts.model;
+  let restCenter = new Vector3();
+  const explodeShift = new Vector3();
+  let explodeZoomOut = 0.22;
+  let fitPoints: Vector3[] = [];
+  let homeDir = new Vector3(0, 0, 1);
+  let width = 1;
+  let height = 1;
+  let dirty = true;
+  const home: HomeView = { target: new Vector3(), theta: 0, phi: Math.PI / 2, radius: 5 };
+
+  const homeDistanceFor = (aspect: number): number =>
+    fitView(fitPoints, homeDir, restCenter, camera.fov, Math.max(aspect, 0.2), FILL).distance;
 
   const setExplodeFraming = (t: number): void => {
     const k = Math.min(1, Math.max(0, t));
-    const s = 1 / (1 + EXPLODE_ZOOM_OUT * k);
+    const s = 1 / (1 + explodeZoomOut * k);
     pivot.scale.setScalar(s);
     pivot.position.copy(restCenter).addScaledVector(explodeShift, -s * k);
     dirty = true;
   };
 
-  /* ---- çerçeveleme: paketlenmiş silüet, tam perspektif sığdırma ---- */
-  const fitPoints = collectPoints(model.root);
-  const homeFit = fitView(fitPoints, HOME_DIR, restCenter, camera.fov, 1, FILL);
-  const homeTarget = homeFit.target;
-  const homeDistanceFor = (aspect: number): number =>
-    fitView(fitPoints, HOME_DIR, restCenter, camera.fov, Math.max(aspect, 0.2), FILL).distance;
-
-  const homeSph = new Spherical().setFromVector3(HOME_DIR);
-  const home: HomeView = { target: homeTarget.clone(), theta: homeSph.theta, phi: homeSph.phi, radius: homeDistanceFor(1) };
-
-  camera.position.copy(homeTarget).addScaledVector(HOME_DIR, home.radius);
-  camera.lookAt(homeTarget);
-
   /* ---- kontroller ---- */
   const controls = new OrbitControls(camera, canvas);
   // OrbitControls sets touch-action:none in connect(); restore vertical page scrolling.
   canvas.style.touchAction = 'pan-y';
-  controls.target.copy(homeTarget);
   controls.enableDamping = true;
   controls.dampingFactor = 0.08;
   controls.enablePan = false;
-  controls.enableZoom = true;
+  // Tekerlek sayfayı kaydırır (sahne üzerinde sayfa kilitlenmesin). Yakınlaştırma: Ctrl/⌘ + tekerlek (trackpad kıstırma
+  // da ctrlKey'li tekerlek olayıdır), dokunmatik iki parmak ve klavye (+ / −). Kapı, OrbitControls'ün kendi dinleyicisinden
+  // önce (yakalama evresinde) açılıp kapanır.
+  controls.enableZoom = false;
+  const zoomGate = (e: WheelEvent): void => {
+    controls.enableZoom = e.ctrlKey || e.metaKey;
+  };
+  const touchZoom = (e: PointerEvent): void => {
+    if (e.pointerType === 'touch') controls.enableZoom = true;
+  };
+  const gateHost = canvas.parentElement ?? canvas;
+  gateHost.addEventListener('wheel', zoomGate, { capture: true, passive: true });
+  gateHost.addEventListener('pointerdown', touchZoom, { capture: true, passive: true });
   controls.zoomSpeed = 0.8;
   controls.rotateSpeed = 0.9;
   controls.autoRotate = false; // index.ts yönetir
@@ -227,62 +334,45 @@ export function createScene(opts: SceneOptions): SceneHandle {
   controls.minPolarAngle = 0.08;
   controls.maxPolarAngle = Math.PI * 0.92;
   controls.touches = { ONE: TOUCH.ROTATE, TWO: TOUCH.DOLLY_PAN };
+
+  const setModel = (next: DeviceModel): void => {
+    if (model.root.parent === pivot) pivot.remove(model.root);
+    model = next;
+    // Model merkezi pivot orijinine gelsin: ölçek/kaydırma merkez etrafında olur.
+    restCenter = model.center.clone();
+    explodeShift.copy(model.boundsExploded.getCenter(new Vector3())).sub(restCenter);
+    model.root.position.copy(restCenter).negate();
+    pivot.position.copy(restCenter);
+    pivot.scale.setScalar(1);
+    pivot.add(model.root);
+    // Açılmış hal, dinlenme haline göre ne kadar büyükse pivot o kadar küçülür.
+    const restSize = model.bounds.getSize(new Vector3());
+    const expSize = model.boundsExploded.getSize(new Vector3());
+    // Pay: kameraya doğru açılan parçalar (CIC kapağı) perspektifte büyür; açık pil kapağı da ek yer kaplar.
+    const ratio = Math.max(expSize.x, expSize.y, expSize.z) / Math.max(1e-6, Math.max(restSize.x, restSize.y, restSize.z));
+    explodeZoomOut = Math.max(0.1, ratio - 1) * 1.3 + 0.08;
+    // Çerçeveleme: paketlenmiş silüet, tam perspektif sığdırma
+    homeDir = model.homeDir.clone().normalize();
+    fitPoints = collectPoints(model.root);
+    const fit = fitView(fitPoints, homeDir, restCenter, camera.fov, 1, FILL);
+    const sph = new Spherical().setFromVector3(homeDir);
+    home.target.copy(fit.target);
+    home.theta = sph.theta;
+    home.phi = sph.phi;
+    home.radius = homeDistanceFor(width / height);
+    controls.minDistance = home.radius * 0.55;
+    controls.maxDistance = home.radius * 2.2;
+    studio.setModel(model);
+    dirty = true;
+  };
+
+  setModel(model);
+  controls.target.copy(home.target);
+  camera.position.copy(home.target).addScaledVector(homeDir, home.radius);
+  camera.lookAt(home.target);
   controls.update();
 
-  /* ---- ışıklar (nötr, ürün fotoğrafı) ---- */
-  // Ana ışık neredeyse tepeden: gölge modelin hemen altında, dar ve yumuşak kalır.
-  const key = new DirectionalLight(0xffffff, 1.6);
-  key.position.copy(restCenter).add(new Vector3(-0.18, 1, 0.22).normalize().multiplyScalar(8));
-  key.target.position.copy(restCenter);
-  key.castShadow = true;
-  key.shadow.mapSize.set(256, 256); // düşük çözünürlük + geniş VSM bulanıklığı = yumuşak temas gölgesi
-  key.shadow.camera.near = 2;
-  key.shadow.camera.far = 16;
-  key.shadow.camera.left = -2.2;
-  key.shadow.camera.right = 2.2;
-  key.shadow.camera.top = 2.2;
-  key.shadow.camera.bottom = -2.2;
-  key.shadow.radius = 10; // texel cinsinden ≈ 0.17 sahne birimi
-  key.shadow.blurSamples = 12;
-  key.shadow.bias = -0.0005;
-  key.shadow.normalBias = 0.02;
-  scene.add(key, key.target);
-
-  // Kenar ışığı: kameranın karşısından (arka-sol, üst)
-  const rim = new DirectionalLight(0xffffff, 0.9);
-  rim.position.copy(restCenter).add(new Vector3(-0.7, 0.5, -1).normalize().multiplyScalar(8));
-  rim.target.position.copy(restCenter);
-  scene.add(rim, rim.target);
-
-  /* ---- temas gölgesi: ShadowMaterial zemin ---- */
-  const groundGeo = new PlaneGeometry(8, 8);
-  const groundMat = new ShadowMaterial({ color: 0x112b3c, opacity: 0.12 });
-  const ground = new Mesh(groundGeo, groundMat);
-  ground.rotation.x = -Math.PI / 2;
-  ground.position.y = model.bounds.min.y - GROUND_GAP;
-  ground.receiveShadow = true;
-  scene.add(ground);
-
-  /* ---- ortam (RoomEnvironment → PMREM; dosya yok) ---- */
-  let envTarget: WebGLRenderTarget | null = null;
-  const buildEnvironment = (): void => {
-    if (envTarget) {
-      envTarget.dispose();
-      envTarget = null;
-    }
-    const pmrem = new PMREMGenerator(renderer);
-    const envScene = new RoomEnvironment();
-    envTarget = pmrem.fromScene(envScene, 0.04);
-    scene.environment = envTarget.texture;
-    scene.environmentIntensity = 0.9;
-    envScene.dispose();
-    pmrem.dispose();
-  };
-  buildEnvironment();
-
   /* ---- boyut ---- */
-  let width = 1;
-  let height = 1;
   const applyPixelRatio = (): boolean => {
     const dpr = Math.min(window.devicePixelRatio || 1, MAX_DPR);
     if (renderer.getPixelRatio() !== dpr) {
@@ -316,7 +406,6 @@ export function createScene(opts: SceneOptions): SceneHandle {
   };
 
   /* ---- döngü ---- */
-  let dirty = true;
   let frameCb: ((time: number, dt: number) => boolean) | null = null;
   let afterRender: (() => void) | null = null;
   let last = 0;
@@ -391,7 +480,7 @@ export function createScene(opts: SceneOptions): SceneHandle {
   };
   const onContextRestored = (): void => {
     contextLost = false;
-    buildEnvironment();
+    studio.rebuildEnvironment();
     dirty = true;
     sync();
   };
@@ -442,15 +531,10 @@ export function createScene(opts: SceneOptions): SceneHandle {
     window.removeEventListener('resize', onWindowResize);
     canvas.removeEventListener('webglcontextlost', onContextLost);
     canvas.removeEventListener('webglcontextrestored', onContextRestored);
+    gateHost.removeEventListener('wheel', zoomGate, { capture: true });
+    gateHost.removeEventListener('pointerdown', touchZoom, { capture: true });
     controls.dispose();
-    groundGeo.dispose();
-    groundMat.dispose();
-    key.shadow.dispose();
-    if (envTarget) {
-      envTarget.dispose();
-      envTarget = null;
-    }
-    scene.environment = null;
+    studio.dispose();
     pivot.remove(model.root);
     scene.clear();
     renderer.dispose();
@@ -463,6 +547,7 @@ export function createScene(opts: SceneOptions): SceneHandle {
     controls,
     pivot,
     home,
+    setModel,
     requestRender: () => {
       dirty = true;
     },

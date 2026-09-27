@@ -5,8 +5,15 @@
   // 2026-08-04 ve sonrası: nodejs_compat varsayılan olarak açık; bu Worker Node API'si kullanmaz.
   "compatibility_date": "2026-09-01",
 
-  // Dashboard'da istek/hata logları (Free planda da çalışır).
-  "observability": { "enabled": true },
+  // Workers Logs: yalnızca Worker'ın kendi console satırları (maskeli telefon, ülke kodu, iletim sonucu, hata özetleri).
+  // Gizlilik varsayılanı: otomatik çağrı (invocation) logları KAPALI — bunlar her istek için istek üst verisini
+  // (yöntem, URL, başlıklar vb.) kaydeder ve gizlilik metninde anlatılmaz. İzleme (traces) de kapalı.
+  // Açmak gizlilik metninin güncellenmesini gerektirir (CONTENT-VERIFICATION.md §7).
+  "observability": {
+    "enabled": true,
+    "logs": { "enabled": true, "invocation_logs": false },
+    "traces": { "enabled": false }
+  },
 
   // ---- Yönlendirme -------------------------------------------------------------
   // Varsayılan: <name>.<hesap>.workers.dev adresi. Alan adı Cloudflare DNS'e taşınınca

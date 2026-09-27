@@ -8,8 +8,8 @@ import { initTabs } from './tabs';
 import { initLightbox } from './lightbox';
 import { initForm } from './form';
 import { initReviews } from './reviews';
-import { initMap } from './map';
 import { initExplorer } from './explorer';
+import { initEarLazy } from './ear-lazy';
 
 const cfg = readConfig();
 const safe = (name: string, fn: () => void) => {
@@ -26,8 +26,8 @@ safe('tracking', () => initTracking());
 safe('nav', () => initNav());
 safe('reveal', () => initReveal());
 safe('tabs', () => initTabs());
+safe('ear-lazy', () => initEarLazy());
 safe('lightbox', () => initLightbox());
 safe('form', () => initForm(cfg));
 safe('reviews', () => initReviews(cfg));
-safe('map', () => initMap());
 safe('explorer', () => initExplorer());

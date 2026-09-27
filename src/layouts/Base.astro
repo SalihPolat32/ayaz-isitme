@@ -19,6 +19,8 @@ import Footer from '../components/Footer.astro';
 import MobileBar from '../components/MobileBar.astro';
 import ConsentBanner from '../components/ConsentBanner.astro';
 import JsonLd from '../components/JsonLd.astro';
+import { legalContextFromEnv } from '../content/legal/facts';
+import { legalEnvFromBuild } from '../content/legal/env';
 
 interface Props {
   locale: Locale;
@@ -30,6 +32,8 @@ interface Props {
   noindex?: boolean;
   /** Ana sayfa: LocalBusiness + FAQ JSON-LD üretilir */
   home?: boolean;
+  /** false: kanonik adres, og:url ve hreflang basılmaz (404 sayfası) */
+  canonical?: false;
   bodyClass?: string;
 }
 
@@ -37,9 +41,16 @@ const { locale, c, title = c.seo.title, description = c.seo.description, alterna
 
 const site = Astro.site!;
 const canonical = new URL(Astro.url.pathname, site).href;
+const hasCanonical = Astro.props.canonical !== false;
+const otherLocale: Locale = locale === 'tr' ? 'en' : 'tr';
 const isProd = PUBLIC_SITE_ENV === 'production';
-const robots = noindex || !isProd ? 'noindex, nofollow' : 'index, follow, max-image-preview:large';
-const ogImage = new URL('/og.jpg', site).href;
+// ALLOW_INCOMPLETE_LEGAL=1 ile üretim derlemesi yalnızca QA içindir (taslak hukuki metin basabilir): site genelinde noindex.
+const legalBuild = legalEnvFromBuild();
+const legalCtx = legalContextFromEnv(legalBuild.env, legalBuild.reviewsMode);
+const qaOverride = legalCtx.production && legalCtx.allowIncomplete;
+const robots = noindex || !isProd || qaOverride ? 'noindex, nofollow' : 'index, follow, max-image-preview:large';
+// Paylaşım kartı dile göre (scripts/make-og.mjs): vitrin fotoğrafı yok, doğrulanmamış iddia görünmez
+const ogImage = new URL(locale === 'en' ? '/og-en.jpg' : '/og.jpg', site).href;
 
 const runtimeConfig = {
   locale,
@@ -65,9 +76,9 @@ const safeJson = JSON.stringify(runtimeConfig).replace(/</g, '\\u003c');
     <title>{title}</title>
     <meta name="description" content={description} />
     <meta name="robots" content={robots} />
-    <link rel="canonical" href={canonical} />
-    {Object.entries(alternates).map(([l, p]) => <link rel="alternate" hreflang={l === 'tr' ? 'tr-TR' : 'en'} href={new URL(p, site).href} />)}
-    <link rel="alternate" hreflang="x-default" href={new URL(alternates.tr, site).href} />
+    {hasCanonical && <link rel="canonical" href={canonical} />}
+    {hasCanonical && Object.entries(alternates).map(([l, p]) => <link rel="alternate" hreflang={l === 'tr' ? 'tr-TR' : 'en'} href={new URL(p, site).href} />)}
+    {hasCanonical && <link rel="alternate" hreflang="x-default" href={new URL(alternates.tr, site).href} />}
     <meta name="theme-color" content="#112b3c" />
     <meta name="color-scheme" content="light" />
     <meta name="generator" content={Astro.generator} />
@@ -76,7 +87,7 @@ const safeJson = JSON.stringify(runtimeConfig).replace(/</g, '\\u003c');
     <meta property="og:site_name" content={locale === 'tr' ? business.brand : business.brandEn} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    <meta property="og:url" content={canonical} />
+    {hasCanonical && <meta property="og:url" content={canonical} />}
     <meta property="og:image" content={ogImage} />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
@@ -117,11 +128,11 @@ const safeJson = JSON.stringify(runtimeConfig).replace(/</g, '\\u003c');
   </head>
   <body class={bodyClass}>
     <a class="skip-link" href="#icerik">{c.common.skip}</a>
-    <Header locale={locale} c={c} />
+    <Header locale={locale} c={c} onHome={home} langHref={alternates[otherLocale]} />
     <main id="icerik" tabindex="-1">
       <slot />
     </main>
-    <Footer locale={locale} c={c} />
+    <Footer locale={locale} c={c} onHome={home} langHref={alternates[otherLocale]} />
     <MobileBar c={c} />
     <ConsentBanner locale={locale} c={c} />
     <script>

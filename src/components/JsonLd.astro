@@ -22,7 +22,7 @@ const localBusiness: Record<string, unknown> = {
   url: `${site}/`,
   telephone: b.phone.e164,
   email: b.email,
-  image: `${site}/og.jpg`,
+  image: `${site}/${locale === 'en' ? 'og-en.jpg' : 'og.jpg'}`,
   logo: `${site}/logo-ayaz.png`,
   address: {
     '@type': 'PostalAddress',
@@ -34,7 +34,7 @@ const localBusiness: Record<string, unknown> = {
   },
   areaServed: [{ '@type': 'City', name: 'Ankara' }, { '@type': 'Place', name: 'Keçiören' }],
   sameAs: b.sameAs,
-  hasMap: b.google.directionsUrl,
+  hasMap: b.google.placeUrl,
   ...(canShow(b.hours)
     ? {
         openingHoursSpecification: b.hours.weekly.map((w) => ({

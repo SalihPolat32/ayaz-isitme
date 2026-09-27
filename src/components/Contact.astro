@@ -19,17 +19,19 @@ const info = ct.info;
     </div>
 
     <div class="cx__grid">
-      <form class="card card--pad cx__form reveal" data-appointment-form novalidate aria-labelledby="cx-form-title" method="post" action="#iletisim">
+      <form class="card card--pad cx__form reveal" data-appointment-form novalidate aria-labelledby="cx-form-title" method="post" action="#iletisim" data-msg-name={f.validation.name} data-msg-phone={f.validation.phone} data-msg-consent={f.validation.consent}>
         <h3 id="cx-form-title">{f.title}</h3>
         <p class="notice cx__fallback" data-fallback-notice hidden><Icon name="info" />{f.fallbackNotice}</p>
+        <noscript><p class="notice"><Icon name="info" />{f.noScript}</p></noscript>
+        <p class="hint cx__req"><span aria-hidden="true">*</span> {f.requiredNote}</p>
 
         <div class="field">
-          <label for="f-name">{f.name}</label>
+          <label for="f-name">{f.name} <span class="cx__star" aria-hidden="true">*</span></label>
           <input class="input" id="f-name" name="name" aria-describedby="f-name-error" type="text" autocomplete="name" required minlength="2" maxlength="80" />
           <p class="error" id="f-name-error" data-error-for="name" aria-live="polite"></p>
         </div>
         <div class="field">
-          <label for="f-phone">{f.phone}</label>
+          <label for="f-phone">{f.phone} <span class="cx__star" aria-hidden="true">*</span></label>
           <input class="input" id="f-phone" name="phone" aria-describedby="f-phone-error" type="tel" inputmode="tel" autocomplete="tel" required placeholder="05xx xxx xx xx" />
           <p class="error" id="f-phone-error" data-error-for="phone" aria-live="polite"></p>
         </div>
@@ -43,7 +45,7 @@ const info = ct.info;
 
         <label class="cx__consent">
           <input type="checkbox" name="consent" aria-describedby="f-consent-error" required />
-          <span>{f.consent} <a href={legalPaths[locale] + '#aydinlatma'} target="_blank" rel="noopener">{f.consentLink}</a></span>
+          <span>{f.consent} <a href={legalPaths[locale] + '#aydinlatma'} target="_blank" rel="noopener">{f.consentLink}</a> <span class="cx__star" aria-hidden="true">*</span></span>
         </label>
         <p class="error" id="f-consent-error" data-error-for="consent" aria-live="polite"></p>
 
@@ -56,7 +58,7 @@ const info = ct.info;
         <input type="hidden" name="topic" value="" data-form-topic />
         <div class="cx__turnstile" data-turnstile hidden></div>
 
-        <button class="btn btn--primary btn--lg cx__submit" type="submit" data-submit data-label-default={f.submit} data-label-wa={f.submitWhatsapp} data-label-sending={f.sending}>
+        <button class="btn btn--primary btn--lg cx__submit" type="submit" disabled data-submit data-label-default={f.submit} data-label-wa={f.submitWhatsapp} data-label-sending={f.sending}>
           <Icon name="send" /><span>{f.submit}</span>
         </button>
         <div class="cx__status" data-status role="status" aria-live="polite"></div>
@@ -83,11 +85,16 @@ const info = ct.info;
           </div>
         </div>
 
-        <div class="cx__map card" data-map data-src={business.google.mapsEmbedUrl}>
-          <div class="cx__mapph" data-map-placeholder>
-            <Icon name="map-pin" />
-            <p><strong>{business.brand}</strong><br />{business.address.line}</p>
-            <button type="button" class="btn btn--navy btn--sm" data-map-load><Icon name="globe" />{info.loadMap}</button>
+        <div class="cx__map card" data-map>
+          <iframe
+            src={business.google.mapsEmbedUrl + (locale === 'tr' ? '&hl=tr' : '&hl=en')}
+            title={locale === 'tr' ? 'Ayaz İşitme Merkezi konumu — Google Haritalar' : 'Ayaz Hearing Center location — Google Maps'}
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade"
+            allowfullscreen
+          ></iframe>
+          <div class="cx__maplinks">
+            <a class="btn btn--navy btn--sm" href={business.google.directionsUrl} target="_blank" rel="noopener" data-track="directions_click"><Icon name="navigation" />{info.directions}</a>
             <p class="small muted">{info.mapNote}</p>
           </div>
         </div>
@@ -97,14 +104,16 @@ const info = ct.info;
 </section>
 
 <style>
+  /* minmax(0, …): uzun e-posta/düğme metni sütunu ekrandan genişletmesin (320 px'te taşma) */
   .cx__grid {
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     gap: var(--space-6);
     align-items: start;
   }
   @media (min-width: 960px) {
     .cx__grid {
-      grid-template-columns: 1.05fr 0.95fr;
+      grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
     }
   }
   .cx__form {
@@ -113,6 +122,13 @@ const info = ct.info;
   }
   .cx__form h3 {
     font-size: 1.35rem;
+  }
+  .cx__star {
+    color: var(--accent-text);
+    font-weight: 700;
+  }
+  .cx__req {
+    margin-top: 0.25rem;
   }
   .cx__consent {
     display: flex;
@@ -158,13 +174,18 @@ const info = ct.info;
     gap: 0.8rem;
     align-items: flex-start;
   }
-  .cx__list li .icon {
+  /* Icon ayrı bileşen: kapsamlı stil onun <svg>'sine ulaşmaz, bu yüzden :global(.icon) */
+  .cx__list li :global(.icon) {
     flex: none;
     color: var(--accent);
     margin-top: 0.25rem;
   }
   .cx__list li div {
     display: grid;
+    min-width: 0;
+  }
+  .cx__list a {
+    overflow-wrap: anywhere;
   }
   .cx__list strong {
     font-size: var(--text-xs);
@@ -174,34 +195,27 @@ const info = ct.info;
   }
   .cx__map {
     overflow: hidden;
-    aspect-ratio: 16 / 10;
-    position: relative;
-    background:
-      linear-gradient(rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.6)),
-      repeating-linear-gradient(0deg, var(--surface-2) 0 1px, transparent 1px 28px),
-      repeating-linear-gradient(90deg, var(--surface-2) 0 1px, transparent 1px 28px),
-      var(--surface);
-  }
-  .cx__mapph {
-    position: absolute;
-    inset: 0;
     display: grid;
-    place-content: center;
-    justify-items: center;
-    gap: 0.75rem;
-    text-align: center;
-    padding: 1.5rem;
+    background: var(--surface-2);
   }
-  .cx__mapph .icon {
-    width: 2rem;
-    height: 2rem;
-    color: var(--accent);
-  }
-  .cx__map :global(iframe) {
-    position: absolute;
-    inset: 0;
+  .cx__map iframe {
+    display: block;
     width: 100%;
-    height: 100%;
+    aspect-ratio: 16 / 11;
+    min-height: 320px;
     border: 0;
+  }
+  .cx__maplinks {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem 1rem;
+    align-items: center;
+    padding: 0.9rem 1.1rem;
+    background: var(--surface);
+    border-top: 1px solid var(--line);
+  }
+  .cx__maplinks p {
+    margin: 0;
+    flex: 1 1 16rem;
   }
 </style>

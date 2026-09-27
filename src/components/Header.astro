@@ -5,23 +5,32 @@ import { business } from '../config/business';
 import Icon from './Icon.astro';
 import logo from '../assets/brand/ayaz-logo-full.png';
 
-interface Props { locale: Locale; c: SiteContent }
-const { locale, c } = Astro.props;
+interface Props {
+  locale: Locale;
+  c: SiteContent;
+  /** Ana sayfada değilken (gizlilik, 404) bölüm bağlantıları ana sayfaya gider: '/#cihazlar' */
+  onHome?: boolean;
+  /** Dil değiştirici: bu sayfanın diğer dildeki karşılığı (varsayılan: diğer dilin ana sayfası) */
+  langHref?: string;
+}
+const { locale, c, onHome = true, langHref = c.langSwitch.href } = Astro.props;
 const home = locale === 'tr' ? '/' : '/en/';
+const prefix = onHome ? '' : home;
+const otherLang = locale === 'tr' ? 'English' : 'Türkçe';
 const brand = locale === 'tr' ? business.brand : business.brandEn;
 ---
 
 <header class="hdr" id="hdr" data-header>
   <div class="container hdr__in">
     <a class="hdr__brand" href={home} aria-label={brand}>
-      <Image src={logo} alt="" width="120" height="79" densities={[1, 2]} loading="eager" decoding="async" class="hdr__logo" />
+      <Image src={logo} alt="" width="67" height="44" densities={[1, 2]} loading="eager" decoding="async" class="hdr__logo" />
       <span class="hdr__name">{brand}</span>
     </a>
 
     <nav class="hdr__nav" aria-label={c.common.menu}>
       <ul>
         {c.nav.map((n) => (
-          <li><a href={n.href} data-nav-link>{n.label}</a></li>
+          <li><a href={prefix + n.href} data-nav-link>{n.label}</a></li>
         ))}
       </ul>
     </nav>
@@ -30,8 +39,8 @@ const brand = locale === 'tr' ? business.brand : business.brandEn;
       <a class="hdr__phone" href={business.phone.href} data-track="phone_click">
         <Icon name="phone" /><span>{business.phone.display}</span>
       </a>
-      <a class="hdr__lang" href={c.langSwitch.href} hreflang={c.langSwitch.hreflang} lang={c.langSwitch.hreflang} aria-label={locale === 'tr' ? 'English' : 'Türkçe'}>{c.langSwitch.label}</a>
-      <a class="btn btn--primary btn--sm hdr__cta" href="#iletisim" data-track="appointment_start">
+      <a class="hdr__lang" href={langHref} hreflang={c.langSwitch.hreflang} lang={c.langSwitch.hreflang} aria-label={`${c.langSwitch.label} – ${otherLang}`}>{c.langSwitch.label}</a>
+      <a class="btn btn--primary btn--sm hdr__cta" href={`${prefix}#iletisim`} data-track="appointment_start">
         <Icon name="calendar" />{c.navCta}
       </a>
       <button class="hdr__burger" type="button" aria-label={c.common.menu} aria-controls="mobileMenu" aria-expanded="false" data-menu-open>
@@ -42,20 +51,20 @@ const brand = locale === 'tr' ? business.brand : business.brandEn;
 
   <dialog id="mobileMenu" class="mmenu" aria-label={c.common.menu}>
     <div class="mmenu__head">
-      <span class="hdr__name">{brand}</span>
-      <button class="btn btn--icon btn--outline" type="button" aria-label={c.common.close} data-menu-close><Icon name="x" /></button>
+      <span class="mmenu__name">{brand}</span>
+      <button class="btn btn--icon btn--outline mmenu__close" type="button" aria-label={c.common.close} data-menu-close><Icon name="x" /></button>
     </div>
     <nav aria-label={c.common.menu}>
       <ul class="mmenu__list">
         {c.nav.map((n) => (
-          <li><a href={n.href} data-menu-link>{n.label}<Icon name="chevron-right" /></a></li>
+          <li><a href={prefix + n.href} data-menu-link>{n.label}<Icon name="chevron-right" /></a></li>
         ))}
       </ul>
     </nav>
     <div class="mmenu__foot">
-      <a class="btn btn--primary" href="#iletisim" data-menu-link data-track="appointment_start"><Icon name="calendar" />{c.navCta}</a>
+      <a class="btn btn--primary" href={`${prefix}#iletisim`} data-menu-link data-track="appointment_start"><Icon name="calendar" />{c.navCta}</a>
       <a class="btn btn--outline" href={business.phone.href} data-track="phone_click"><Icon name="phone" />{business.phone.display}</a>
-      <a class="mmenu__lang" href={c.langSwitch.href} hreflang={c.langSwitch.hreflang}><Icon name="globe" />{locale === 'tr' ? 'English' : 'Türkçe'}</a>
+      <a class="mmenu__lang" href={langHref} hreflang={c.langSwitch.hreflang} lang={c.langSwitch.hreflang}><Icon name="globe" />{otherLang}</a>
     </div>
   </dialog>
 </header>
@@ -83,10 +92,11 @@ const brand = locale === 'tr' ? business.brand : business.brandEn;
     display: flex;
     align-items: center;
     gap: var(--space-5);
-    min-height: var(--header-h);
+    min-height: var(--header-min); /* ölçülen --header-h değil: geri besleme ile her yeniden boyutlamada 1 px büyümesin */
   }
   .hdr__brand {
     display: inline-flex;
+    flex-shrink: 0;
     align-items: center;
     gap: 0.6rem;
     text-decoration: none;
@@ -105,8 +115,12 @@ const brand = locale === 'tr' ? business.brand : business.brandEn;
     letter-spacing: -0.01em;
     white-space: nowrap;
   }
-  .hdr__nav ul {
+  /* <1024 px: gezinme mobil menüdedir; boş bir 'Menü' işaret noktası kalmasın diye nav'ın kendisi gizli */
+  .hdr__nav {
     display: none;
+  }
+  .hdr__nav ul {
+    display: flex;
     list-style: none;
     padding: 0;
     margin: 0;
@@ -114,6 +128,7 @@ const brand = locale === 'tr' ? business.brand : business.brandEn;
   }
   .hdr__nav a {
     display: inline-block;
+    white-space: nowrap;
     padding: 0.55rem 0.85rem;
     border-radius: var(--r-pill);
     color: var(--ink-2);
@@ -170,6 +185,7 @@ const brand = locale === 'tr' ? business.brand : business.brandEn;
   }
   .hdr__cta {
     display: none;
+    white-space: nowrap;
   }
   .hdr__burger {
     display: grid;
@@ -186,8 +202,8 @@ const brand = locale === 'tr' ? business.brand : business.brandEn;
     }
   }
   @media (min-width: 1024px) {
-    .hdr__nav ul {
-      display: flex;
+    .hdr__nav {
+      display: block;
     }
     .hdr__burger {
       display: none;
@@ -207,8 +223,20 @@ const brand = locale === 'tr' ? business.brand : business.brandEn;
       display: inline-flex;
     }
   }
+  /* EN'de düğme metni daha uzun ("Request an Appointment"): telefon biraz daha geniş ekranda görünür, tek satır kalır */
+  @media (min-width: 1280px) and (max-width: 1359px) {
+    :global(html:lang(en)) .hdr__phone {
+      display: none;
+    }
+  }
   @media (max-width: 420px) {
-    .hdr__name {
+    .hdr__brand .hdr__name {
+      display: none;
+    }
+  }
+  /* EN 640–719 px: CTA görünür ve daha uzun → marka adı gizlenir (logo kalır), sıkışma olmaz */
+  @media (min-width: 640px) and (max-width: 719px) {
+    :global(html:lang(en)) .hdr__brand .hdr__name {
       display: none;
     }
   }
@@ -256,15 +284,36 @@ const brand = locale === 'tr' ? business.brand : business.brandEn;
     align-items: center;
     justify-content: space-between;
     padding: 1rem var(--gutter);
-    min-height: var(--header-h);
+    min-height: var(--header-min); /* ölçülen --header-h değil: geri besleme ile her yeniden boyutlamada 1 px büyümesin */
     border-bottom: 1px solid var(--line);
+  }
+  .mmenu__name {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 1.05rem;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+  }
+  .mmenu__close {
+    margin-left: auto;
+  }
+  /* Liste sarmalayıcısı (nav) dialog'un esnek çocuğu: kalan alanı o alır, alt kısım (düğmeler) hep altta kalır */
+  .mmenu > nav {
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
   }
   .mmenu__list {
     list-style: none;
     margin: 0;
     padding: 0.5rem 0;
-    flex: 1;
-    overflow: auto;
+  }
+  /* Kısa ekran (ör. 320×568): beş bağlantı alt düğmelerin üstünde tam sığsın */
+  @media (max-height: 640px) {
+    .mmenu__list a {
+      padding-block: 0.65rem;
+      font-size: 1.1rem;
+    }
   }
   .mmenu__list a {
     display: flex;

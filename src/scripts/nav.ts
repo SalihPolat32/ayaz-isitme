@@ -25,7 +25,8 @@ export function initNav(): void {
   }
 
   // Aktif bölüm vurgusu
-  const links = Array.from(document.querySelectorAll<HTMLAnchorElement>('[data-nav-link]'));
+  // Yalnız sayfa içi (#…) bağlantılar; gizlilik/404'te bağlantılar '/#…' olur ve bölüm yoktur
+  const links = Array.from(document.querySelectorAll<HTMLAnchorElement>('[data-nav-link]')).filter((a) => (a.getAttribute('href') || '').startsWith('#'));
   const sections = links
     .map((a) => document.querySelector<HTMLElement>(a.getAttribute('href') || ''))
     .filter((s): s is HTMLElement => !!s);

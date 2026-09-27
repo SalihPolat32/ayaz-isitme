@@ -4,6 +4,7 @@ import Icon from './Icon.astro';
 interface Props { locale: Locale; c: SiteContent }
 const { c } = Astro.props;
 const p = c.process;
+const stepIcons = ['message', 'ear', 'sliders', 'calendar'] as const;
 ---
 
 <section class="section pr" id="surec" aria-labelledby="pr-title">
@@ -16,7 +17,7 @@ const p = c.process;
     <ol class="pr__steps">
       {p.steps.map((s, i) => (
         <li class="reveal" style={`--reveal-delay:${i * 80}ms`}>
-          <span class="pr__num">{i + 1}</span>
+          <span class="pr__num"><Icon name={stepIcons[i % stepIcons.length]} /><span class="pr__idx">{i + 1}</span></span>
           <h3>{s.title}</h3>
           <p class="small muted">{s.text}</p>
         </li>
@@ -47,9 +48,10 @@ const p = c.process;
     .pr__steps::before {
       content: '';
       position: absolute;
-      left: 8%;
-      right: 8%;
-      top: 26px;
+      /* 1. ve 4. adım dairelerinin merkezleri arasında (li iç boşluğu 0.5rem, daire 64px, 3 aralık × 1.25rem) */
+      left: calc(0.5rem + 32px);
+      right: calc((100% - 3.75rem) / 4 - 0.5rem - 32px);
+      top: 32px;
       height: 2px;
       background: linear-gradient(90deg, var(--accent-soft-2), var(--accent), var(--accent-soft-2));
       opacity: 0.7;
@@ -63,19 +65,38 @@ const p = c.process;
     padding: 0 0.5rem;
   }
   .pr__num {
-    width: 52px;
-    height: 52px;
+    width: 64px;
+    height: 64px;
     border-radius: 50%;
     display: grid;
     place-items: center;
     background: var(--accent);
     color: #fff;
-    font-family: var(--font-display);
-    font-weight: 800;
-    font-size: 1.2rem;
     box-shadow: 0 0 0 8px var(--bg);
     position: relative;
     z-index: 1;
+  }
+  /* Icon ayrı bileşen: kapsamlı stil onun <svg>'sine ulaşmaz, bu yüzden :global(.icon) */
+  .pr__num :global(.icon) {
+    width: 1.6rem;
+    height: 1.6rem;
+  }
+  /* Adım numarası: ikonun sağ üstünde küçük rozet */
+  .pr__idx {
+    position: absolute;
+    top: -4px;
+    right: -6px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: var(--navy);
+    color: #fff;
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 0.78rem;
+    box-shadow: 0 0 0 3px var(--bg);
   }
   .pr__steps h3 {
     font-size: 1.15rem;
@@ -90,7 +111,7 @@ const p = c.process;
     max-width: 70ch;
     margin-inline: auto;
   }
-  .pr__note .icon {
+  .pr__note :global(.icon) {
     flex: none;
     margin-top: 0.2em;
   }

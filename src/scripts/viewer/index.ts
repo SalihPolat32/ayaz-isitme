@@ -1,22 +1,25 @@
 /**
- * Ayaz İşitme — temsili RIC işitme cihazı 3B görüntüleyici (giriş noktası).
+ * Ayaz İşitme — temsili işitme cihazı 3B görüntüleyici (giriş noktası).
  *
  * Kullanım (Astro bileşeninden, tembel yükleme ile):
  *   const { mountDeviceViewer, isWebGLAvailable } = await import('../scripts/viewer/index.ts');
- *   if (isWebGLAvailable()) controller = await mountDeviceViewer(root, { canvas, onHotspot });
+ *   if (isWebGLAvailable()) controller = await mountDeviceViewer(root, { canvas, onHotspot, deviceType: 'ric' });
  *
- * Çerçeve bağımsızdır; yalnızca `three` kullanır. Model harici varlık içermez.
+ * Çerçeve bağımsızdır; yalnızca `three` kullanır. Modeller harici varlık içermez.
+ * Üç cihaz (RIC 312 / BTE 13 / CIC 10) `setDeviceType()` ile çalışma zamanında değiştirilir;
+ * hepsinde animasyonlu pil kapağı vardır (`setBatteryDoor`, klavye `b`).
  */
 import { Vector2, Vector3 } from 'three';
-import { CameraMover, orbitStep } from './camera.ts';
+import { applyView, CameraMover, orbitStep } from './camera.ts';
 import { ExplodeController } from './explode.ts';
 import { createHotspotTracker } from './hotspots.ts';
 import { buildDeviceModel, HIGHLIGHT_COLOR } from './model.ts';
 import { createScene } from './scene.ts';
-import type { PartId, ViewerController, ViewerOptions } from './types.ts';
+import { type DeviceModel, type DeviceType, isDeviceType, PART_IDS, type PartId, type ViewerController, type ViewerOptions } from './types.ts';
 
-export type { DeviceModel, DevicePart, PartId, ViewerController, ViewerOptions } from './types.ts';
-export { PART_IDS, UNIT_MM } from './model.ts';
+export type { DeviceModel, DevicePart, DeviceType, PartId, ViewerController, ViewerOptions } from './types.ts';
+export { PART_IDS, DEVICE_TYPES } from './types.ts';
+export { UNIT_MM, BATTERY_SIZE } from './model.ts';
 
 declare global {
   interface Window {
@@ -28,12 +31,14 @@ declare global {
 const FOCUS_DURATION = 700;
 const RESET_DURATION = 700;
 const PULSE_DURATION = 1200;
+const DOOR_DURATION = 450;
 const AUTOROTATE_HOLD_AFTER_FOCUS = 2500;
 const KEY_ROTATE_STEP = 0.12;
 const KEY_TILT_STEP = 0.08;
 const KEY_ZOOM_FACTOR = 0.88;
 const STEADY_EMISSIVE = 0.35;
 const PULSE_EMISSIVE = 0.6;
+const DOOR_PARTS: ReadonlySet<string> = new Set(['battery', 'battery-door']);
 
 /** WebGL2 var mı? (Yoksa bileşen statik poster gösterir.) */
 export function isWebGLAvailable(): boolean {
@@ -61,7 +66,7 @@ export async function mountDeviceViewer(root: HTMLElement, opts: ViewerOptions):
   let autoRotatePref = opts.autoRotate ?? !reducedMotion;
   let autoRotateEnabled = autoRotatePref;
 
-  const model = buildDeviceModel();
+  let model: DeviceModel = buildDeviceModel(isDeviceType(opts.deviceType) ? opts.deviceType : 'ric');
   const sc = createScene({ canvas, root, model });
   const { camera, controls } = sc;
 
@@ -70,6 +75,14 @@ export async function mountDeviceViewer(root: HTMLElement, opts: ViewerOptions):
     sc.setExplodeFraming(t);
     opts.onExplodeChange?.(t);
   }, reducedMotion);
+  const door = new ExplodeController(
+    (t) => {
+      model.setDoor(t);
+      sc.requestRender();
+    },
+    reducedMotion,
+    DOOR_DURATION,
+  );
   const mover = new CameraMover(camera, controls);
   const tracker = opts.onHotspot ? createHotspotTracker(model, opts.onHotspot) : null;
   const highlights = new Map<PartId, Highlight>();
@@ -78,6 +91,7 @@ export async function mountDeviceViewer(root: HTMLElement, opts: ViewerOptions):
   let interacted = false;
   let holdAutoRotateUntil = 0;
   let destroyed = false;
+  let switching = 0;
 
   /* ---- etkileşim ---- */
   const markInteracted = (): void => {
@@ -95,10 +109,16 @@ export async function mountDeviceViewer(root: HTMLElement, opts: ViewerOptions):
 
   /* ---- vurgu ---- */
   const setEmissive = (id: PartId, intensity: number): void => {
-    for (const m of model.parts[id].materials) {
+    const part = model.parts[id];
+    if (!part) return;
+    for (const m of part.materials) {
       m.emissive.copy(HIGHLIGHT_COLOR);
       m.emissiveIntensity = intensity;
     }
+  };
+  const clearHighlights = (): void => {
+    for (const id of highlights.keys()) setEmissive(id, 0);
+    highlights.clear();
   };
   const updateHighlights = (time: number): boolean => {
     if (highlights.size === 0) return false;
@@ -129,6 +149,7 @@ export async function mountDeviceViewer(root: HTMLElement, opts: ViewerOptions):
     controls.autoRotate = autoRotateEnabled && !mover.active && time >= holdAutoRotateUntil;
     let need = false;
     if (explode.update(time)) need = true;
+    if (door.update(time)) need = true;
     if (mover.update(time)) need = true;
     if (updateHighlights(time)) need = true;
     return need;
@@ -140,7 +161,7 @@ export async function mountDeviceViewer(root: HTMLElement, opts: ViewerOptions):
     });
   }
 
-  /* ---- klavye (canvas odaklıyken) ---- */
+  /* ---- parçalanma / kapak ---- */
   const setExplodeInternal = (t: number, animate: boolean, fromUser: boolean): void => {
     if (destroyed) return;
     const k = Math.min(1, Math.max(0, t));
@@ -149,6 +170,17 @@ export async function mountDeviceViewer(root: HTMLElement, opts: ViewerOptions):
     sc.requestRender();
   };
 
+  const isDoorOpen = (): boolean => door.getTarget() > 0.5;
+  const setDoorInternal = (open: boolean, animate: boolean, fromUser: boolean): void => {
+    if (destroyed) return;
+    const changed = open !== isDoorOpen();
+    if (fromUser && changed) markInteracted();
+    door.set(open ? 1 : 0, animate);
+    if (changed) opts.onDoorChange?.(open);
+    sc.requestRender();
+  };
+
+  /* ---- klavye (canvas odaklıyken) ---- */
   const onKeyDown = (e: KeyboardEvent): void => {
     if (e.ctrlKey || e.metaKey || e.altKey) return;
     let handled = true;
@@ -187,6 +219,10 @@ export async function mountDeviceViewer(root: HTMLElement, opts: ViewerOptions):
       case 'E':
         setExplodeInternal(explode.getTarget() > 0.5 ? 0 : 1, true, true);
         break;
+      case 'b':
+      case 'B':
+        setDoorInternal(!isDoorOpen(), true, true);
+        break;
       default:
         handled = false;
     }
@@ -203,9 +239,9 @@ export async function mountDeviceViewer(root: HTMLElement, opts: ViewerOptions):
   const reset = (): void => {
     if (destroyed) return;
     mover.cancel();
-    for (const id of highlights.keys()) setEmissive(id, 0);
-    highlights.clear();
+    clearHighlights();
     explode.set(0, !reducedMotion);
+    setDoorInternal(false, !reducedMotion, false);
     autoRotateEnabled = autoRotatePref;
     opts.onAutoRotateChange?.(autoRotateEnabled);
     holdAutoRotateUntil = 0;
@@ -217,9 +253,17 @@ export async function mountDeviceViewer(root: HTMLElement, opts: ViewerOptions):
     if (destroyed) return;
     const part = model.parts[id];
     if (!part) return;
+    const opensDoor = DOOR_PARTS.has(id);
+    if (opensDoor) setDoorInternal(true, true, false);
+
+    // Çapayı kapağın HEDEF pozunda hesapla (kapak açılırken pil dışarıda olacak)
+    const prevDoor = model.getDoor();
+    if (opensDoor) model.setDoor(1);
     part.object.updateWorldMatrix(true, false);
     const anchorW = part.object.localToWorld(part.anchorLocal.clone());
     const normalW = part.anchorNormal.clone().transformDirection(part.object.matrixWorld);
+    if (opensDoor) model.setDoor(prevDoor);
+
     const curDir = camera.position.clone().sub(controls.target).normalize();
     const curRadius = camera.position.distanceTo(controls.target);
 
@@ -248,10 +292,40 @@ export async function mountDeviceViewer(root: HTMLElement, opts: ViewerOptions):
         highlights.delete(pid);
       }
     }
-    if (id) {
+    if (id && model.parts[id]) {
       highlights.set(id, { mode: 'steady', start: performance.now(), applied: false });
     }
     sc.requestRender();
+  };
+
+  /* ---- model değiştirme ---- */
+  const setDeviceType = async (type: DeviceType): Promise<void> => {
+    if (destroyed || !isDeviceType(type) || type === model.type) return;
+    const token = ++switching;
+    mover.cancel();
+    explode.cancel();
+    door.cancel();
+    clearHighlights();
+    const old = model;
+    model = buildDeviceModel(type);
+    sc.setModel(model);
+    tracker?.setModel(model);
+    old.dispose();
+    // Parçalanma 0 ve kapak kapalı (bildirimlerle), kamera yeni ana bakışa (anında)
+    explode.set(0, false);
+    door.set(0, false);
+    opts.onDoorChange?.(false);
+    holdAutoRotateUntil = 0;
+    applyView(homeView(), camera, controls);
+    sc.requestRender();
+    try {
+      await sc.renderer.compileAsync(sc.scene, camera);
+    } catch {
+      /* ilk çizimde derlenir */
+    }
+    if (destroyed || token !== switching) return;
+    sc.requestRender();
+    opts.onDeviceChange?.(type);
   };
 
   /* ---- shader ön derleme, ilk kare ---- */
@@ -280,14 +354,22 @@ export async function mountDeviceViewer(root: HTMLElement, opts: ViewerOptions):
     },
     focusPart,
     highlightPart,
+    setDeviceType,
+    getDeviceType: () => model.type,
+    getPartIds: () => PART_IDS[model.type],
+    setBatteryDoor: (open, animate = true) => setDoorInternal(open, animate, true),
+    toggleBatteryDoor: () => setDoorInternal(!isDoorOpen(), true, true),
+    isBatteryDoorOpen: isDoorOpen,
     captureImage: (w, h) => sc.captureImage(w, h),
     pause: () => sc.setUserPaused(true),
     resume: () => sc.setUserPaused(false),
     destroy: () => {
       if (destroyed) return;
       destroyed = true;
+      switching++;
       mover.cancel();
       explode.cancel();
+      door.cancel();
       highlights.clear();
       controls.removeEventListener('start', onControlsStart);
       canvas.removeEventListener('keydown', onKeyDown);
@@ -318,6 +400,12 @@ export async function mountDeviceViewer(root: HTMLElement, opts: ViewerOptions):
       setAutoRotate: noop,
       focusPart: noop,
       highlightPart: noop,
+      setDeviceType: async () => {},
+      getDeviceType: () => model.type,
+      getPartIds: () => PART_IDS[model.type],
+      setBatteryDoor: noop,
+      toggleBatteryDoor: noop,
+      isBatteryDoorOpen: () => false,
       captureImage: () => '',
       pause: noop,
       resume: noop,

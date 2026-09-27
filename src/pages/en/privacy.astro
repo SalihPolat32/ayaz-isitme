@@ -2,11 +2,16 @@
 import Base from '../../layouts/Base.astro';
 import LegalPage from '../../components/LegalPage.astro';
 import { getContent } from '../../i18n';
-import { legalEn } from '../../content/legal/en';
+import { buildLegalDoc } from '../../content/legal';
+import { legalEnvFromBuild } from '../../content/legal/env';
 const locale = 'en' as const;
 const c = getContent(locale);
+// Metin bu derlemenin yapılandırmasından üretilir; üretimde eksik işletme bilgisi varsa derleme burada durur.
+const { env, reviewsMode } = legalEnvFromBuild();
+const legal = buildLegalDoc(locale, env, reviewsMode);
+// Taslak metin (eksik işletme bilgisi, ör. ALLOW_INCOMPLETE_LEGAL=1 QA derlemesi) asla dizine eklenmez.
 ---
 
-<Base locale={locale} c={c} title={`${legalEn.title} | Ayaz Hearing Center`} description={legalEn.description} alternates={{ tr: '/gizlilik/', en: '/en/privacy/' }}>
-  <LegalPage locale={locale} c={c} legal={legalEn} />
+<Base locale={locale} c={c} title={`${legal.title} | Ayaz Hearing Center`} description={legal.description} alternates={{ tr: '/gizlilik/', en: '/en/privacy/' }} noindex={legal.draftNotice !== null}>
+  <LegalPage locale={locale} c={c} legal={legal} />
 </Base>

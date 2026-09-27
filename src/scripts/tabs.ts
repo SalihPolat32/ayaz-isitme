@@ -1,3 +1,5 @@
+import { prefersReducedMotion } from './config';
+
 /** WAI-ARIA APG Tabs: tıklama + ok tuşları + Home/End, roving tabindex. */
 export function initTabs(): void {
   document.querySelectorAll<HTMLElement>('[data-tabs]').forEach((root) => {
@@ -12,7 +14,7 @@ export function initTabs(): void {
         if (panels[j]) panels[j]!.hidden = !on;
       });
       if (focus) tabs[i]?.focus();
-      tabs[i]?.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' });
+      tabs[i]?.scrollIntoView({ block: 'nearest', inline: 'center', behavior: prefersReducedMotion() ? 'auto' : 'smooth' });
     };
     tabs.forEach((t, i) => {
       t.addEventListener('click', () => select(i, false));

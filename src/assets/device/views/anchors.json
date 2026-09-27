@@ -1,0 +1,98 @@
+{
+  "ear-bte-body": {
+    "file": "ear-bte-body.png",
+    "width": 692,
+    "height": 1162,
+    "mmPerPx": 0.045,
+    "canvasBox": {
+      "x": 251,
+      "y": 124,
+      "w": 692,
+      "h": 1162,
+      "canvas": 1400
+    },
+    "tubeOuterMm": 3.3,
+    "tubeInnerMm": 1.9,
+    "hookTip": {
+      "x": 669.9,
+      "y": 333.9
+    },
+    "hookTipDir": {
+      "x": 0.291,
+      "y": 0.957
+    }
+  },
+  "ear-bte-mold": {
+    "file": "ear-bte-mold.png",
+    "width": 297,
+    "height": 434,
+    "mmPerPx": 0.045,
+    "canvasBox": {
+      "x": 843,
+      "y": 707,
+      "w": 297,
+      "h": 434,
+      "canvas": 1400
+    },
+    "tubeOuterMm": 3.3,
+    "tubeInnerMm": 1.9,
+    "tubeInlet": {
+      "x": 195.4,
+      "y": 54
+    },
+    "tubeInletDir": {
+      "x": 0.137,
+      "y": -0.991
+    },
+    "center": {
+      "x": 159.2,
+      "y": 257.4
+    }
+  },
+  "ear-ric-body": {
+    "file": "ear-ric-body.png",
+    "width": 282,
+    "height": 698,
+    "mmPerPx": 0.045,
+    "canvasBox": {
+      "x": 300,
+      "y": 388,
+      "w": 282,
+      "h": 698,
+      "canvas": 1400
+    },
+    "wireExit": {
+      "x": 212.3,
+      "y": 11.2
+    },
+    "wireExitDir": {
+      "x": 0.321,
+      "y": -0.947
+    }
+  },
+  "ear-ric-receiver": {
+    "file": "ear-ric-receiver.png",
+    "width": 152,
+    "height": 156,
+    "mmPerPx": 0.045,
+    "canvasBox": {
+      "x": 894,
+      "y": 816,
+      "w": 152,
+      "h": 156,
+      "canvas": 1400
+    },
+    "wireInlet": {
+      "x": 23,
+      "y": 22.1
+    },
+    "wireInletDir": {
+      "x": -0.671,
+      "y": -0.741
+    },
+    "center": {
+      "x": 56.3,
+      "y": 58.9
+    }
+  }
+}

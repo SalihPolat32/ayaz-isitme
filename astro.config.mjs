@@ -18,6 +18,24 @@ export default defineConfig({
   },
 
   integrations: [
+    // Derleme, çalışan dev sunucusunun önceden optimize ettiği modülleri geçersiz kılmasın (504 "Outdated Optimize Dep"): ayrı Vite önbellekleri.
+    {
+      name: 'ayaz-isolated-vite-cache',
+      hooks: {
+        'astro:config:setup': ({ command, updateConfig }) => {
+          updateConfig({ vite: { cacheDir: `node_modules/.vite-ayaz-${command === 'dev' ? 'dev' : 'build'}` } });
+        },
+      },
+    },
+    // Geliştirme sayfası (3B görüntüleyici + render API'si) YALNIZCA `astro dev` sırasında vardır; üretim derlemesine girmez.
+    {
+      name: 'ayaz-dev-pages',
+      hooks: {
+        'astro:config:setup': ({ command, injectRoute }) => {
+          if (command === 'dev') injectRoute({ pattern: '/dev/viewer', entrypoint: './src/dev/viewer.astro' });
+        },
+      },
+    },
     sitemap({
       i18n: { defaultLocale: 'tr', locales: { tr: 'tr-TR', en: 'en' } },
       filter: (page) => !page.includes('/dev/') && !page.includes('/404'),
@@ -48,7 +66,9 @@ export default defineConfig({
     },
     {
       provider: fontProviders.google(),
-      name: 'Inter',
+      // Tur 10: gövde metni de Manrope (aynı değişken font dosyaları, ≈40 KB toplam, başlıkla birlikte önceden yüklenir).
+      // Inter denendi: +≈130 KB (latin-ext 85 KB) → mobil LCP 1,9 → 2,7 s; Manrope ile 99/100, CLS 0 (QA-REPORT.md).
+      name: 'Manrope',
       cssVariable: '--font-body',
       weights: ['400 700'],
       styles: ['normal'],
@@ -75,6 +95,8 @@ export default defineConfig({
       PUBLIC_TURNSTILE_SITE_KEY: envField.string({ context: 'client', access: 'public', optional: true, default: '' }),
       /** 'production' dışındaki her değer noindex üretir (preview ortamı). */
       PUBLIC_SITE_ENV: envField.string({ context: 'client', access: 'public', optional: true, default: 'preview' }),
+      /** Yorum bölümü modu: 'carousel' | 'link'. Boşsa src/config/business.ts > reviewsDisplay kullanılır. */
+      PUBLIC_REVIEWS_DISPLAY: envField.string({ context: 'client', access: 'public', optional: true, default: '' }),
     },
   },
 });

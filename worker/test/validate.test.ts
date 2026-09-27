@@ -133,6 +133,16 @@ describe('validateAppointment', () => {
     });
   });
 
+  it('konu (kart başlığı) varsa eklenir; geçersiz ya da çok uzunsa formu reddetmez, yalnızca atılır', () => {
+    const ok = validateAppointment({ ...valid, topic: '  Kulak\u0007 kalıbı ' });
+    expect(ok).toMatchObject({ ok: true, data: { topic: 'Kulak kalıbı' } });
+    for (const topic of [42, 'x'.repeat(61), '', null]) {
+      const r = validateAppointment({ ...valid, topic });
+      expect(r.ok).toBe(true);
+      if (r.ok) expect(r.data.topic).toBeUndefined();
+    }
+  });
+
   it('time verilmezse alan hiç yer almaz; locale varsayılanı tr', () => {
     const r = validateAppointment({ name: 'Ali Veli', phone: '5071551151', consent: true });
     expect(r).toEqual({ ok: true, data: { name: 'Ali Veli', phone: '+905071551151', locale: 'tr' } });
@@ -235,6 +245,7 @@ describe('trimPlace (Google Places → ön yüz)', () => {
 
   it('yorum alanlarını doğru eşler', () => {
     expect(out.reviews[0]).toEqual({
+      id: 'AbCdEf1',
       author: 'Ayşe Y.',
       authorUri: 'https://www.google.com/maps/contrib/1111111111111111111/reviews',
       authorPhoto: 'https://lh3.googleusercontent.com/a/example-1=s128-c0x00000000-cc-rp-mo',
@@ -251,6 +262,14 @@ describe('trimPlace (Google Places → ön yüz)', () => {
   it('çevrilmiş yorumu işaretler, metinsiz yorumu boş metinle korur', () => {
     expect(out.reviews[1]).toMatchObject({ translated: true, text: 'Great service, translated text.' });
     expect(out.reviews[2]).toMatchObject({ author: 'Fatma D.', rating: 5, text: '', translated: false });
+  });
+
+  it('yorum kimliğini yalnızca kaynak adının son parçası olarak verir (geriye dönük uyumlu ek alan)', () => {
+    expect(out.reviews.map((r) => r.id)).toEqual(['AbCdEf1', 'AbCdEf2', 'AbCdEf3']);
+    expect(trimPlace({ reviews: [{ rating: 5 }] } as PlaceDetails, fetchedAt).reviews[0]).toMatchObject({ id: '', publishTime: '' });
+    expect(trimPlace({ reviews: [{ name: 'places/P/reviews/a b<script>' }] } as PlaceDetails, fetchedAt).reviews[0]!.id).toBe('');
+    // Eski alanların hepsi yerinde (eski istemciler kırılmaz)
+    expect(Object.keys(out.reviews[0]!).sort()).toEqual(['author', 'authorPhoto', 'authorUri', 'flagUri', 'id', 'publishTime', 'rating', 'relativeTime', 'reviewUri', 'text', 'translated'].sort());
   });
 
   it('Google\'ın iç alanlarını (name, originalText, languageCode) sızdırmaz', () => {
@@ -271,7 +290,7 @@ describe('trimPlace (Google Places → ön yüz)', () => {
       reviews: [],
       fetchedAt,
     });
-    expect(trimPlace({ reviews: [{}] } as PlaceDetails, fetchedAt).reviews[0]).toMatchObject({ author: '', rating: 0, text: '' });
+    expect(trimPlace({ reviews: [{}] } as PlaceDetails, fetchedAt).reviews[0]).toMatchObject({ id: '', author: '', rating: 0, text: '' });
   });
 });
 

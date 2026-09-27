@@ -41,15 +41,16 @@
   --warn-soft: #fff3df;
   --danger: #b3261e;
   --danger-soft: #fbe9e7;
-  --whatsapp: #128c7e;
+  /* WhatsApp yeşili, beyaz yazıyla AA (≈5,2:1); önceki #128c7e 4,1:1 kalıyordu */
+  --whatsapp: #0f7a6e;
 
   /* Ürün sunumu (titanyum/grafit) */
   --graphite: #2b2f36;
   --titanium: #b8bcc2;
 
-  /* Tipografi */
-  --font-display: 'Manrope', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-  --font-body: 'Inter', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  /* Tipografi: --font-display ve --font-body (ikisi de Manrope) Astro Fonts API'den gelir (Base.astro <Font>,
+     :root üzerinde, karma adlı yüz + ölçülü yedek). Burada :root'ta TANIMLANMAZ: tanımlanırsa Astro'nunkini ezer
+     ve site sistem fontuyla görünür. Yalnızca <Font> olmayan sayfalar (dev) için aşağıdaki html yedeği vardır. */
   --text-base: clamp(1.0625rem, 1rem + 0.2vw, 1.125rem); /* 17–18px */
   --text-sm: 0.9375rem;
   --text-xs: 0.8125rem;
@@ -104,6 +105,8 @@
   --z-toast: 110;
 
   /* Yapışkan başlık yüksekliği (scroll-margin için) */
+  /* --header-min: başlığın sabit en küçük yüksekliği. --header-h: ölçülen gerçek yükseklik (nav.ts yazar; yalnız kaydırma payları kullanır) */
+  --header-min: 72px;
   --header-h: 72px;
 }
 
@@ -113,4 +116,10 @@
     --dur-2: 0ms;
     --dur-3: 0ms;
   }
+}
+
+/* Yedek: html (0,0,1) özgüllüğü :root'tan (0,1,0) düşüktür → Astro Fonts varsa her zaman o kazanır */
+html {
+  --font-display: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  --font-body: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
 }

@@ -48,6 +48,7 @@ export function buildNotification(data: AppointmentData, meta: NotificationMeta)
     ['Ad Soyad', data.name],
     ['Telefon', `${formatPhoneTR(data.phone)} (${data.phone})`],
     ['Tercih edilen zaman', data.time ?? '-'],
+    ['Konu', data.topic ?? '-'],
     ['Dil', data.locale],
     ['Alınma zamanı', formatIstanbul(meta.receivedAt)],
     ['Sayfa', meta.pageUrl],
