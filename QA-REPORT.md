@@ -1,7 +1,7 @@
 # QA — nihai durum (27 Eylül 2026, Tur 10)
 
 Ayaz İşitme Merkezi v2 (keciorenisitme.com). Ortam: macOS, Node 24, Astro 7.3.5, Chromium (Playwright), Lighthouse 13.5.
-Canlı sürüm hâlâ `e851804`. Bu rapordaki her şey yerel çalışmadır. Commit ya da push yapılmadı.
+Canlı sürüm hâlâ `e851804`. Canlıya henüz bir şey çıkmadı. Tur 3–10 çalışması `gelistirme/v2-tur10` dalında (taslak PR #1); `master` birleştirmesi yayın kapısının 4 bilgisinden sonra.
 
 ## 1. Güncel doğrulama (Tur 10, 27 Eyl 2026)
 
@@ -97,7 +97,8 @@ ALLOW_INCOMPLETE_LEGAL=1 PUBLIC_SITE_ENV=production npx astro build && npx playw
 - **Canlı yorum API'si açılmadan önce:** Places yorum kimliğinin Takeout kimliğiyle aynı olduğu bir kez doğrulanmalıdır (`INTEGRATIONS.md` §5, risk 12).
 - API moduna geçilecekse Cloudflare panelindeki kayıt üst verisi kontrol edilmelidir (`worker/README.md` §9).
 - Kozmetik: BTE kalıp yuvası birleşim çizgisi yakın zumda hafif tırtıklıdır. CIC menteşe ucunda ince açık bir şerit görünür.
-- Kozmetik: Hero, MobileBar, Footer, Contact, ConsentBanner ve DeviceExplorer içindeki 10 `.x .icon` kuralı kapsamlı stil yüzünden uygulanmıyor. Bugünkü görünüm bu kurallar olmadan onaylandı. Düzeltme ayrı yapılmalı, çünkü kurallar devreye girince ikon boyut ve renkleri değişir.
+- ~~Etkisiz `.x .icon` kuralları~~ — Tur 10'da düzeltildi: Hero, MobileBar, Footer, Contact, ConsentBanner ve DeviceExplorer'daki 9 kural `:global(.icon)`; önce/sonra görüntüleriyle kontrol edildi (ikonlar artık niyet edilen renk ve boyutta).
+- **Depo (27 Eyl 2026):** değişiklikler temiz bir klondan geliştirme dalına aktarıldı: `gelistirme/v2-tur10` (commit `3def419`), taslak PR https://github.com/SalihPolat32/ayaz-isitme/pull/1 (birleştirilmedi; `master` = `e851804`, canlı sürüm değişmedi). Aktarımdan önce gizli anahtar, kişisel veri, yorumcu tam adı ve Takeout taraması temiz; işletme profili iç kimlikleri belgede kısaltıldı.
 - Gerçek cihazda (iOS Safari, Android Chrome) test yapılmadı, Playwright emülasyonu kullanıldı. Saha verisi (CrUX) yayından sonra izlenmelidir.
 - Yorumcu adları: bitişik yazılmış ad-soyad kullanıcı adı `displayNames` ile "Samet Ö." gösteriliyor — kullanıcı adından okunan kısaltmadır, **işletme sahibi onaylamalı** ☐. Kalan tek kelimelik adlar (berat, Musa, Abdulkadir, melis, Mahwut, OSMAN) yalnızca ilk addır. Canlı API modunda tek kelimelik Google adları olduğu gibi gelir; otomatik kısaltma kuralı ("Abdulkadir" gibi gerçek adları bozacağı için) yoktur.
 - **Galeri vitrin fotoğrafı (ofis-6) — sahip kararı ☐:** mağaza vitrinindeki SGK logosu, "ücretsiz işitme testi", "12 aya kadar taksit", "ömür boyu bakım" ve unvan yazıları fotoğrafta okunur (özellikle büyütmede). Metinde bu iddialar doğrulanana kadar gizli; paylaşım kartından çıkarıldı. Seçenekler: olduğu gibi bırakmak (işletmenin kendi gerçek vitrini), panelleri bulanıklaştırmak ya da tabelayı gösteren bir kırpım.
