@@ -26,5 +26,15 @@ export default defineConfig({
   projects: [
     { name: 'desktop', use: { ...devices['Desktop Chrome'], viewport: { width: 1280, height: 800 } } },
     { name: 'mobile', use: { ...devices['Pixel 7'] } },
+    // Yayın öncesi motor kapsamı (varsayılan çalıştırmada kapalı): E2E_ENGINES=1 npx playwright test
+    // WebKit = Safari'nin motoru (masaüstü + iPhone emülasyonu); gerçek iPhone/Safari testi yerine geçmez.
+    // Önce: npx playwright install webkit firefox
+    ...(process.env.E2E_ENGINES
+      ? [
+          { name: 'webkit-desktop', use: { ...devices['Desktop Safari'], viewport: { width: 1280, height: 800 } } },
+          { name: 'webkit-iphone', use: { ...devices['iPhone 15'] } },
+          { name: 'firefox-desktop', use: { ...devices['Desktop Firefox'], viewport: { width: 1280, height: 800 } } },
+        ]
+      : []),
   ],
 });

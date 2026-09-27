@@ -84,7 +84,9 @@ test.describe('JavaScript kapalı', () => {
   });
 });
 
-test('3B sahne üzerinde fare tekerleği sayfayı kaydırır (yakınlaştırma yalnız Ctrl/⌘ ile)', async ({ page }) => {
+test('3B sahne üzerinde fare tekerleği sayfayı kaydırır (yakınlaştırma yalnız Ctrl/⌘ ile)', async ({ page, isMobile }) => {
+  // Fare tekerleği masaüstü senaryosudur; mobil WebKit'te page.mouse.wheel desteklenmez (dokunmatikte tekerlek yok)
+  test.skip(isMobile, 'Telefon: fare tekerleği yok');
   test.slow();
   await page.setViewportSize({ width: 1280, height: 800 });
   await page.goto('/');
