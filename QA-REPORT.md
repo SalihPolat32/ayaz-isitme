@@ -1,7 +1,7 @@
 # QA — nihai durum (27 Eylül 2026, Tur 10)
 
 Ayaz İşitme Merkezi v2 (keciorenisitme.com). Ortam: macOS, Node 24, Astro 7.3.5, Chromium (Playwright), Lighthouse 13.5.
-Canlı sürüm hâlâ `e851804`. Canlıya henüz bir şey çıkmadı. Tur 3–10 çalışması `gelistirme/v2-tur10` dalında (taslak PR #1); `master` birleştirmesi yayın kapısının 4 bilgisinden sonra.
+Canlı sürüm hâlâ `e851804`. Tur 3–10 çalışması `gelistirme/v2-tur10` dalında (PR #1). 27 Eyl 2026 akşamı yayın kapısının 4 bilgisi tamamlandı; üretim derlemesi geçersiz kılmasız geçiyor.
 
 ## 1. Güncel doğrulama (Tur 10, 27 Eyl 2026)
 
@@ -10,12 +10,12 @@ Canlı sürüm hâlâ `e851804`. Canlıya henüz bir şey çıkmadı. Tur 3–10
 | `npx astro check` (TypeScript strict, 89 dosya) | 0 hata · 0 uyarı · 0 ipucu |
 | `npx vitest run` (site, 8 dosya; yeni: `tests/molds.test.ts`) | **140/140** |
 | `cd worker && npx vitest run && npm run typecheck` | **112/112**, tip kontrolü temiz |
-| Playwright e2e (masaüstü 1280 + Pixel 7) | **102/102** (yeni: `tests/e2e/audit-fixes.spec.ts`). Derleme: `ALLOW_INCOMPLETE_LEGAL=1 PUBLIC_SITE_ENV=production` (QA) |
+| Playwright e2e (masaüstü 1280 + Pixel 7) | **101 geçti, 1 atlandı** (tekerlek testi telefonda) — gerçek üretim derlemesinde (geçersiz kılma yok) |
 | axe-core, tüm sayfalar (`/`, `/en/`, iki gizlilik sayfası, 404) | **0 ihlal** (WCAG 2 A/AA, 2.1 AA, 2.2 AA + best-practice; 320, 400, 760, 1280 px; hareket azaltma açık/kapalı; çerez paneli görünürken; sekmeler, `details`, mobil menü açık) |
 | Motor kapsamı (27 Eyl 2026, `E2E_ENGINES=1`) | **WebKit** (Safari motoru; masaüstü + iPhone 15 emülasyonu): 101 geçti, 1 atlandı (fare tekerleği testi telefonda anlamsız). Tam paket paralel koşarken canlı API modu testlerinden 2'si bir kez zaman aşımına düştü; tek başına 3 tekrarda 78/78 geçti (yazılımsal 3B motoru yükü). Canlı API modu bu yayında kapalı. **Firefox:** bu bilgisayarda açılamıyor (macOS 27 + Playwright Firefox bilinen profil hatası, sandbox dışı da aynı). Gerçek iPhone/Android testi yok |
 | Yatay taşma / başlık taraması | 4 sayfa, 320–1440 px (20 px adım): taşma yok, başlıkta satır kırılması yok, yeniden boyutlamada başlık büyümüyor |
-| Üretim derlemesi (`PUBLIC_SITE_ENV=production`, geçersiz kılma yok) | **Bilinçli olarak durur.** 4 işletme bilgisi eksik. Bilgiler eksikken kopyalanacak onay özeti basılmaz (§3). Metin sürümü `2026-09-27.5` (Tur 10: `ayaz.topic` anlatımı düzeltildi) |
-| Lighthouse Tur 10 (QA derlemesi, `noindex`) | Performans · erişilebilirlik · en iyi uygulama — TR ve EN: mobil **99·100·100**, masaüstü **100·100·100**; LCP 1,9 s / 0,4 s, TBT 0, **CLS 0**, aktarım **148 / 166 KiB** (Tur 9: 191 / 188). SEO 69 yalnız `is-crawlable` (QA derlemesi bilerek `noindex`) |
+| Üretim derlemesi (`PUBLIC_SITE_ENV=production`, geçersiz kılma yok) | **Geçer** (27 Eyl 2026, 20:09): 4 hukuki bilgi işletmeden geldi — m.9 cümlesi (TR/EN), hukuki sebep teyidi (İşletme sahibi), metin onayı (İşletme sahibi; sürüm `2026-09-27.6`, özet `5c05496f033b303e`). Robots `index, follow`, önizleme uyarısı yok |
+| Lighthouse (gerçek üretim derlemesi, 27 Eyl 2026) | TR ve EN: mobil **99·100·100·100**, masaüstü **100·100·100·100**; LCP 1,9 s / 0,4 s, TBT 0, **CLS 0**, aktarım 148 / 166 KiB |
 | Dağıtım boyutu | `dist` 12 MB → **7,8 MB** (kullanılmayan görsel varyantları üretilmiyor; kalan ≈ 0,6 MB, içe aktarılan katmanların Astro'nun kopyaladığı özgünleri) |
 | Paket | İlk JS ≈ 11 KB gz. 3B motoru ayrı parça, yalnızca bölüm görünür olunca yüklenir. Font: Manrope (2 dosya, ≈ 40 KB, önceden yüklenir) |
 
@@ -101,8 +101,8 @@ ALLOW_INCOMPLETE_LEGAL=1 PUBLIC_SITE_ENV=production npx astro build && npx playw
 - ~~Etkisiz `.x .icon` kuralları~~ — Tur 10'da düzeltildi: Hero, MobileBar, Footer, Contact, ConsentBanner ve DeviceExplorer'daki 9 kural `:global(.icon)`; önce/sonra görüntüleriyle kontrol edildi (ikonlar artık niyet edilen renk ve boyutta).
 - **Depo (27 Eyl 2026):** değişiklikler temiz bir klondan geliştirme dalına aktarıldı: `gelistirme/v2-tur10` (commit `3def419`), taslak PR https://github.com/SalihPolat32/ayaz-isitme/pull/1 (birleştirilmedi; `master` = `e851804`, canlı sürüm değişmedi). Aktarımdan önce gizli anahtar, kişisel veri, yorumcu tam adı ve Takeout taraması temiz; işletme profili iç kimlikleri belgede kısaltıldı.
 - Gerçek cihazda (iOS Safari, Android Chrome) test yapılmadı, Playwright emülasyonu kullanıldı. Saha verisi (CrUX) yayından sonra izlenmelidir.
-- Yorumcu adları: bitişik yazılmış ad-soyad kullanıcı adı `displayNames` ile "Samet Ö." gösteriliyor — kullanıcı adından okunan kısaltmadır, **işletme sahibi onaylamalı** ☐. Kalan tek kelimelik adlar (berat, Musa, Abdulkadir, melis, Mahwut, OSMAN) yalnızca ilk addır. Canlı API modunda tek kelimelik Google adları olduğu gibi gelir; otomatik kısaltma kuralı ("Abdulkadir" gibi gerçek adları bozacağı için) yoktur.
-- **Galeri vitrin fotoğrafı (ofis-6) — sahip kararı ☐:** mağaza vitrinindeki SGK logosu, "ücretsiz işitme testi", "12 aya kadar taksit", "ömür boyu bakım" ve unvan yazıları fotoğrafta okunur (özellikle büyütmede). Metinde bu iddialar doğrulanana kadar gizli; paylaşım kartından çıkarıldı. Seçenekler: olduğu gibi bırakmak (işletmenin kendi gerçek vitrini), panelleri bulanıklaştırmak ya da tabelayı gösteren bir kırpım.
+- Yorumcu adları: bitişik yazılmış ad-soyad kullanıcı adı `displayNames` ile "Samet Ö." gösteriliyor — kullanıcı adından okunan kısaltma; **işletme onayladı (27 Eyl 2026)** ☑. Kalan tek kelimelik adlar (berat, Musa, Abdulkadir, melis, Mahwut, OSMAN) yalnızca ilk addır. Canlı API modunda tek kelimelik Google adları olduğu gibi gelir; otomatik kısaltma kuralı ("Abdulkadir" gibi gerçek adları bozacağı için) yoktur.
+- **Galeri vitrin fotoğrafı (ofis-6) — sahip kararı ☑ (27 Eyl 2026: olduğu gibi kalsın):** mağaza vitrinindeki SGK logosu, "ücretsiz işitme testi", "12 aya kadar taksit", "ömür boyu bakım" ve unvan yazıları fotoğrafta okunur (özellikle büyütmede). Metinde bu iddialar doğrulanana kadar gizli; paylaşım kartından çıkarıldı. Seçenekler: olduğu gibi bırakmak (işletmenin kendi gerçek vitrini), panelleri bulanıklaştırmak ya da tabelayı gösteren bir kırpım.
 - Kulak kalıbı "yarım iskelet" biçiminin tanımı kaynaklar arasında farklı (halkanın hangi kısmının açık olduğu); render, sahibinin gönderdiği tedarikçi çizelgesindeki biçime göre yapıldı.
 
 ## 5. Tur geçmişi (özet)

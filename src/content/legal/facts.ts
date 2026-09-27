@@ -24,7 +24,7 @@ import type { LegalFacts, NotificationChannel } from '../../config/business';
  * .2 (27 Eyl 2026): KVKK m.11 bentleri Kanun lafzıyla (a–ğ); çerez paneli ve kaydı yapılandırmaya bağlı.
  * .3 (27 Eyl 2026): bildirim kanalları "ve/and" ile listelenir; pazarlama hizmeti varken "reklam profili" cümlesi kesinleşti.
  */
-export const LEGAL_TEXT_VERSION = '2026-09-27.5';
+export const LEGAL_TEXT_VERSION = '2026-09-27.6';
 
 /** QA için kapıyı aşan ortam değişkeni. deploy.yml'de ASLA tanımlanmaz (tests/legal.test.ts denetler). */
 export const LEGAL_OVERRIDE_ENV = 'ALLOW_INCOMPLETE_LEGAL';
@@ -129,7 +129,7 @@ const FACTS: Record<string, Omit<MissingFact, 'key'>> = {
     label: { tr: 'randevu bildiriminin iletildiği sağlayıcı(lar)', en: 'notification provider(s) that deliver appointment requests' },
   },
   'crossBorderBasis.tr': {
-    question: 'KVKK m.9 kapsamında yurt dışına aktarımın (GitHub Pages barındırma, Google Haritalar, WhatsApp/Meta; API modunda Cloudflare ve bildirim sağlayıcısı; izinle ölçüm hizmetleri) dayanağı nedir? Avukatın yazdığı tek cümlelik Türkçe metin.',
+    question: 'KVKK m.9 kapsamında yurt dışına aktarımın (GitHub Pages barındırma, Google Haritalar, WhatsApp/Meta; API modunda Cloudflare ve bildirim sağlayıcısı; izinle ölçüm hizmetleri) dayanağını anlatan tek, tam Türkçe cümle (sayfada "Yurt dışına aktarım" paragrafına olduğu gibi eklenir). İşletme/avukat belirler.',
     label: { tr: 'yurt dışına aktarım dayanağı (KVKK m.9)', en: 'legal basis for cross-border transfer (Art. 9)' },
   },
   'crossBorderBasis.en': {

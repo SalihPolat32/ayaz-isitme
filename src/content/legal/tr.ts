@@ -98,7 +98,7 @@ ${formP}
 <p>Kişisel verileriniz, yukarıdaki işlemler için aşağıdaki hizmet sağlayıcılar tarafından işlenir:</p>
 <ul>${recipients.join('')}</ul>
 <p>Form içeriğiniz (ad, telefon, konu) analitik veya reklam etiketlerine gönderilmez.</p>
-<p><strong>Yurt dışına aktarım:</strong> Bu sağlayıcıların tamamı yurt dışında yerleşiktir; bu nedenle yukarıdaki işlemler kişisel verilerinizin yurt dışına aktarılması sonucunu doğurur. Aktarımın dayanağı (KVKK m.9): ${v.crossBorder}</p>
+<p><strong>Yurt dışına aktarım:</strong> Bu sağlayıcıların tamamı yurt dışında yerleşiktir; bu nedenle yukarıdaki işlemler kişisel verilerinizin yurt dışına aktarılması sonucunu doğurur. ${v.crossBorder}</p>
 <h3>Saklama süreleri</h3>
 <p>Randevu ve iletişim talepleri, talebin alındığı tarihten itibaren en fazla ${v.appointmentMonths} ay saklanır ve ardından silinir. WhatsApp yazışmaları en fazla ${v.whatsappMonths} ay saklanır ve ardından silinir.${api ? ` Randevu uygulamasının teknik çalışma kayıtları ${v.logsDays} gün sonra silinir.` : ''} Tarayıcınızdaki kayıtların süreleri <a href="#cerez">Çerezler</a> bölümündedir; sağlayıcıların kendi kayıtları için ilgili sağlayıcının politikası geçerlidir.</p>
 <h3>Haklarınız ve başvuru</h3>

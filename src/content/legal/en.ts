@@ -79,7 +79,7 @@ ${formP}
 <p>For the processing described above, your personal data is processed by the following service providers:</p>
 <ul>${recipients.join('')}</ul>
 <p>Your form content (name, phone, topic) is not sent to analytics or advertising tags.</p>
-<p><strong>Cross-border transfer:</strong> all of these providers are established outside Türkiye, so the processing above results in a transfer of your personal data abroad. Legal basis for the transfer (Art. 9): ${v.crossBorder}</p>
+<p><strong>Cross-border transfer:</strong> all of these providers are established outside Türkiye, so the processing above results in a transfer of your personal data abroad. ${v.crossBorder}</p>
 <h3>Retention periods</h3>
 <p>Appointment and contact requests are kept for at most ${v.appointmentMonths} months from the date the request is received and then deleted. WhatsApp conversations are kept for at most ${v.whatsappMonths} months and then deleted.${api ? ` Technical logs of the appointment application are deleted after ${v.logsDays} days.` : ''} The durations of the records in your browser are listed in the <a href="#cerez">Cookies</a> section; the providers' own records are governed by the respective provider's policy.</p>
 <h3>Your rights and how to apply</h3>

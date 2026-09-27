@@ -70,7 +70,7 @@ export interface LegalFacts {
   textApproval: (LegalConfirmation & { version: string; context: string; hash: string }) | null;
 }
 
-/** Yalnızca işletme/avukat yanıtıyla doldurulur (tahmin yok). Sorular: CONTENT-VERIFICATION.md §7. 27 Eyl 2026: saklama süreleri geldi; m.9 dayanağı, hukuki sebep teyidi ve metin onayı bekliyor. */
+/** Yalnızca işletme/avukat yanıtıyla doldurulur (tahmin yok). Sorular: CONTENT-VERIFICATION.md §7. 27 Eyl 2026: tamamı işletmeden geldi (saklama süreleri, m.9 cümlesi, hukuki sebep teyidi, metin onayı). */
 export const legalFacts: LegalFacts = {
   retention: {
     /** İşletme sahibi yanıtı, 27 Eyl 2026: randevu/iletişim talepleri 6 ay saklanır. */
@@ -80,9 +80,29 @@ export const legalFacts: LegalFacts = {
     technicalLogsDays: null,
   },
   notificationChannels: null,
-  crossBorderBasis: null,
-  legalBasesConfirmation: null,
-  textApproval: null,
+  /**
+   * İşletme tarafından iletilen metin, 27 Eyl 2026 (TR aynen; EN, Claude çevirisi — nihai metin onayı kapsamında onaylanır).
+   * Genel ifadedir; sağlayıcı başına mekanizma saymaz. Uyum için işletmenin sağlayıcılarla m.9'daki uygun güvenceleri
+   * (ör. standart sözleşme) fiilen sağlaması gerekir — bu cümle tek başına bunu sağlamaz (CONTENT-VERIFICATION.md §7).
+   */
+  crossBorderBasis: {
+    tr: 'Kişisel verileriniz, 6698 sayılı Kişisel Verilerin Korunması Kanunu’nun 9. maddesi kapsamında, ilgili mevzuatta öngörülen şartların sağlanması ve gerekli uygun güvencelerin bulunması hâlinde, hizmet alınan yurt dışındaki hizmet sağlayıcılara aktarılabilmektedir.',
+    en: 'Your personal data may be transferred to the service providers abroad whose services we use, within the scope of Article 9 of the Turkish Personal Data Protection Law No. 6698, provided that the conditions set out in the relevant legislation are met and the necessary appropriate safeguards are in place.',
+  },
+  /** İşletme sahibi teyidi, 27 Eyl 2026 (sohbette: "Hukuki sebepleri teyit eden: İşletme sahibi"). */
+  legalBasesConfirmation: { by: 'İşletme sahibi', date: '2026-09-27' },
+  /**
+   * İşletme sahibi onayı, 27 Eyl 2026: son gizlilik metni TR/EN (AYAZ-GIZLILIK-METNI-SON-TR.pdf, AYAZ-PRIVACY-NOTICE-FINAL-EN.pdf)
+   * okundu, "Okudum, onaylıyorum". version/context/hash derlemenin bastığı nesneden aynen kopyalandı; metin, bir işletme
+   * bilgisi ya da yapılandırma değişirse hash tutmaz → üretim derlemesi yeniden onay ister.
+   */
+  textApproval: {
+    by: 'İşletme sahibi',
+    date: '2026-09-27',
+    version: '2026-09-27.6',
+    context: 'form=whatsapp;turnstile=0;live=0;ga4=0;gads=0;meta=0;openai=0',
+    hash: '5c05496f033b303e',
+  },
 };
 
 export const business = {
