@@ -1,7 +1,7 @@
 # QA — nihai durum (27 Eylül 2026, Tur 10)
 
 Ayaz İşitme Merkezi v2 (keciorenisitme.com). Ortam: macOS, Node 24, Astro 7.3.5, Chromium (Playwright), Lighthouse 13.5.
-Canlı sürüm hâlâ `e851804`. Tur 3–10 çalışması `gelistirme/v2-tur10` dalında (PR #1). 27 Eyl 2026 akşamı yayın kapısının 4 bilgisi tamamlandı; üretim derlemesi geçersiz kılmasız geçiyor.
+Canlı sürüm: Tur 3–10 (PR #1) 27 Eyl 2026'da `master`'a birleştirildi (`52b0f85`) ve yayında; önceki sürüm `e851804`. Yayın kapısının 4 bilgisi tamam; üretim derlemesi geçersiz kılmasız geçiyor. 29 Eyl 2026: yorum kaydırıcısı odak düzeltmesi (§1'in sonunda).
 
 ## 1. Güncel doğrulama (Tur 10, 27 Eyl 2026)
 
@@ -26,6 +26,24 @@ npm test
 cd worker && npm test
 ALLOW_INCOMPLETE_LEGAL=1 PUBLIC_SITE_ENV=production npx astro build && npx playwright test
 ```
+
+### 29 Eyl 2026 — yorum kaydırıcısı: otomatik kaydırma ve odak
+
+- **Bulgu (GPT incelemesi):** klavye odağı kaydırıcıdayken sekmeye dönülünce otomatik kaydırma yeniden başlıyordu.
+- **Kural (WAI-ARIA APG, `src/scripts/reviews.ts`):**
+  - Kart şeridine, önceki/sonraki düğmelerine ve sayfa noktalarına gelen her odak kaydırmayı durdurur. Düğme "Başlat" olur, önceki başlatma izni silinir.
+  - Başlat/durdur düğmesi yalnız Tab ile odaklanınca durdurur. Fare ya da ekran okuyucu basarken düğme önce odak alır; o odak durdursaydı tıklama durumu geri çevirirdi.
+  - Odak çıkışı, sekmeye dönüş ya da bölümün yeniden görünmesi kaydırmayı başlatmaz. Tek basış başlatır.
+- **Testler (`tests/e2e/audit-fixes.spec.ts`, 5 test):**
+  - 4 motorda 5 tekrar: 90/90 geçti. Chrome'un "odaklanan öğeyi vurgula" ayarı testi yalnız Chromium'da koşar.
+  - Canlıdaki önceki kod ve 5 hatalı varyantın her biri en az bir testte başarısız olur.
+  - Tüm paket: Chromium 111 geçti, 1 atlandı. WebKit 105 geçti, 3 atlandı, 4 düştü:
+    - Form ve 3B testleri tek başına 3 tekrarda geçti.
+    - Canlı API modu testleri önceki kodda da ara ara düşüyor (130 koşuda 1'e karşı 2).
+  - Site 140/140, Worker 112/112, `astro check` 0 hata.
+- **Bilinen:**
+  - Safari'de klavye odağı kart şeridindeyken "Başlat"a fareyle basılırsa, sekmeye dönüşte kaydırma durur. Bu güvenli taraftır; tek basış yeniden başlatır.
+  - `tests/e2e/helpers.ts` içindeki `dismissConsent` çerez bildirimini beklemiyor: `isVisible` bekleme süresini yok sayar, bildirim yarım saniye sonra açılır. Ayrı bir değişiklikte düzeltilmeli.
 
 ## 2. Güncel kanıt dizini
 
@@ -99,7 +117,7 @@ ALLOW_INCOMPLETE_LEGAL=1 PUBLIC_SITE_ENV=production npx astro build && npx playw
 - API moduna geçilecekse Cloudflare panelindeki kayıt üst verisi kontrol edilmelidir (`worker/README.md` §9).
 - Kozmetik: BTE kalıp yuvası birleşim çizgisi yakın zumda hafif tırtıklıdır. CIC menteşe ucunda ince açık bir şerit görünür.
 - ~~Etkisiz `.x .icon` kuralları~~ — Tur 10'da düzeltildi: Hero, MobileBar, Footer, Contact, ConsentBanner ve DeviceExplorer'daki 9 kural `:global(.icon)`; önce/sonra görüntüleriyle kontrol edildi (ikonlar artık niyet edilen renk ve boyutta).
-- **Depo (27 Eyl 2026):** değişiklikler temiz bir klondan geliştirme dalına aktarıldı: `gelistirme/v2-tur10` (commit `3def419`), taslak PR https://github.com/SalihPolat32/ayaz-isitme/pull/1 (birleştirilmedi; `master` = `e851804`, canlı sürüm değişmedi). Aktarımdan önce gizli anahtar, kişisel veri, yorumcu tam adı ve Takeout taraması temiz; işletme profili iç kimlikleri belgede kısaltıldı.
+- **Depo (27 Eyl 2026):** değişiklikler temiz bir klondan geliştirme dalına aktarıldı: `gelistirme/v2-tur10`, PR https://github.com/SalihPolat32/ayaz-isitme/pull/1; 27 Eyl 2026 17:14 UTC'de `master`'a birleştirildi (`52b0f85`) ve yayına çıktı (geri dönüş: `e851804`). Aktarımdan önce gizli anahtar, kişisel veri, yorumcu tam adı ve Takeout taraması temiz; işletme profili iç kimlikleri belgede kısaltıldı.
 - Gerçek cihazda (iOS Safari, Android Chrome) test yapılmadı, Playwright emülasyonu kullanıldı. Saha verisi (CrUX) yayından sonra izlenmelidir.
 - Yorumcu adları: bitişik yazılmış ad-soyad kullanıcı adı `displayNames` ile "Samet Ö." gösteriliyor — kullanıcı adından okunan kısaltma; **işletme onayladı (27 Eyl 2026)** ☑. Kalan tek kelimelik adlar (berat, Musa, Abdulkadir, melis, Mahwut, OSMAN) yalnızca ilk addır. Canlı API modunda tek kelimelik Google adları olduğu gibi gelir; otomatik kısaltma kuralı ("Abdulkadir" gibi gerçek adları bozacağı için) yoktur.
 - **Galeri vitrin fotoğrafı (ofis-6) — sahip kararı ☑ (27 Eyl 2026: olduğu gibi kalsın):** mağaza vitrinindeki SGK logosu, "ücretsiz işitme testi", "12 aya kadar taksit", "ömür boyu bakım" ve unvan yazıları fotoğrafta okunur (özellikle büyütmede). Metinde bu iddialar doğrulanana kadar gizli; paylaşım kartından çıkarıldı. Seçenekler: olduğu gibi bırakmak (işletmenin kendi gerçek vitrini), panelleri bulanıklaştırmak ya da tabelayı gösteren bir kırpım.

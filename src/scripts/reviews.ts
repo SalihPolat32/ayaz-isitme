@@ -61,7 +61,7 @@ function initCarousel(root: HTMLElement, track: HTMLElement, locale: 'tr' | 'en'
   const reduced = prefersReducedMotion();
   let timer: number | null = null;
   let playing = !reduced;
-  /** Hareket azaltma tercihine rağmen kullanıcı otomatik kaydırmayı kendisi başlattıysa */
+  /** Hareket azaltma tercihine rağmen kullanıcı otomatik kaydırmayı kendisi başlattıysa (kullanıcı durdurunca sıfırlanır) */
   let userStarted = false;
   let hovered = false;
 
@@ -130,6 +130,8 @@ function initCarousel(root: HTMLElement, track: HTMLElement, locale: 'tr' | 'en'
   // Otomatik kaydırırken sayaç okunmaz (her 5 sn'de "2 / 18" duyurusu olmasın); durunca/elle gezinmede duyurulur
   const setLive = (on: boolean) => progressText?.setAttribute('aria-live', on ? 'polite' : 'off');
   const start = () => {
+    // Odak kaydırıcıya girince playing=false olur (bkz. focusin): sekmeye dönüş, bölümün yeniden görünmesi ya da
+    // imlecin ayrılması kaydırmayı yeniden başlatmaz; yalnızca "başlat" düğmesi başlatır
     if (timer || (reduced && !userStarted) || !playing || hovered || document.hidden) return;
     timer = window.setInterval(advance, 5000);
     setLive(false);
@@ -141,17 +143,29 @@ function initCarousel(root: HTMLElement, track: HTMLElement, locale: 'tr' | 'en'
   };
   // Etiket eylemi söyler ("durdur" / "başlat"); ayrıca aria-pressed kullanılmaz (durum iki kez, çelişkili okunmasın)
   const setPlayUi = () => {
-    if (!play) return;
+    // Durum değişmediyse düğmenin içi yenilenmez: basılı tutulan ikon silinirse tarayıcı tıklamayı yutar
+    if (!play || play.dataset.shown === String(playing)) return;
+    play.dataset.shown = String(playing);
     play.setAttribute('aria-label', playing ? play.dataset.labelPause || '' : play.dataset.labelPlay || '');
     play.innerHTML = playing
       ? '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>'
       : '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><polygon points="6 3 20 12 6 21 6 3"/></svg>';
   };
   const pause = (user = false) => {
-    if (user) playing = false;
+    if (user) {
+      playing = false;
+      userStarted = false;
+    }
     stop();
     setPlayUi();
   };
+  /** Odak Tab ile mi geliyor? Sıralı odak geçişi, Tab'ın keydown varsayılan eylemi olarak aynı görevde olur. */
+  let tabNav = false;
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Tab') return;
+    tabNav = true;
+    window.setTimeout(() => (tabNav = false));
+  }, true);
 
   prev?.addEventListener('click', () => {
     track.scrollBy({ left: -step() * perView(), behavior: reduced ? 'auto' : 'smooth' });
@@ -176,8 +190,14 @@ function initCarousel(root: HTMLElement, track: HTMLElement, locale: 'tr' | 'en'
     hovered = false;
     start();
   });
-  root.addEventListener('focusin', () => stop());
-  root.addEventListener('focusout', () => start());
+  // WAI-ARIA APG: odak kaydırıcıya (kart şeridi, önceki/sonraki, sayfa noktaları) gelince otomatik kaydırma durur ve düğme
+  // "başlat" olur; önceki başlatma izni silinir. Odak çıkışı, sekmeye dönüş ya da bölümün yeniden görünmesi başlatmaz; tek
+  // "başlat" basışı başlatır. Bölümün kaydırıcı dışındaki bağlantıları sayılmaz. Başlat/durdur düğmesi yalnız Tab ile
+  // odaklanınca durdurur: fare ya da ekran okuyucu basarken düğme önce odak alır (Chromium, Firefox) ve o odak durdursaydı
+  // ardından gelen tıklama durumu geri çevirirdi. Sekmeye/pencereye dönünce aynı düğmeye yeniden gelen odak da durdurmaz.
+  (root.querySelector<HTMLElement>('[data-carousel]') ?? root).addEventListener('focusin', (e) => {
+    if (!(e.target instanceof Node && play?.contains(e.target)) || tabNav) pause(true);
+  });
   track.addEventListener('pointerdown', () => pause(true), { passive: true });
   document.addEventListener('visibilitychange', () => (document.hidden ? stop() : start()));
   let raf = 0;
